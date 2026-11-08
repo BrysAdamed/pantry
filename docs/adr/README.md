@@ -1,0 +1,16 @@
+# Architecture Decision Records
+
+Short records of decisions that shape the project. Format: context, decision, consequences. A new decision that changes an old one gets a new ADR and marks the old one *Superseded*.
+
+| # | Decision | Status |
+|---|---|---|
+| [0001](0001-stack.md) | .NET 10, Angular 21, PostgreSQL | Accepted |
+| [0002](0002-modular-monolith.md) | Modular monolith, one container serves API, MCP and SPA | Accepted |
+| [0003](0003-single-household.md) | One household per deployment | Accepted |
+| [0004](0004-passkeys.md) | ASP.NET Identity with passkeys, first-run admin and invites | Accepted |
+| [0005](0005-mcp-no-in-app-agents.md) | MCP server in the app, no in-app agents, cart run stays in Claude | Accepted |
+| [0006](0006-private-network-https.md) | No public exposure; HTTPS on a private hostname (choice deferred) | Accepted (TLS option open) |
+| [0007](0007-offline-scope.md) | Offline: read everything, write shopping lists only | Accepted |
+| [0008](0008-deterministic-shopping-list.md) | Shopping list computed in code with base units | Accepted |
+| [0009](0009-ui-library.md) | Tailwind + Spartan UI instead of PrimeNG | Accepted |
+| [0010](0010-languages.md) | English code and docs, PL/EN UI, household content language | Accepted |

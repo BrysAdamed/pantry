@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Frontend
+node_modules/
+dist/
+.angular/
+
+# Built SPA copied into the API
+src/Pantry.Api/wwwroot/*
+!src/Pantry.Api/wwwroot/.gitkeep
+
+# Local config and secrets
+.env
+appsettings.*.local.json
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

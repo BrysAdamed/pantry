@@ -1,0 +1,32 @@
+# Local / homelab stack. Copy .env.example to .env and set real values there (never commit .env).
+#   docker compose up -d                 -> Postgres only (for development)
+#   docker compose --profile app up -d   -> Postgres + app
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pantry}
+      POSTGRES_USER: ${POSTGRES_USER:-pantry}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    profiles: ["app"]
+    environment:
+      ConnectionStrings__Pantry: Host=db;Database=${POSTGRES_DB:-pantry};Username=${POSTGRES_USER:-pantry};Password=${POSTGRES_PASSWORD}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

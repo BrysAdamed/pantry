@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Design tokens are defined in epic E2 (PAN-2). Placeholders only. */
+@theme {
+  --color-brand: oklch(0.62 0.14 145);
+}
