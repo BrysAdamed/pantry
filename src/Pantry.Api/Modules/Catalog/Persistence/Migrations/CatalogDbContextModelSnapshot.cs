@@ -110,6 +110,37 @@ namespace Pantry.Api.Modules.Catalog.Persistence.Migrations
                                 .HasConstraintName("fk_ingredient_names_ingredients_ingredient_id");
                         });
 
+                    b.OwnsMany("Pantry.Api.Modules.Catalog.Domain.UnitConversion", "Conversions", b1 =>
+                        {
+                            b1.Property<Guid>("IngredientId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("ingredient_id");
+
+                            b1.Property<string>("Unit")
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("unit");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 4)
+                                .HasColumnType("numeric(18,4)")
+                                .HasColumnName("amount");
+
+                            b1.HasKey("IngredientId", "Unit")
+                                .HasName("pk_ingredient_conversions");
+
+                            b1.ToTable("ingredient_conversions", "catalog", t =>
+                                {
+                                    t.HasCheckConstraint("ck_ingredient_conversions_amount", "amount > 0");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("IngredientId")
+                                .HasConstraintName("fk_ingredient_conversions_ingredients_ingredient_id");
+                        });
+
+                    b.Navigation("Conversions");
+
                     b.Navigation("Names");
                 });
 #pragma warning restore 612, 618

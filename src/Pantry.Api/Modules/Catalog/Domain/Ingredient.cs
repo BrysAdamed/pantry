@@ -10,6 +10,7 @@ public sealed class Ingredient
     public const int MaxAliases = 20;
 
     private readonly List<IngredientName> _names = [];
+    private readonly List<UnitConversion> _conversions = [];
 
     private Ingredient()
     {
@@ -35,6 +36,9 @@ public sealed class Ingredient
 
     public IReadOnlyList<string> Aliases =>
         _names.Where(n => n.IsAlias).OrderBy(n => n.Key, StringComparer.Ordinal).Select(n => n.Value).ToList();
+
+    /// <summary>The ingredient's own unit conversions, each into the base unit.</summary>
+    public IReadOnlyCollection<UnitConversion> Conversions => _conversions;
 
     public static Ingredient Create(
         string name,
@@ -121,9 +125,81 @@ public sealed class Ingredient
         NameKey = IngredientName.KeyOf(cleanName);
     }
 
+    /// <summary>Changes the base unit. The conversions are written in the old base unit, so they are removed.</summary>
+    public void SetBaseUnit(Unit baseUnit)
+    {
+        if (!Units.IsBaseUnit(baseUnit))
+        {
+            throw new ArgumentException($"'{baseUnit}' is not a base unit.", nameof(baseUnit));
+        }
+
+        if (baseUnit == BaseUnit)
+        {
+            return;
+        }
+
+        BaseUnit = baseUnit;
+        _conversions.Clear();
+    }
+
+    /// <summary>
+    /// What is wrong with <paramref name="conversions"/> for <paramref name="baseUnit"/>: a repeated unit, a unit that
+    /// is the base unit or converts into it anyway, or an amount that is not positive, too big or too precise.
+    /// Empty when they can be set.
+    /// </summary>
+    public static IReadOnlyList<string> ConversionProblems(Unit baseUnit, IReadOnlyCollection<(Unit Unit, decimal Amount)> conversions)
+    {
+        var problems = new List<string>();
+        foreach (var repeated in conversions.GroupBy(c => c.Unit).Where(g => g.Count() > 1))
+        {
+            problems.Add($"A unit can have one conversion: {CatalogCode.Of(repeated.Key)}.");
+        }
+
+        foreach (var (unit, amount) in conversions)
+        {
+            if (UnitConversion.IsRedundant(unit, baseUnit))
+            {
+                problems.Add($"{CatalogCode.Of(unit)} already converts into {CatalogCode.Of(baseUnit)}.");
+            }
+
+            if (!UnitConversion.IsValidAmount(amount))
+            {
+                problems.Add(
+                    $"The amount for {CatalogCode.Of(unit)} must be greater than 0, at most {UnitConversion.MaxAmount} " +
+                    $"and have at most {UnitConversion.AmountScale} decimal places.");
+            }
+        }
+
+        return problems;
+    }
+
+    /// <summary>Replaces the conversions; each amount is in the base unit. A unit that keeps its conversion keeps its row.</summary>
+    public void SetConversions(IReadOnlyCollection<(Unit Unit, decimal Amount)> conversions)
+    {
+        if (ConversionProblems(BaseUnit, conversions).Count > 0)
+        {
+            throw new ArgumentException("The conversions must be valid, distinct and not redundant.", nameof(conversions));
+        }
+
+        _conversions.RemoveAll(existing => conversions.All(c => c.Unit != existing.Unit));
+        foreach (var (unit, amount) in conversions)
+        {
+            if (_conversions.FirstOrDefault(existing => existing.Unit == unit) is { } existing)
+            {
+                existing.Amount = amount;
+            }
+            else
+            {
+                _conversions.Add(new UnitConversion(unit, amount));
+            }
+        }
+    }
+
+    public IReadOnlyDictionary<Unit, decimal> ConversionAmounts() => _conversions.ToDictionary(c => c.Unit, c => c.Amount);
+
     /// <summary>
     /// Takes over what <paramref name="merge"/> planned to move from the source, which must already be deleted, so its
-    /// names are free, and confirms this ingredient. Name, base unit, category and staple flag stay as they are.
+    /// names are free, and confirms this ingredient. Name, base unit, category, staple flag and own conversions stay as they are.
     /// </summary>
     public void Absorb(IngredientMerge merge)
     {
@@ -133,6 +209,7 @@ public sealed class Ingredient
         }
 
         SetNames(Name, [.. Aliases, .. merge.AliasesToAdd]);
+        SetConversions([.. _conversions.Select(c => (c.Unit, c.Amount)), .. merge.ConversionsToAdd]);
         Confirm();
     }
 }

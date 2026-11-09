@@ -39,6 +39,27 @@ internal static class IngredientValidation
         }
     }
 
+    /// <summary>Checks the conversions against <paramref name="baseUnit"/>, adding what is wrong to <paramref name="errors"/>.</summary>
+    public static void ValidateConversions(
+        Unit baseUnit,
+        IReadOnlyList<ConversionRequest?> conversions,
+        Dictionary<string, string[]> errors,
+        out IReadOnlyList<(Unit Unit, decimal Amount)> validConversions)
+    {
+        validConversions = [];
+        if (conversions.Any(c => c?.Unit is null || c.Amount is null))
+        {
+            errors["Conversions"] = ["Each conversion needs a unit and an amount."];
+            return;
+        }
+
+        validConversions = conversions.Select(c => (c!.Unit!.Value, c.Amount!.Value)).ToList();
+        if (Ingredient.ConversionProblems(baseUnit, validConversions) is { Count: > 0 } problems)
+        {
+            errors["Conversions"] = [.. problems];
+        }
+    }
+
     /// <summary>
     /// Saves the ingredient, or returns the 409 for the names another ingredient already has. The unique key on names
     /// catches the race the check before the save cannot.
