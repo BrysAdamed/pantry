@@ -166,6 +166,19 @@ public sealed class PossibleDuplicatesTests(PantryApiFactory factory) : IAsyncLi
     }
 
     [Fact]
+    public async Task Deleting_an_ingredient_removes_its_not_duplicates_pairs()
+    {
+        var onion = await CreateAsync("Cebula");
+        var yellowOnion = await CreateAsync("Cebula żółta");
+        await MarkAsync(onion, yellowOnion);
+
+        var deleted = await _client.DeleteAsync($"{IngredientsUrl}/{onion}");
+
+        Assert.True(deleted.IsSuccessStatusCode, deleted.StatusCode.ToString());
+        Assert.Equal(0, await CountNotDuplicatePairsAsync());
+    }
+
+    [Fact]
     public async Task Threshold_is_configurable()
     {
         // Arrange

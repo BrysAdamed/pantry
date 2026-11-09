@@ -11,7 +11,7 @@ namespace Pantry.Api.Modules.Catalog.Features.Duplicates;
 
 /// <summary>
 /// Pairs of ingredients with similar names or aliases, most similar first, without the pairs marked as not duplicates
-/// (ADR 0021). <c>ingredientId</c> limits the pairs to one ingredient.
+/// (ADR 0022). <c>ingredientId</c> limits the pairs to one ingredient.
 /// </summary>
 public static class GetPossibleDuplicates
 {

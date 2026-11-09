@@ -1,4 +1,4 @@
-# 0021 Possible duplicates by trigram similarity of name keys; not duplicates stored per pair
+# 0022 Possible duplicates by trigram similarity of name keys; not duplicates stored per pair
 
 **Status:** Accepted, 2026-11-09. Builds on [0019](0019-ingredient-catalog.md).
 

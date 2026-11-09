@@ -35,6 +35,7 @@ public static class CatalogModule
         ingredients.MapResolveIngredient();
         ingredients.MapConfirmIngredient();
         ingredients.MapMergeIngredients();
+        ingredients.MapDeleteIngredient();
         return api;
     }
 }

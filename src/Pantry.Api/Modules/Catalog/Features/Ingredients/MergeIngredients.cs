@@ -47,6 +47,8 @@ public static class MergeIngredients
             merge.AliasCountAfter(target),
             merge.ExceedsAliasLimit(target),
             merge.SameBaseUnit,
+            merge.ConversionsToAdd.Select(c => new ConversionResponse(c.Unit, c.Amount)).ToList(),
+            merge.ConversionsSkipped.Select(c => new ConversionResponse(c.Unit, c.Amount)).ToList(),
             sourceCounts.Zip(targetCounts, (s, t) => new MergeReferences(s.Module, s.Count, t.Count)).ToList()));
     }
 
@@ -99,7 +101,8 @@ public static class MergeIngredients
 public sealed record MergeIngredientsRequest(Guid? SourceId);
 
 /// <summary>
-/// The plan of a merge: names the target gains, the alias count after it, whether both share a base unit, and the
+/// The plan of a merge: names the target gains, the alias count after it, whether both share a base unit, the source's
+/// conversions copied to the target and those skipped (the target has its own, or the base units differ), and the
 /// references each module holds to the source (moving to the target) and to the target.
 /// </summary>
 public sealed record MergePreviewResponse(
@@ -109,6 +112,8 @@ public sealed record MergePreviewResponse(
     int AliasCountAfter,
     bool ExceedsAliasLimit,
     bool SameBaseUnit,
+    IReadOnlyList<ConversionResponse> ConversionsToAdd,
+    IReadOnlyList<ConversionResponse> ConversionsSkipped,
     IReadOnlyList<MergeReferences> References);
 
 public sealed record MergeReferences(string Module, int Source, int Target);
