@@ -22,7 +22,8 @@ export type IconName =
   | 'chevronDown'
   | 'signOut'
   | 'link'
-  | 'copy';
+  | 'copy'
+  | 'search';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
 @Component({
@@ -120,6 +121,10 @@ export type IconName =
         @case ('copy') {
           <rect x="9" y="9" width="12" height="12" rx="2" />
           <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+        }
+        @case ('search') {
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-4-4" />
         }
       }
     </svg>

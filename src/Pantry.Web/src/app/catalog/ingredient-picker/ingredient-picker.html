@@ -1,0 +1,101 @@
+<ng-container *transloco="let t; prefix: 'catalog'">
+  <div
+    class="flex min-h-tap items-center gap-2 rounded-control border-2 border-outline bg-card px-3 text-muted-foreground focus-within:ring-3 focus-within:ring-ring/50"
+  >
+    <app-icon name="search" class="size-5" />
+    <input
+      #field
+      type="text"
+      role="combobox"
+      autocomplete="off"
+      class="min-h-10 min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+      aria-autocomplete="list"
+      [attr.aria-label]="label()"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-controls]="listId"
+      [attr.aria-activedescendant]="activeOption()?.id ?? null"
+      [attr.maxlength]="maxLength"
+      [placeholder]="placeholder() ?? t('picker.placeholder')"
+      [value]="text()"
+      (input)="onInput(field.value)"
+      (keydown)="onKeydown($event)"
+      (focus)="open.set(true)"
+    />
+  </div>
+
+  <div
+    role="listbox"
+    class="absolute inset-x-0 top-[calc(100%+6px)] z-20 grid max-h-80 gap-0.5 overflow-y-auto rounded-control border-2 border-outline bg-card p-1.5 shadow-card"
+    [id]="listId"
+    [attr.aria-label]="label()"
+    [hidden]="!expanded()"
+    (mousedown)="$event.preventDefault()"
+  >
+    @if (expanded()) {
+      @if (results.error() && !results.hasValue()) {
+        <p class="p-2.5 text-sm text-muted-foreground" role="alert">{{ t('picker.searchFailed') }}</p>
+      }
+      @for (option of options(); track option.id) {
+        @if (option.kind === 'existing') {
+          <div
+            role="option"
+            class="grid min-h-tap cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0.5 rounded-md px-2.5 py-2 aria-disabled:cursor-not-allowed aria-disabled:opacity-55 aria-selected:bg-secondary aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-outline"
+            [id]="option.id"
+            [attr.aria-selected]="activeOption()?.id === option.id"
+            [attr.aria-disabled]="option.taken || null"
+            (click)="choose(option)"
+          >
+            <span class="font-bold" data-testid="option-name"><ng-container *ngTemplateOutlet="highlighted; context: { $implicit: option.name }" /></span>
+            <span class="text-xs text-muted-foreground">{{ t('unit.' + option.ingredient.baseUnit) }}</span>
+            @if (option.alias || option.taken || option.ingredient.needsReview) {
+              <span class="col-span-full flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                @if (option.alias) {
+                  <span data-testid="option-alias">{{ t('picker.aliasMatch') }} <ng-container *ngTemplateOutlet="highlighted; context: { $implicit: option.alias }" /></span>
+                }
+                @if (option.taken) {
+                  <span>{{ t('picker.taken') }}</span>
+                }
+                @if (option.ingredient.needsReview) {
+                  <span
+                    class="rounded-full border-[1.5px] border-current bg-ingredient-review-surface px-1.5 py-px text-[11px] font-extrabold text-ingredient-review"
+                  >
+                    {{ t('picker.needsReview') }}
+                  </span>
+                }
+              </span>
+            }
+          </div>
+        } @else {
+          <div
+            role="option"
+            class="grid min-h-tap cursor-pointer gap-0.5 rounded-md border-t border-dashed border-border px-2.5 py-2 text-info aria-selected:bg-secondary aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-outline"
+            data-testid="new-option"
+            [id]="option.id"
+            [attr.aria-selected]="activeOption()?.id === option.id"
+            (click)="choose(option)"
+          >
+            <span class="flex items-center gap-1.5 font-bold">
+              <app-icon name="plus" class="size-4" />
+              {{ t('picker.addNew', { name: option.name }) }}
+            </span>
+            <span class="text-xs">{{ t('picker.addNewHint') }}</span>
+          </div>
+        }
+      } @empty {
+        @if (results.hasValue()) {
+          <p class="p-2.5 text-sm text-muted-foreground">{{ t('picker.noMatch') }}</p>
+        }
+      }
+    }
+  </div>
+</ng-container>
+
+<ng-template #highlighted let-parts>
+  @for (part of parts; track $index) {
+    @if (part.matched) {
+      <mark class="rounded-sm bg-accent/45 px-px text-inherit">{{ part.text }}</mark>
+    } @else {
+      <ng-container>{{ part.text }}</ng-container>
+    }
+  }
+</ng-template>

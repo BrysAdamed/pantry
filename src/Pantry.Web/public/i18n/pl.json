@@ -521,6 +521,16 @@
       "handful": "garść",
       "glass": "szklanka"
     },
+    "picker": {
+      "placeholder": "Szukaj składnika",
+      "aliasMatch": "pasuje:",
+      "taken": "już na liście",
+      "needsReview": "do sprawdzenia",
+      "addNew": "Dodaj „{{name}}”",
+      "addNewHint": "Nowy składnik, trafi do katalogu po zapisaniu",
+      "noMatch": "Nie ma takiego składnika w katalogu.",
+      "searchFailed": "Wyszukiwanie teraz nie działa. Spróbuj za chwilę."
+    },
     "unitAmount": {
       "g": "g",
       "kg": "kg",

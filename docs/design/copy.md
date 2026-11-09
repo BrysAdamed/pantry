@@ -195,6 +195,7 @@ Labels for the catalog (`ingredients.html`, PAN-29). Category and unit labels co
 | New option | Dodaj „{q}” · Nowy składnik, trafi do katalogu po zapisaniu | Add "{q}" · New ingredient, added to the catalog when you save |
 | New badge / hint | nowy · Nowy składnik, trafi do katalogu jako „do sprawdzenia” | new · New ingredient, added to the catalog as "needs review" |
 | No match (new not allowed) | Nie ma takiego składnika w katalogu. | No such ingredient in the catalog. |
+| Search failed | Wyszukiwanie teraz nie działa. Spróbuj za chwilę. | Search is not working right now. Try again in a moment. |
 
 ## App name
 

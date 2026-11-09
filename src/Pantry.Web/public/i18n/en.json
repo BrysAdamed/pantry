@@ -521,6 +521,16 @@
       "handful": "handful",
       "glass": "glass"
     },
+    "picker": {
+      "placeholder": "Search ingredients",
+      "aliasMatch": "matches:",
+      "taken": "already on the list",
+      "needsReview": "needs review",
+      "addNew": "Add \"{{name}}\"",
+      "addNewHint": "New ingredient, added to the catalog when you save",
+      "noMatch": "No such ingredient in the catalog.",
+      "searchFailed": "Search is not working right now. Try again in a moment."
+    },
     "unitAmount": {
       "g": "g",
       "kg": "kg",
