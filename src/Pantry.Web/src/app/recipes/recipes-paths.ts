@@ -6,6 +6,10 @@ export function newRecipePath(): string[] {
   return [RECIPES_PATH, NEW_RECIPE_PATH];
 }
 
+export function recipePath(id: string): string[] {
+  return [RECIPES_PATH, id];
+}
+
 export function editRecipePath(id: string): string[] {
   return [RECIPES_PATH, id, EDIT_RECIPE_PATH];
 }

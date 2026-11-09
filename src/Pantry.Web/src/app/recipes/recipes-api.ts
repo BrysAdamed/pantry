@@ -115,16 +115,91 @@ export interface RecipeChange {
   sections: RecipeSectionChange[];
 }
 
+/**
+ * The cooldown in effect: the recipe's own `days` or the household default. `availableFrom` (last eaten + days) is null
+ * when the recipe was never eaten, which means it is available now; planning it before that date is *too soon*.
+ */
+export interface RecipeCooldown {
+  days: number;
+  isHouseholdDefault: boolean;
+  lastEaten: string | null;
+  availableFrom: string | null;
+}
+
+/** A recipe as the library lists it. `averageRating` is null while no history entry is rated. */
+export interface RecipeListItem {
+  id: string;
+  name: string;
+  servings: number;
+  prepTimeMinutes: number | null;
+  tags: string[];
+  nutrition: Nutrition;
+  makeAgain: boolean;
+  averageRating: number | null;
+  ratingCount: number;
+  isFavourite: boolean;
+  cooldownDays: number | null;
+  cooldown: RecipeCooldown;
+  isArchived: boolean;
+  updatedAt: string;
+  dislikes: RecipeDislike[];
+}
+
+export interface RecipesPage {
+  items: RecipeListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export const RECIPE_SORTS = ['rating', 'recentlyEaten', 'notEatenLately', 'prepTime', 'name'] as const;
+export type RecipeSort = (typeof RECIPE_SORTS)[number];
+
+/** What the library asks `GET /api/recipes` for; every `tags` entry must be on a recipe. */
+export interface RecipeLibraryFilter {
+  search?: string;
+  tags?: readonly string[];
+  withoutNever?: boolean;
+  archived?: boolean;
+  sort?: RecipeSort;
+}
+
+export const RECIPES_MAX_PAGE_SIZE = 200;
+
+export function libraryParams(filter: RecipeLibraryFilter, page: number, pageSize: number): Record<string, string | string[]> {
+  const params: Record<string, string | string[]> = { page: String(page), pageSize: String(pageSize) };
+  if (filter.search) {
+    params['search'] = filter.search;
+  }
+  if (filter.tags?.length) {
+    params['tag'] = [...filter.tags];
+  }
+  if (filter.withoutNever) {
+    params['withoutNever'] = 'true';
+  }
+  if (filter.archived) {
+    params['archived'] = 'true';
+  }
+  if (filter.sort) {
+    params['sort'] = filter.sort;
+  }
+  return params;
+}
+
 /** A tag for autocomplete and how many recipes that are not archived use it. */
 export interface TagUsage {
   tag: string;
   recipes: number;
 }
 
-/** Writes of the Recipes module. Reads use `httpResource`. */
+/** Writes of the Recipes module and the paged library. Other reads use `httpResource`. */
 @Injectable({ providedIn: 'root' })
 export class RecipesApi {
   private readonly http = inject(HttpClient);
+
+  libraryPage(filter: RecipeLibraryFilter, page: number, pageSize: number): Promise<RecipesPage> {
+    return firstValueFrom(this.http.get<RecipesPage>(RECIPES_URL, { params: libraryParams(filter, page, pageSize) }));
+  }
 
   createRecipe(change: RecipeChange): Promise<Recipe> {
     return firstValueFrom(this.http.post<Recipe>(RECIPES_URL, change));

@@ -802,6 +802,50 @@
     }
   },
   "recipes": {
+    "library": {
+      "title": "Przepisy",
+      "new": "Nowy przepis",
+      "search": "Szukaj przepisu",
+      "searchPlaceholder": "Szukaj w nazwach, tagach, składnikach",
+      "filters": "Filtry",
+      "filter": {
+        "withoutNever": "Bez „nigdy”",
+        "archived": "Archiwum"
+      },
+      "count": "{count, plural, one {# przepis} few {# przepisy} many {# przepisów} other {# przepisu}}",
+      "archivedCount": "{count, plural, one {# przepis w archiwum} few {# przepisy w archiwum} many {# przepisów w archiwum} other {# przepisu w archiwum}}",
+      "sortBy": "Sortuj:",
+      "sort": {
+        "rating": "Ocena",
+        "recentlyEaten": "Ostatnio jedzone",
+        "notEatenLately": "Dawno nie było",
+        "prepTime": "Czas",
+        "name": "Nazwa"
+      },
+      "rating": "Ocena {{rating}} na 5",
+      "notRated": "bez oceny",
+      "neverEaten": "jeszcze nie jedzone",
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "kcal": "{{kcal}} kcal",
+      "badge": {
+        "never": "nigdy",
+        "avoid": "unikamy",
+        "notAgain": "nie gotujemy znowu",
+        "tooSoon": "za wcześnie"
+      },
+      "noResults": {
+        "title": "Nic tu nie pasuje",
+        "description": "Spróbuj krótszego słowa albo wyłącz filtry. Szukamy w nazwach, tagach i składnikach.",
+        "archive": "Archiwum jest puste. Zarchiwizowany przepis znika z biblioteki, ale zostaje w historii."
+      },
+      "clearFilters": "Wyczyść filtry",
+      "showMore": "Pokaż więcej",
+      "loadFailed": "Nie udało się wczytać przepisów. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "nothingSelected": "Wybierz przepis z listy, żeby zobaczyć szczegóły."
+    },
     "editor": {
       "back": "Przepisy",
       "newTitle": "Nowy przepis",

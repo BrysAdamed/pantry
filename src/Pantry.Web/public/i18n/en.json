@@ -802,6 +802,50 @@
     }
   },
   "recipes": {
+    "library": {
+      "title": "Recipes",
+      "new": "New recipe",
+      "search": "Search recipes",
+      "searchPlaceholder": "Search names, tags, ingredients",
+      "filters": "Filters",
+      "filter": {
+        "withoutNever": "Without \"never\"",
+        "archived": "Archive"
+      },
+      "count": "{count, plural, one {# recipe} other {# recipes}}",
+      "archivedCount": "{count, plural, one {# archived recipe} other {# archived recipes}}",
+      "sortBy": "Sort:",
+      "sort": {
+        "rating": "Rating",
+        "recentlyEaten": "Recently eaten",
+        "notEatenLately": "Not eaten lately",
+        "prepTime": "Prep time",
+        "name": "Name"
+      },
+      "rating": "Rated {{rating}} out of 5",
+      "notRated": "not rated",
+      "neverEaten": "not eaten yet",
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "kcal": "{{kcal}} kcal",
+      "badge": {
+        "never": "never",
+        "avoid": "avoid",
+        "notAgain": "not cooking again",
+        "tooSoon": "too soon"
+      },
+      "noResults": {
+        "title": "Nothing matches",
+        "description": "Try a shorter word or turn off filters. We search names, tags and ingredients.",
+        "archive": "The archive is empty. An archived recipe leaves the library but stays in the history."
+      },
+      "clearFilters": "Clear filters",
+      "showMore": "Show more",
+      "loadFailed": "Could not load the recipes. Check the connection.",
+      "retry": "Try again",
+      "nothingSelected": "Pick a recipe from the list to see it here."
+    },
     "editor": {
       "back": "Recipes",
       "newTitle": "New recipe",

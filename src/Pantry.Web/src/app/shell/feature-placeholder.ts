@@ -3,11 +3,10 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { EmptyState, EmptyStateIllustration } from '../shared/empty-state/empty-state';
 import { Destination } from './destinations';
 
-export type PlaceholderDestination = Exclude<Destination, 'household' | 'ingredients'>;
+export type PlaceholderDestination = Exclude<Destination, 'household' | 'ingredients' | 'recipes'>;
 
 const PLACEHOLDERS: Record<PlaceholderDestination, { illustration: EmptyStateIllustration; agentHint: boolean }> = {
   planner: { illustration: 'planner', agentHint: true },
-  recipes: { illustration: 'recipes', agentHint: true },
   shopping: { illustration: 'lists', agentHint: false },
 };
 

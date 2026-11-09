@@ -17,6 +17,8 @@ test.beforeEach(async ({ page }) => {
     return route.fulfill({ status: 204 });
   });
   await page.route(/\/api\/catalog\/ingredients/, (route) => route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 1 } }));
+  await page.route(/\/api\/recipes\/tags/, (route) => route.fulfill({ json: [] }));
+  await page.route(/\/api\/recipes(\?.*)?$/, (route) => route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 50 } }));
   await page.route('/api/household/members', (route) => route.fulfill({ json: { members: [], householdServing: 0 } }));
   await page.addInitScript(() => {
     if (!sessionStorage.getItem('e2e.seeded')) {
@@ -38,7 +40,7 @@ test('opens the planner and navigates all five destinations', async ({ page }) =
     await expect(page).toHaveURL(destination.path);
     await expect(link).toHaveAttribute('aria-current', 'page');
     if (destination.heading) {
-      await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText(destination.heading);
+      await expect(page.getByRole('main').getByRole('heading', { level: 2, name: destination.heading })).toBeVisible();
     }
   }
 });
@@ -54,7 +56,7 @@ test('remembers the UI language chosen in the avatar menu', async ({ page }) => 
 
   await page.getByRole('button', { name: 'Account' }).filter({ visible: true }).click();
   await page.getByRole('dialog', { name: 'Account' }).getByTestId('language-pl').click();
-  await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText('Dodaj pierwszy przepis');
+  await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Dodaj pierwszy przepis' })).toBeVisible();
   await expect(page).toHaveTitle('Spiżarnia');
 
   await page.keyboard.press('Escape');
