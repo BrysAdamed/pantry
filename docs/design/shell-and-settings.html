@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Powłoka i ustawienia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* PAN-16 app shell, sign-in and settings prototype. Tokens mirror src/Pantry.Web/src/styles.css (ADR 0013). */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff4e6, #1b141e);
+  --foreground: light-dark(#2a1b2d, #fbefe3);
+  --card: light-dark(#ffffff, #251c29);
+  --secondary: light-dark(#fde6cc, #322536);
+  --muted-foreground: light-dark(#6e5b70, #c2aec3);
+  --border: light-dark(#f0d9bf, #3d2e42);
+  --outline: light-dark(#2a1b2d, #7a6280);
+  --primary: light-dark(#6e2a5e, #e59cd0);
+  --primary-foreground: light-dark(#fff4e6, #1b141e);
+  --accent: #f4a259;
+  --accent-foreground: light-dark(#2a1b2d, #1b141e);
+  --agent: light-dark(#1c6964, #6fd0c6);
+  --agent-surface: light-dark(#ddf1ee, #173a37);
+  --success: light-dark(#28724a, #7dd3a0);
+  --success-surface: light-dark(#e2f2e7, #17311f);
+  --warning: light-dark(#a8520f, #f4a259);
+  --warning-surface: light-dark(#fcead6, #3a2814);
+  --danger: light-dark(#b8342a, #ff8a7a);
+  --danger-surface: light-dark(#fbe3df, #3d1c19);
+  --info: var(--agent);
+  --info-surface: var(--agent-surface);
+  --page: light-dark(#f6efe6, #141113);
+
+  --radius-chip: 8px; --radius-control: 12px; --radius-card: 16px;
+  --shadow-control: 2px 2px 0 var(--outline);
+  --shadow-card: 3px 3px 0 var(--outline);
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.i.sm { width: 14px; height: 14px; }
+svg.i.xl { width: 40px; height: 40px; }
+
+.wrap { max-width: 1340px; margin: 0 auto; padding: 20px 16px 64px; display: grid; gap: 28px; }
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 700; }
+.pagebar h1 { font-size: clamp(24px, 3vw, 32px); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
+.ctl { display: grid; gap: 4px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: var(--radius-control); background: var(--secondary); }
+.seg button { border: 0; background: none; padding: 7px 13px; min-height: 36px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow-control); outline: 2px solid var(--outline); outline-offset: -2px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); font-weight: 700; font-size: 14px; white-space: nowrap; transition: translate .08s, box-shadow .08s; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.btn.lg { min-height: 56px; font-size: 16px; padding: 0 22px; }
+.btn.block { width: 100%; }
+.btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.btn.accent { background: var(--accent); color: var(--accent-foreground); }
+.btn.ghost { border-color: transparent; box-shadow: none; background: none; }
+.btn.danger { color: var(--danger); }
+.btn.icon { width: 44px; padding: 0; }
+.btn.icon.sm { width: 36px; }
+.btn:active { translate: 1px 1px; box-shadow: none; }
+.btn:disabled, .input:disabled, .chipx:disabled, .sw:disabled { opacity: .45; pointer-events: none; }
+
+.frame-label { margin-bottom: 10px; }
+.scroller { overflow-x: auto; border-radius: 20px; border: 2px solid var(--outline); box-shadow: var(--shadow-card); }
+.desk { min-width: 1200px; height: 820px; display: grid; grid-template-columns: 84px 240px minmax(0, 1fr); background: var(--background); position: relative; }
+.side { background: var(--card); border-right: 2px solid var(--outline); padding: 18px 8px 14px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.mark { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--accent); color: var(--accent-foreground); border-radius: 10px; }
+.nav { display: grid; gap: 4px; }
+.nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; min-height: 56px; width: 64px; font-size: 11px; border-radius: var(--radius-control); color: var(--muted-foreground); text-decoration: none; font-weight: 700; border: 2px solid transparent; }
+.nav a.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); }
+.railfoot { margin-top: auto; display: grid; gap: 12px; justify-items: center; }
+.syncdot { display: grid; justify-items: center; gap: 4px; font-size: 10px; font-weight: 800; text-align: center; line-height: 1.15; border: 0; background: none; padding: 4px; }
+.syncdot .dot { width: 12px; height: 12px; border-radius: 50%; background: currentColor; border: 2px solid var(--card); outline: 2px solid currentColor; }
+.s-online { color: var(--success); } .s-offline { color: var(--warning); } .s-pending { color: var(--info); }
+.avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--outline); background: var(--secondary); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; box-shadow: var(--shadow-control); padding: 0; }
+
+.subnav { border-right: 2px solid var(--outline); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+.subnav h2 { font-size: 26px; padding: 0 8px 12px; }
+.subnav button { display: flex; gap: 10px; align-items: center; text-align: left; border: 2px solid transparent; background: none; min-height: 44px; padding: 8px 10px; border-radius: var(--radius-control); font-weight: 700; color: var(--muted-foreground); }
+.subnav button[aria-current="true"] { background: var(--card); color: var(--foreground); border-color: var(--outline); box-shadow: var(--shadow-control); }
+.subnav .sep { height: 1px; background: var(--border); margin: 8px 6px; }
+
+.pane { overflow-y: auto; padding: 24px 28px 40px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+.shead2 { display: grid; gap: 4px; }
+.shead2 h2 { font-size: 30px; }
+.sub2 { color: var(--muted-foreground); font-size: 14px; max-width: 70ch; }
+.card { background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.card h3 { font-size: 19px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.spacer { flex: 1; }
+.note { font-size: 12px; color: var(--muted-foreground); }
+.input { border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 8px 12px; min-height: 44px; min-width: 0; }
+.field { display: grid; gap: 6px; }
+.field > span { font-size: 13px; font-weight: 700; }
+.offline { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-control); border: 2px solid var(--warning); background: var(--warning-surface); font-size: 14px; }
+.offline > svg { color: var(--warning); margin-top: 2px; }
+
+.mrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto 170px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); }
+.mrow:first-child { border-top: 0; }
+.mrow .avatar { box-shadow: none; }
+.mrow .nm { font-weight: 800; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
+.b-ok { color: var(--success); background: var(--success-surface); }
+.b-muted { color: var(--muted-foreground); border-color: var(--border); }
+.b-info { color: var(--info); background: var(--info-surface); }
+.b-warn { color: var(--warning); background: var(--warning-surface); }
+.b-miss { color: var(--danger); background: var(--danger-surface); }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper output { min-width: 40px; text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
+.sum { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed var(--border); padding-top: 10px; font-weight: 700; }
+.sum b { font-family: var(--font-display); font-size: 22px; }
+
+.slot { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+.slot:first-child { border-top: 0; }
+.slot .n { font-family: var(--font-display); font-weight: 800; color: var(--muted-foreground); text-align: center; }
+.slot.off .input { color: var(--muted-foreground); text-decoration: line-through; }
+.sw { width: 44px; height: 28px; border-radius: 999px; border: 2px solid var(--outline); background: var(--secondary); position: relative; padding: 0; flex: none; }
+.sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--outline); transition: left .12s; }
+.sw[aria-checked="true"] { background: var(--accent); }
+.sw[aria-checked="true"]::after { left: 19px; }
+
+.dcols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.dcol.never { border-color: var(--danger); box-shadow: 3px 3px 0 var(--danger); }
+.dcol.avoid { border-color: var(--warning); box-shadow: 3px 3px 0 var(--warning); }
+.dcol h3 { display: flex; gap: 8px; align-items: center; }
+.dcol.never h3 { color: var(--danger); }
+.dcol.avoid h3 { color: var(--warning); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipx { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--outline); background: var(--secondary); border-radius: 999px; padding: 4px 6px 4px 12px; font-weight: 700; font-size: 14px; min-height: 36px; }
+.chipx .why { font-weight: 500; color: var(--muted-foreground); font-size: 12px; }
+.chipx button { border: 0; background: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; padding: 0; }
+.addrow { display: flex; gap: 8px; }
+.addrow .input { flex: 1; }
+
+.rule { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); }
+.rule:first-child { border-top: 0; }
+.rule.off span { color: var(--muted-foreground); text-decoration: line-through; }
+.radio { display: grid; gap: 8px; }
+.radio button { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; border: 2px solid var(--border); background: var(--card); border-radius: var(--radius-control); padding: 10px 12px; min-height: 52px; }
+.radio button[aria-checked="true"] { border-color: var(--outline); box-shadow: var(--shadow-control); }
+.radio .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--outline); display: grid; place-items: center; }
+.radio button[aria-checked="true"] .dot::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+
+.trow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+.trow:first-child { border-top: 0; }
+.trow .nm { font-weight: 800; }
+.trow .meta { font-size: 12px; color: var(--muted-foreground); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.trow.revoked .nm { color: var(--muted-foreground); text-decoration: line-through; }
+.secret { display: flex; gap: 8px; align-items: center; border: 2px dashed var(--outline); border-radius: var(--radius-control); padding: 10px 12px; background: var(--background); font-family: ui-monospace, Consolas, monospace; font-size: 13px; word-break: break-all; }
+.secret span { flex: 1; }
+.warnbox { display: flex; gap: 8px; align-items: flex-start; color: var(--warning); font-weight: 700; font-size: 13px; }
+
+.scrim { position: absolute; inset: 0; z-index: 8; background: rgb(20 12 22 / .45); }
+.modal { position: absolute; z-index: 9; left: 50%; top: 50%; translate: -50% -50%; width: min(460px, calc(100% - 24px)); background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 22px; display: grid; gap: 14px; animation: fade .15s ease-out; }
+.phone .modal { top: auto; bottom: 0; translate: -50% 0; width: 100%; border-radius: 24px 24px 0 0; padding-bottom: 28px; animation: up .18s ease-out; }
+@keyframes fade { from { opacity: 0; } }
+@keyframes up { from { translate: -50% 30px; opacity: 0; } }
+.modal h3 { font-size: 22px; }
+.menu { position: absolute; z-index: 9; left: 92px; bottom: 16px; width: 280px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 14px; display: grid; gap: 12px; }
+.toast { position: absolute; left: 50%; bottom: 96px; translate: -50% 0; z-index: 10; background: var(--foreground); color: var(--background); border-radius: var(--radius-control); padding: 10px 16px; font-weight: 700; font-size: 14px; white-space: nowrap; }
+.desk .toast { bottom: 24px; }
+
+/* Phones */
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 28px; align-items: start; }
+.pcol { display: grid; gap: 10px; justify-items: center; }
+.pcol .ctl { justify-self: stretch; }
+.phone { width: 390px; max-width: 100%; height: 820px; border-radius: 44px; border: 10px solid #1b1714; background: var(--background); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px -25px rgb(0 0 0 / .45); }
+.statusbar { height: 40px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-size: 13px; font-weight: 700; }
+.ptop { display: flex; align-items: center; gap: 8px; padding: 4px 14px 10px; flex: none; }
+.ptop h2 { font-size: 26px; flex: 1; }
+.ptop .avatar { width: 40px; height: 40px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 6px 10px; border-radius: var(--radius-control); border: 2px solid currentColor; background: var(--card); min-height: 36px; }
+.pill .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.pbody { flex: 1; overflow-y: auto; padding: 0 14px 100px; display: grid; gap: 14px; align-content: start; }
+.phone .pane { padding: 0; overflow: visible; }
+.phone .shead2 h2 { font-size: 24px; }
+.phone .dcols { grid-template-columns: minmax(0, 1fr); }
+.phone .mrow { grid-template-columns: 40px minmax(0, 1fr) auto; }
+.phone .mrow .acts { grid-column: 2 / 4; justify-self: start; }
+.mrow .acts:empty { display: none; }
+.menulist { background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); overflow: hidden; }
+.menulist button { width: 100%; display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left; border: 0; border-top: 1px solid var(--border); background: none; padding: 14px 16px; min-height: 60px; }
+.menulist button:first-child { border-top: 0; }
+.menulist .t { font-weight: 800; display: block; }
+.menulist .d { font-size: 12px; color: var(--muted-foreground); }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; height: 76px; padding-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border-top: 2px solid var(--outline); }
+.tabbar a { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-decoration: none; position: relative; }
+.tabbar a.on { color: var(--primary); }
+
+.auth { flex: 1; display: flex; flex-direction: column; padding: 20px 22px 30px; gap: 18px; }
+.auth .hero { flex: 1; display: grid; place-items: center; align-content: center; gap: 16px; text-align: center; }
+.auth .logo { width: 84px; height: 84px; border-radius: 24px; display: grid; place-items: center; border: 2px solid var(--outline); box-shadow: var(--shadow-card); background: var(--accent); color: var(--accent-foreground); }
+.auth h2 { font-size: 30px; }
+.auth .sub2 { text-align: center; }
+.auth .foot { display: grid; gap: 10px; }
+.invitecard { border: 2px dashed var(--primary); border-radius: var(--radius-card); padding: 14px; display: grid; gap: 4px; text-align: left; background: var(--card); width: 100%; }
+.sys { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 9; border-radius: 22px; background: #f2f2f2; color: #1d1d1d; padding: 20px; display: grid; gap: 12px; justify-items: center; text-align: center; box-shadow: 0 -10px 40px rgb(0 0 0 / .3); font-family: system-ui, sans-serif; animation: fade .15s; }
+.sys .fp { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #1d1d1d; display: grid; place-items: center; }
+.sys small { color: #555; }
+.sys .row { width: 100%; justify-content: center; }
+.sys button { border: 0; border-radius: 12px; padding: 10px 16px; font-weight: 600; background: #ddd; color: #1d1d1d; }
+.sys button.go { background: #1d1d1d; color: #fff; }
+.errorbox { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border: 2px solid var(--danger); background: var(--danger-surface); border-radius: var(--radius-control); font-size: 14px; text-align: left; }
+.errorbox > svg { color: var(--danger); margin-top: 2px; }
+
+.notes { display: grid; gap: 16px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; min-width: 0; }
+.notes h3 { font-size: 22px; }
+.notes .lg { display: grid; gap: 8px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.notes li { max-width: 72ch; }
+.notes p { color: var(--muted-foreground); }
+
+@media (max-width: 440px) { .phone { border-width: 6px; border-radius: 32px; height: 760px; } }
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pagebar">
+    <div>
+      <div class="label">PAN-16 · Spiżarnia</div>
+      <h1>Powłoka, logowanie i ustawienia</h1>
+    </div>
+    <div class="switches">
+      <div class="ctl"><span class="label">Sieć</span><div class="seg" id="net">
+        <button data-v="online">Online</button><button data-v="pending">Czeka na wysłanie</button><button data-v="offline">Offline</button>
+      </div></div>
+      <div class="ctl"><span class="label">Motyw</span><div class="seg" id="theme">
+        <button data-v="system">System</button><button data-v="light">Jasny</button><button data-v="dark">Ciemny</button>
+      </div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="label frame-label">Dom i ustawienia · komputer</div>
+    <div class="scroller"><div class="desk" id="desk"></div></div>
+  </section>
+
+  <section class="phones">
+    <div class="pcol">
+      <div class="ctl"><span class="label">Logowanie · telefon</span><div class="seg" id="authseg">
+        <button data-v="first">Pierwsze uruchomienie</button><button data-v="signin">Logowanie</button><button data-v="invite">Zaproszenie</button><button data-v="error">Anulowano</button>
+      </div></div>
+      <div class="phone" id="authphone"></div>
+    </div>
+    <div class="pcol">
+      <div class="label" style="justify-self:stretch;padding-top:4px">Dom · telefon</div>
+      <div class="phone" id="homephone"></div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div>
+      <h3>Jak to działa</h3>
+      <p>Komputer i telefon „Dom” pokazują te same ustawienia. Przełącznik „Sieć” u góry pokazuje, jak powłoka i ustawienia wyglądają offline. Prototyp jest tylko po polsku; wersja angielska ma te same ekrany.</p>
+    </div>
+    <div class="lg">
+      <div class="label">Powłoka</div>
+      <ul>
+        <li>Komputer: wąski pasek po lewej (Plan, Przepisy, Zakupy, Dom). Na dole stan synchronizacji i awatar, który otwiera konto: język interfejsu, motyw, wylogowanie.</li>
+        <li>Telefon: te same cztery karty na dole. Stan synchronizacji siedzi w nagłówku każdego ekranu, obok awatara, w tym samym miejscu co w trybie zakupów.</li>
+        <li>„Zapisane” jest ciche (zielona kropka), „Offline” i „Czeka na wysłanie” są wyraźne i podają liczbę zmian.</li>
+      </ul>
+    </div>
+    <div class="lg">
+      <div class="label">Logowanie kluczem dostępu</div>
+      <ul>
+        <li>Bez haseł. Pierwsze uruchomienie prosi o imię i tworzy klucz dostępu administratora.</li>
+        <li>Zaproszenie to link od administratora, ważny 48 godzin. Osoba wpisuje imię i tworzy swój klucz. Ten sam link służy do odzyskania dostępu, gdy ktoś zgubi telefon.</li>
+        <li>Okno systemowe w prototypie to tylko atrapa; w aplikacji pokazuje je przeglądarka.</li>
+        <li>Anulowanie albo błąd nie jest dramatem: jasny komunikat i przycisk „Spróbuj ponownie”.</li>
+      </ul>
+    </div>
+    <div class="lg">
+      <div class="label">Ustawienia domu</div>
+      <ul>
+        <li>Domownicy mają mnożnik porcji; suma od razu pokazuje porcję domową, z której liczą się zakupy. Domownik nie musi mieć konta (maluch).</li>
+        <li>Posiłki: kolejność strzałkami, nazwy w miejscu, wyłączenie bez kasowania, żeby nie zgubić historii planu.</li>
+        <li>„Nie jemy” ma dwie kolumny: nigdy (z powodem, np. alergia) i unikamy. To te same znaczniki, które widać w przepisach.</li>
+        <li>Zasady planowania i język treści czyta agent przez MCP. Język treści jest wspólny dla domu, język interfejsu każdy wybiera sam.</li>
+        <li>Tokeny dostępu: nazwa, token pokazany raz z kopiowaniem, potem tylko początek. Unieważnienie wymaga potwierdzenia i od razu odcina agenta.</li>
+        <li>Offline wszystkie ustawienia są wyszarzone z wyjaśnieniem; listy zakupów działają dalej (ADR 0007).</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const ICONS = {
+  jar: '<path d="M7 3h10M8 3v3l-2 3v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M6 12h12"/>',
+  cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/>',
+  rules: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>', left: '<path d="M15 18l-6-6 6-6"/>', right: '<path d="M9 18l6-6-6-6"/>',
+  up: '<path d="M6 15l6-6 6 6"/>', down: '<path d="M6 9l6 6 6-6"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  wifioff: '<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.7M19 13a10 10 0 0 0-2.3-1.6M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 10.7 5"/><circle cx="12" cy="20" r=".8"/>',
+  sync: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+  fingerprint: '<path d="M12 11v4M8 12a4 4 0 0 1 8 0v3a6 6 0 0 1-1 3M5 10a7 7 0 0 1 14 0v2M9 16a10 10 0 0 0 1 4M12 19v1"/>',
+  logout: '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+  phone: '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+  laptop: '<rect x="4" y="5" width="16" height="11" rx="1"/><path d="M2 19h20"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
+};
+const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = n => Number(n).toLocaleString('pl-PL', { maximumFractionDigits: 2 });
+
+const SECTIONS = [
+  ['members', 'Domownicy', 'users', 'Kto je i ile'],
+  ['slots', 'Posiłki', 'clock', 'Pory posiłków w planie'],
+  ['dislikes', 'Nie jemy', 'ban', 'Nigdy i unikamy'],
+  ['rules', 'Zasady planowania', 'rules', 'Wskazówki dla agenta'],
+  ['language', 'Język treści', 'globe', 'W jakim języku pisze agent'],
+  ['tokens', 'Tokeny dostępu', 'key', 'Dla agentów przez MCP'],
+  ['account', 'Moje konto', 'user', 'Język, motyw, klucze dostępu']
+];
+
+const S = {
+  net: 'online', pending: 3, theme: 'system', uiLang: 'pl',
+  desk: { section: 'members', modal: null, menu: false, toast: '' },
+  home: { section: null, modal: null, toast: '' },
+  auth: { screen: 'first', sys: false, done: false, name: '' },
+  members: [
+    { id: 1, name: 'Ania', factor: 1, account: 'admin' },
+    { id: 2, name: 'Bartek', factor: 1, account: 'user' },
+    { id: 3, name: 'Maluch', factor: 0.3, account: null }
+  ],
+  slots: [
+    { id: 'b', name: 'Śniadanie', on: true }, { id: 's', name: 'II śniadanie', on: false }, { id: 'l', name: 'Obiad', on: true },
+    { id: 'n', name: 'Podwieczorek', on: false }, { id: 'd', name: 'Kolacja', on: true }
+  ],
+  dislikes: { never: [['orzechy włoskie', 'alergia'], ['grzyby leśne', '']], avoid: [['kolendra', ''], ['wątróbka', ''], ['seler naciowy', '']] },
+  rules: [
+    { text: 'Obiady w dni robocze do 30 minut', on: true },
+    { text: 'Ryba przynajmniej raz w tygodniu', on: true },
+    { text: 'W niedzielę coś na dwa dni, żeby w poniedziałek były resztki', on: true },
+    { text: 'Bez smażenia w głębokim tłuszczu', on: false }
+  ],
+  contentLang: 'pl',
+  tokens: [
+    { id: 't1', name: 'Asystent na laptopie', prefix: 'pan_7f3K…', created: '2 lis', used: 'dziś, 16:20', revoked: false },
+    { id: 't2', name: 'Stary telefon', prefix: 'pan_Qa91…', created: '12 wrz', used: '3 tyg. temu', revoked: false }
+  ],
+  passkeys: [{ name: 'Telefon z Androidem', icon: 'phone', added: '8 lis' }, { name: 'Laptop', icon: 'laptop', added: '8 lis' }]
+};
+let nid = 10;
+const offline = () => S.net === 'offline';
+const dis = () => offline() ? 'disabled' : '';
+const household = () => S.members.reduce((a, m) => a + m.factor, 0);
+
+function syncInfo() {
+  return {
+    online: { cls: 's-online', short: 'Zapisane', long: 'Online · wszystko zapisane' },
+    pending: { cls: 's-pending', short: `Wysyłanie ${S.pending}`, long: `Online · wysyłanie ${S.pending} zmian` },
+    offline: { cls: 's-offline', short: `Offline · ${S.pending}`, long: `Offline · ${S.pending} zmiany czekają` }
+  }[S.net];
+}
+function syncPill() {
+  const s = syncInfo();
+  const ic = S.net === 'online' ? '<span class="dot"></span>' : icon(S.net === 'offline' ? 'wifioff' : 'sync', 'sm');
+  return `<span class="pill ${s.cls}" role="status">${ic}${s.short}</span>`;
+}
+const offlineBox = () => offline() ? `<div class="offline">${icon('wifioff')}<div><b>Jesteś offline.</b> Ustawienia zmienisz po powrocie do sieci. Listy zakupów działają dalej, a zmiany z nich wyślą się same.</div></div>` : '';
+
+function sectionHtml(id, where) {
+  const head = (t, d) => `<div class="shead2"><h2>${t}</h2><p class="sub2">${d}</p></div>${offlineBox()}`;
+  if (id === 'members') return head('Domownicy', 'Mnożnik porcji mówi, ile zjada każdy domownik. Z sumy liczymy porcję domową, a z niej zakupy.') + `
+    <div class="card">${S.members.map(m => `<div class="mrow">
+        <span class="avatar">${esc(m.name[0])}</span>
+        <div><div class="nm">${esc(m.name)}</div><div class="row">${m.account === 'admin' ? '<span class="badge b-ok">administrator</span>' : m.account === 'user' ? '<span class="badge b-ok">ma konto</span>' : m.account === 'invited' ? '<span class="badge b-info">zaproszenie wysłane</span>' : '<span class="badge b-muted">bez konta</span>'}</div></div>
+        <div class="stepper"><button class="btn icon sm" data-act="factor" data-id="${m.id}" data-d="-0.1" aria-label="Mniej dla ${esc(m.name)}" ${dis()}>${icon('minus', 'sm')}</button><output>${fmt(m.factor)}</output><button class="btn icon sm" data-act="factor" data-id="${m.id}" data-d="0.1" aria-label="Więcej dla ${esc(m.name)}" ${dis()}>${icon('plus', 'sm')}</button></div>
+        <div class="acts">${!m.account || m.account === 'invited' ? `<button class="btn sm" data-act="invite" data-id="${m.id}" ${dis()}>${icon('link', 'sm')}${m.account === 'invited' ? 'Nowy link' : 'Zaproś'}</button>` : m.account === 'user' ? `<button class="btn sm ghost" data-act="invite" data-id="${m.id}" ${dis()} title="Gdy ktoś zgubi telefon">Odzyskaj dostęp</button>` : ''}</div>
+      </div>`).join('')}
+      <div class="sum"><span>Porcja domowa</span><b>${fmt(household())}</b></div>
+      <form class="addrow" data-form="member"><input class="input" name="v" placeholder="Imię nowego domownika" aria-label="Imię nowego domownika" ${dis()}><button class="btn" ${dis()}>${icon('plus', 'sm')}Dodaj</button></form>
+    </div>`;
+  if (id === 'slots') return head('Posiłki', 'Pory posiłków to wiersze w planie. Wyłączony posiłek znika z planu, ale nie kasuje historii.') + `
+    <div class="card">${S.slots.map((s, i) => `<div class="slot ${s.on ? '' : 'off'}">
+        <span class="n">${i + 1}</span>
+        <input class="input" value="${esc(s.name)}" data-input="slot" data-i="${i}" aria-label="Nazwa posiłku ${i + 1}" ${dis()}>
+        <span class="row" style="gap:4px"><button class="btn icon sm ghost" data-act="slot-up" data-i="${i}" aria-label="W górę" ${i === 0 || offline() ? 'disabled' : ''}>${icon('up', 'sm')}</button><button class="btn icon sm ghost" data-act="slot-down" data-i="${i}" aria-label="W dół" ${i === S.slots.length - 1 || offline() ? 'disabled' : ''}>${icon('down', 'sm')}</button></span>
+        <button class="sw" role="switch" aria-checked="${s.on}" aria-label="${esc(s.name)} w planie" data-act="slot-on" data-i="${i}" ${dis()}></button>
+      </div>`).join('')}
+      <form class="addrow" data-form="slot"><input class="input" name="v" placeholder="np. Kolacja na mieście" aria-label="Nowy posiłek" ${dis()}><button class="btn" ${dis()}>${icon('plus', 'sm')}Dodaj posiłek</button></form>
+      <p class="note">W planie: ${S.slots.filter(s => s.on).length} posiłki dziennie.</p></div>`;
+  if (id === 'dislikes') {
+    const col = (lvl, title, ic, desc) => `<div class="card dcol ${lvl}"><h3>${icon(ic)}${title}</h3><p class="note">${desc}</p>
+      <div class="chips">${S.dislikes[lvl].map(([n, why], i) => `<span class="chipx">${esc(n)}${why ? ` <span class="why">· ${esc(why)}</span>` : ''}<button data-act="dis-del" data-l="${lvl}" data-i="${i}" aria-label="Usuń ${esc(n)}" ${dis()}>${icon('x', 'sm')}</button></span>`).join('')}</div>
+      <form class="addrow" data-form="dis-${lvl}"><input class="input" name="v" list="ingredients" placeholder="${lvl === 'never' ? 'Składnik, np. orzeszki ziemne' : 'Składnik, np. brukselka'}" aria-label="Nowy składnik: ${title}" ${dis()}>${lvl === 'never' ? `<input class="input" name="why" placeholder="Powód" style="max-width:120px" aria-label="Powód" ${dis()}>` : ''}<button class="btn icon" aria-label="Dodaj" ${dis()}>${icon('plus', 'sm')}</button></form></div>`;
+    return head('Nie jemy', 'Dotyczy całego domu. Agent nie proponuje dań ze składnikami z listy „nigdy”, a te z „unikamy” wybiera rzadko i oznacza.') + `<div class="dcols">${col('never', 'Nigdy', 'ban', 'Alergie i twarde „nie”. Przepisy z tymi składnikami mają czerwone ostrzeżenie.')}${col('avoid', 'Unikamy', 'alert', 'Lepiej nie, ale w razie czego da się zjeść.')}</div>`;
+  }
+  if (id === 'rules') return head('Zasady planowania', 'Krótkie zdania, które agent czyta przed planowaniem. Wyłączona zasada zostaje na później.') + `
+    <div class="card">${S.rules.map((r, i) => `<div class="rule ${r.on ? '' : 'off'}"><span>${esc(r.text)}</span><button class="sw" role="switch" aria-checked="${r.on}" aria-label="Zasada włączona" data-act="rule-on" data-i="${i}" ${dis()}></button><button class="btn icon sm ghost" data-act="rule-del" data-i="${i}" aria-label="Usuń zasadę" ${dis()}>${icon('x', 'sm')}</button></div>`).join('')}
+      <form class="addrow" data-form="rule"><input class="input" name="v" placeholder="np. Słodkie śniadanie tylko w weekend" aria-label="Nowa zasada" ${dis()}><button class="btn" ${dis()}>${icon('plus', 'sm')}Dodaj</button></form></div>`;
+  if (id === 'language') return head('Język treści', 'W tym języku agent pisze przepisy, nazwy pozycji na listach i notatki. Język przycisków i menu każdy wybiera sam w swoim koncie.') + `
+    <div class="card"><div class="radio" role="radiogroup" aria-label="Język treści">${[['pl', 'Polski', 'Przepisy i listy po polsku'], ['en', 'English', 'Recipes and lists in English']].map(([v, l, d]) => `<button role="radio" aria-checked="${S.contentLang === v}" data-act="content-lang" data-v="${v}" ${dis()}><span class="dot"></span><span><b>${l}</b><br><span class="note">${d}</span></span></button>`).join('')}</div>
+    <p class="note">Zmiana nie tłumaczy istniejących przepisów. Agent może to zrobić, jeśli go poprosisz.</p></div>`;
+  if (id === 'tokens') return head('Tokeny dostępu', 'Token pozwala agentowi (np. Claude na komputerze) pracować ze Spiżarnią przez MCP w Twoim imieniu. Każde urządzenie powinno mieć swój.') + `
+    <div class="card"><div class="row"><h3 class="spacer">Twoje tokeny</h3><button class="btn primary sm" data-act="token-new" ${dis()}>${icon('plus', 'sm')}Nowy token</button></div>
+      ${S.tokens.map(t => `<div class="trow ${t.revoked ? 'revoked' : ''}"><div><div class="nm">${esc(t.name)}</div><div class="meta"><span><code>${t.prefix}</code></span><span>utworzony ${t.created}</span><span>${t.revoked ? 'unieważniony' : 'ostatnio użyty ' + t.used}</span></div></div>
+        ${t.revoked ? '<span class="badge b-muted">unieważniony</span>' : `<button class="btn sm danger" data-act="token-revoke" data-id="${t.id}" ${dis()}>Unieważnij</button>`}</div>`).join('') || '<p class="note">Nie masz jeszcze tokenów.</p>'}
+    </div>`;
+  if (id === 'account') return `<div class="shead2"><h2>Moje konto</h2><p class="sub2">Te ustawienia dotyczą tylko Ciebie.</p></div>${offlineBox()}
+    <div class="card"><h3>Język interfejsu</h3><div class="seg" role="group" aria-label="Język interfejsu">${[['pl', 'Polski'], ['en', 'English']].map(([v, l]) => `<button data-act="ui-lang" data-v="${v}" aria-pressed="${S.uiLang === v}" lang="${v}">${l}</button>`).join('')}</div></div>
+    <div class="card"><h3>Motyw</h3><div class="seg" role="group" aria-label="Motyw">${[['system', 'Systemowy'], ['light', 'Jasny'], ['dark', 'Ciemny']].map(([v, l]) => `<button data-act="theme" data-v="${v}" aria-pressed="${S.theme === v}">${l}</button>`).join('')}</div><p class="note">Systemowy podąża za ustawieniem telefonu lub komputera.</p></div>
+    <div class="card"><div class="row"><h3 class="spacer">Klucze dostępu</h3><button class="btn sm" data-act="passkey-add" ${dis()}>${icon('plus', 'sm')}Dodaj</button></div>
+      ${S.passkeys.map(p => `<div class="trow"><div class="row">${icon(p.icon)}<div><div class="nm">${esc(p.name)}</div><div class="meta">dodany ${p.added}</div></div></div><span class="badge b-ok">aktywny</span></div>`).join('')}
+      <p class="note">Klucze synchronizują się przez menedżer haseł telefonu. Dodaj drugi, jeśli używasz kilku urządzeń bez wspólnego konta.</p></div>
+    <button class="btn danger" data-act="logout" style="justify-self:start">${icon('logout', 'sm')}Wyloguj się</button>`;
+  return '';
+}
+
+function modalHtml(m) {
+  if (!m) return '';
+  let body = '';
+  if (m.kind === 'invite') {
+    const mem = S.members.find(x => x.id === m.id);
+    body = `<h3>Zaproszenie dla: ${esc(mem.name)}</h3><p class="sub2">Wyślij ten link tylko tej osobie. Otworzy go na swoim telefonie i utworzy klucz dostępu.</p>
+      <div class="secret"><span>https://spizarnia.local/zaproszenie/4kF9-Tq2M</span><button class="btn sm" data-act="copy">${icon('copy', 'sm')}Kopiuj</button></div>
+      <p class="note">Link działa 48 godzin i tylko raz. ${mem.account === 'user' ? 'Stare klucze tej osoby przestaną działać po użyciu linku.' : ''}</p>
+      <div class="row"><span class="spacer"></span><button class="btn primary" data-act="close-modal">Gotowe</button></div>`;
+  }
+  if (m.kind === 'token-new') body = `<h3>Nowy token</h3><form class="field" data-form="token"><span>Nazwa, żeby wiedzieć, gdzie jest używany</span><input class="input" name="v" placeholder="np. Asystent na komputerze w kuchni" autofocus aria-label="Nazwa tokenu"></form>
+      <div class="row"><span class="spacer"></span><button class="btn ghost" data-act="close-modal">Anuluj</button><button class="btn primary" data-act="token-create">Utwórz</button></div>`;
+  if (m.kind === 'token-show') body = `<h3>Token gotowy</h3><p class="sub2">Skopiuj go teraz i wklej w ustawieniach agenta.</p>
+      <div class="secret"><span>${m.secret}</span><button class="btn sm" data-act="copy">${icon('copy', 'sm')}Kopiuj</button></div>
+      <div class="warnbox">${icon('alert', 'sm')}Nie pokażemy go ponownie. Jeśli go zgubisz, utwórz nowy, a ten unieważnij.</div>
+      <div class="row"><span class="spacer"></span><button class="btn primary" data-act="close-modal">Skopiowałem, zamknij</button></div>`;
+  if (m.kind === 'token-revoke') {
+    const t = S.tokens.find(x => x.id === m.id);
+    body = `<h3>Unieważnić „${esc(t.name)}”?</h3><p class="sub2">Agent, który go używa, od razu straci dostęp. Tego nie da się cofnąć.</p>
+      <div class="row"><span class="spacer"></span><button class="btn ghost" data-act="close-modal">Anuluj</button><button class="btn danger" data-act="token-revoke-ok" data-id="${t.id}">Unieważnij</button></div>`;
+  }
+  return `<div class="scrim" data-act="close-modal"></div><div class="modal" role="dialog" aria-modal="true">${body}</div>`;
+}
+
+function renderDesk() {
+  const d = S.desk;
+  const s = syncInfo();
+  document.getElementById('desk').innerHTML = `
+    <aside class="side">
+      <span class="mark" title="Spiżarnia">${icon('jar')}</span>
+      <nav class="nav"><a href="#">${icon('cal')}Plan</a><a href="#">${icon('book')}Przepisy</a><a href="#">${icon('cart')}Zakupy</a><a href="#" class="on">${icon('home')}Dom</a></nav>
+      <div class="railfoot">
+        <button class="syncdot ${s.cls}" title="${s.long}" aria-label="${s.long}"><span class="dot"></span>${s.short}</button>
+        <button class="avatar" data-act="menu" aria-label="Konto: Ania" aria-expanded="${d.menu}">A</button>
+      </div>
+    </aside>
+    <nav class="subnav" aria-label="Ustawienia domu"><h2>Dom</h2>
+      ${SECTIONS.map(([id, label, ic], i) => `${id === 'tokens' ? '<div class="sep"></div>' : ''}<button data-act="section" data-v="${id}" aria-current="${d.section === id}">${icon(ic)}${label}</button>`).join('')}
+    </nav>
+    <div class="pane">${sectionHtml(d.section, 'desk')}</div>
+    ${d.menu ? `<div class="scrim" style="background:transparent" data-act="menu"></div><div class="menu" role="menu"><div class="row"><span class="avatar">A</span><div><b>Ania</b><div class="note">administrator</div></div></div>
+      <div class="field"><span>Język</span><div class="seg">${[['pl', 'Polski'], ['en', 'English']].map(([v, l]) => `<button data-act="ui-lang" data-v="${v}" aria-pressed="${S.uiLang === v}">${l}</button>`).join('')}</div></div>
+      <div class="field"><span>Motyw</span><div class="seg">${[['system', 'System'], ['light', 'Jasny'], ['dark', 'Ciemny']].map(([v, l]) => `<button data-act="theme" data-v="${v}" aria-pressed="${S.theme === v}">${l}</button>`).join('')}</div></div>
+      <button class="btn sm ghost danger" data-act="logout" style="justify-self:start">${icon('logout', 'sm')}Wyloguj się</button></div>` : ''}
+    ${modalHtml(d.modal)}
+    ${d.toast ? `<div class="toast" role="status">${d.toast}</div>` : ''}`;
+}
+
+function renderHome() {
+  const h = S.home;
+  const cur = SECTIONS.find(x => x[0] === h.section);
+  document.getElementById('homephone').innerHTML = `
+    <div class="statusbar"><span>20:10</span><span>81%</span></div>
+    <div class="ptop">${h.section ? `<button class="btn icon ghost" data-act="home-back" aria-label="Wstecz">${icon('left')}</button><h2 style="font-size:20px">${cur[1]}</h2>` : '<h2>Dom</h2>'}${syncPill()}<button class="avatar" data-act="home-account" aria-label="Moje konto">A</button></div>
+    <div class="pbody">${h.section ? `<div class="pane">${sectionHtml(h.section, 'phone')}</div>`
+      : `${offlineBox()}<div class="menulist">${SECTIONS.filter(x => x[0] !== 'account').map(([id, l, ic, d]) => `<button data-act="home-section" data-v="${id}">${icon(ic)}<span><span class="t">${l}</span><span class="d">${d}</span></span>${icon('right', 'sm')}</button>`).join('')}</div>
+         <div class="menulist"><button data-act="home-section" data-v="account">${icon('user')}<span><span class="t">Moje konto</span><span class="d">Język, motyw, klucze dostępu</span></span>${icon('right', 'sm')}</button></div>`}</div>
+    <nav class="tabbar"><a href="#">${icon('cal')}Plan</a><a href="#">${icon('book')}Przepisy</a><a href="#">${icon('cart')}Zakupy</a><a href="#" class="on">${icon('home')}Dom</a></nav>
+    ${modalHtml(h.modal)}
+    ${h.toast ? `<div class="toast" role="status">${h.toast}</div>` : ''}`;
+}
+
+function renderAuth() {
+  const a = S.auth;
+  let body = '';
+  const logo = `<span class="logo">${icon('jar', 'xl')}</span>`;
+  if (a.done) body = `<div class="hero">${logo}<h2>Witaj w domu!</h2><p class="sub2">Klucz dostępu zapisany na tym telefonie. Następnym razem wystarczy odcisk palca albo twarz.</p></div>
+      <div class="foot"><button class="btn primary lg block" data-act="auth-reset">Przejdź do planu</button></div>`;
+  else if (a.screen === 'first') body = `<div class="hero">${logo}<div><span class="label">Pierwsze uruchomienie</span><h2>Załóżmy Spiżarnię</h2></div><p class="sub2">Będziesz administratorem. Potem zaprosisz resztę domowników.</p>
+        <label class="field" style="width:100%;text-align:left"><span>Jak masz na imię?</span><input class="input" data-input="auth-name" value="${esc(a.name)}" placeholder="np. Ania"></label></div>
+      <div class="foot"><button class="btn primary lg block" data-act="auth-go" ${a.name.trim() ? '' : 'disabled'}>${icon('fingerprint')}Utwórz klucz dostępu</button><p class="note" style="text-align:center">Bez hasła. Klucz zostaje w menedżerze haseł telefonu.</p></div>`;
+  else if (a.screen === 'signin' || a.screen === 'error') body = `<div class="hero">${logo}<h2>Spiżarnia</h2><p class="sub2">Plan posiłków i zakupy dla całego domu.</p>
+        ${a.screen === 'error' ? `<div class="errorbox">${icon('alert')}<div><b>Logowanie przerwane.</b> Okno klucza zostało zamknięte albo klucz nie pasuje do tego adresu. Spróbuj jeszcze raz albo poproś administratora o nowy link.</div></div>` : ''}</div>
+      <div class="foot"><button class="btn primary lg block" data-act="auth-go">${icon('fingerprint')}${a.screen === 'error' ? 'Spróbuj ponownie' : 'Zaloguj się kluczem dostępu'}</button><p class="note" style="text-align:center">Nie masz konta? Poproś domownika o zaproszenie.</p></div>`;
+  else if (a.screen === 'invite') body = `<div class="hero">${logo}<div class="invitecard"><span class="label">Zaproszenie</span><b>Ania zaprasza Cię do Spiżarni</b><span class="note">Link ważny jeszcze 46 godzin</span></div>
+        <label class="field" style="width:100%;text-align:left"><span>Jak masz na imię?</span><input class="input" data-input="auth-name" value="${esc(a.name || 'Bartek')}"></label></div>
+      <div class="foot"><button class="btn primary lg block" data-act="auth-go">${icon('fingerprint')}Dołącz i utwórz klucz</button></div>`;
+  document.getElementById('authphone').innerHTML = `<div class="statusbar"><span>09:41</span><span>90%</span></div><div class="auth">${body}</div>
+    ${a.sys ? `<div class="scrim"></div><div class="sys" role="dialog" aria-label="Okno systemowe (atrapa)"><small>Okno systemu · atrapa</small><b>${a.screen === 'first' || a.screen === 'invite' ? 'Utworzyć klucz dla spizarnia.local?' : 'Zalogować się do spizarnia.local?'}</b><span class="fp">${icon('fingerprint', 'xl')}</span><small>Dotknij czytnika linii papilarnych</small><div class="row"><button data-act="sys-cancel">Anuluj</button><button class="go" data-act="sys-ok">Potwierdź</button></div></div>` : ''}`;
+}
+
+function render() { renderDesk(); renderHome(); renderAuth(); }
+
+function where(el) { return el.closest('#homephone') ? S.home : S.desk; }
+function toast(ctx, msg) { ctx.toast = msg; render(); clearTimeout(ctx.tt); ctx.tt = setTimeout(() => { ctx.toast = ''; render(); }, 2000); }
+function setTheme(v) {
+  S.theme = v;
+  if (v === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', v);
+  document.querySelectorAll('#theme button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+}
+
+function act(el) {
+  const a = el.dataset.act, ctx = where(el), id = Number(el.dataset.id) || el.dataset.id, i = Number(el.dataset.i), v = el.dataset.v;
+  switch (a) {
+    case 'section': S.desk.section = v; break;
+    case 'menu': S.desk.menu = !S.desk.menu; break;
+    case 'home-section': S.home.section = v; break;
+    case 'home-back': S.home.section = null; break;
+    case 'home-account': S.home.section = 'account'; break;
+    case 'factor': { const m = S.members.find(x => x.id === id); m.factor = Math.min(2, Math.max(0.1, Math.round((m.factor + Number(el.dataset.d)) * 10) / 10)); break; }
+    case 'invite': ctx.modal = { kind: 'invite', id }; { const m = S.members.find(x => x.id === id); if (!m.account) m.account = 'invited'; } break;
+    case 'copy': toast(ctx, 'Skopiowano'); return;
+    case 'close-modal': ctx.modal = null; break;
+    case 'slot-up': [S.slots[i - 1], S.slots[i]] = [S.slots[i], S.slots[i - 1]]; break;
+    case 'slot-down': [S.slots[i + 1], S.slots[i]] = [S.slots[i], S.slots[i + 1]]; break;
+    case 'slot-on': S.slots[i].on = !S.slots[i].on; break;
+    case 'dis-del': S.dislikes[el.dataset.l].splice(i, 1); break;
+    case 'rule-on': S.rules[i].on = !S.rules[i].on; break;
+    case 'rule-del': S.rules.splice(i, 1); break;
+    case 'content-lang': S.contentLang = v; break;
+    case 'token-new': ctx.modal = { kind: 'token-new' }; break;
+    case 'token-create': {
+      const input = el.closest('.modal').querySelector('input');
+      const name = input.value.trim() || 'Nowy token';
+      const secret = 'pan_' + Array.from({ length: 32 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 56)]).join('');
+      S.tokens.unshift({ id: 't' + (++nid), name, prefix: secret.slice(0, 8) + '…', created: 'dziś', used: 'jeszcze nie', revoked: false });
+      ctx.modal = { kind: 'token-show', secret };
+      break;
+    }
+    case 'token-revoke': ctx.modal = { kind: 'token-revoke', id: el.dataset.id }; break;
+    case 'token-revoke-ok': S.tokens.find(x => x.id === el.dataset.id).revoked = true; ctx.modal = null; toast(ctx, 'Token unieważniony'); return;
+    case 'ui-lang': S.uiLang = v; toast(ctx, v === 'en' ? 'Interface language: English (prototype stays in Polish)' : 'Język interfejsu: polski'); return;
+    case 'theme': setTheme(v); break;
+    case 'passkey-add': S.auth.screen = 'first'; toast(ctx, 'Tu otworzy się okno systemowe klucza'); return;
+    case 'logout': S.desk.menu = false; S.auth = { screen: 'signin', sys: false, done: false, name: '' }; setAuthSeg(); document.getElementById('authphone').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
+    case 'auth-go': S.auth.sys = true; break;
+    case 'sys-cancel': S.auth.sys = false; S.auth.screen = S.auth.screen === 'signin' || S.auth.screen === 'error' ? 'error' : S.auth.screen; if (S.auth.screen === 'error') setAuthSeg(); break;
+    case 'sys-ok': S.auth.sys = false; S.auth.done = true; break;
+    case 'auth-reset': S.auth.done = false; break;
+    default: return;
+  }
+  render();
+}
+
+document.addEventListener('click', ev => { const el = ev.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
+document.addEventListener('submit', ev => {
+  const f = ev.target.closest('[data-form]');
+  if (!f) return;
+  ev.preventDefault();
+  if (f.dataset.form === 'token') { f.closest('.modal').querySelector('[data-act="token-create"]').click(); return; }
+  const val = f.elements.v.value.trim();
+  if (!val) return;
+  const k = f.dataset.form;
+  if (k === 'member') S.members.push({ id: ++nid, name: val, factor: 1, account: null });
+  if (k === 'slot') S.slots.push({ id: 'x' + (++nid), name: val, on: true });
+  if (k === 'rule') S.rules.push({ text: val, on: true });
+  if (k.startsWith('dis-')) S.dislikes[k.slice(4)].push([val.toLowerCase(), f.elements.why?.value.trim() ?? '']);
+  const inPhone = !!f.closest('#homephone');
+  render();
+  document.querySelector(`${inPhone ? '#homephone' : '#desk'} [data-form="${k}"] input`)?.focus();
+});
+document.addEventListener('input', ev => {
+  const k = ev.target.dataset.input;
+  if (k === 'slot') S.slots[Number(ev.target.dataset.i)].name = ev.target.value;
+  if (k === 'auth-name') {
+    S.auth.name = ev.target.value;
+    const btn = document.querySelector('#authphone [data-act="auth-go"]');
+    if (btn) btn.disabled = S.auth.screen === 'first' && !S.auth.name.trim();
+  }
+});
+document.addEventListener('change', ev => { if (ev.target.dataset.input === 'slot') render(); });
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'Escape') return;
+  S.desk.modal = null; S.home.modal = null; S.desk.menu = false; S.auth.sys = false; render();
+});
+
+function setAuthSeg() { document.querySelectorAll('#authseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.auth.screen))); }
+document.getElementById('authseg').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-v]'); if (!b) return;
+  S.auth = { screen: b.dataset.v, sys: false, done: false, name: '' };
+  setAuthSeg(); renderAuth();
+});
+document.getElementById('net').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-v]'); if (!b) return;
+  S.net = b.dataset.v;
+  document.querySelectorAll('#net button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === S.net)));
+  render();
+});
+document.getElementById('theme').addEventListener('click', ev => { const b = ev.target.closest('button[data-v]'); if (b) { setTheme(b.dataset.v); render(); } });
+
+const dl = document.createElement('datalist');
+dl.id = 'ingredients';
+dl.innerHTML = ['orzeszki ziemne', 'brukselka', 'krewetki', 'mleko krowie', 'gluten', 'kolendra', 'grzyby leśne', 'seler naciowy', 'wątróbka', 'oliwki'].map(x => `<option value="${x}">`).join('');
+document.body.append(dl);
+
+document.querySelectorAll('#net button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === S.net)));
+setTheme('system');
+setAuthSeg();
+render();
+</script>
+</body>
+</html>
