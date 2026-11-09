@@ -20,7 +20,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddHouseholdModule();
-builder.Services.AddCatalogModule();
+builder.Services.AddCatalogModule(builder.Configuration);
 
 var app = builder.Build();
 

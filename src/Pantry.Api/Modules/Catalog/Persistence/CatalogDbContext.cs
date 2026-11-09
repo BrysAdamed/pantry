@@ -12,7 +12,11 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
 
     private const int CodeMaxLength = 32;
 
+    public const string NameKeyTrigramIndex = "ix_ingredient_names_key_trgm";
+
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+
+    public DbSet<NotDuplicatePair> NotDuplicatePairs => Set<NotDuplicatePair>();
 
     public static bool IsDuplicateName(DbUpdateException exception) =>
         exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: NameKeyIndex };
@@ -20,6 +24,7 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema(Schema);
+        builder.HasPostgresExtension("public", "pg_trgm");
 
         builder.Entity<Ingredient>(ingredient =>
         {
@@ -42,8 +47,18 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
                 name.Property(n => n.Value).HasMaxLength(Ingredient.NameMaxLength);
                 name.Property(n => n.Key).HasMaxLength(Ingredient.NameMaxLength * 2);
                 name.HasIndex(n => n.Key).IsUnique().HasDatabaseName(NameKeyIndex);
+                name.HasIndex(n => n.Key, NameKeyTrigramIndex).HasMethod("gin").HasOperators("gin_trgm_ops");
             });
             ingredient.Navigation(i => i.Names).UsePropertyAccessMode(PropertyAccessMode.Field);
+        });
+
+        builder.Entity<NotDuplicatePair>(pair =>
+        {
+            pair.ToTable("not_duplicate_pairs", table => table.HasCheckConstraint(
+                "ck_not_duplicate_pairs_order", "first_ingredient_id < second_ingredient_id"));
+            pair.HasKey(p => new { p.FirstIngredientId, p.SecondIngredientId });
+            pair.HasOne<Ingredient>().WithMany().HasForeignKey(p => p.FirstIngredientId).OnDelete(DeleteBehavior.Cascade);
+            pair.HasOne<Ingredient>().WithMany().HasForeignKey(p => p.SecondIngredientId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 

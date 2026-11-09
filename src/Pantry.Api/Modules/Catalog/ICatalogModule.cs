@@ -28,7 +28,23 @@ public interface ICatalogModule
 
     /// <summary>Clears <c>needs review</c> of the ingredient; null when it does not exist.</summary>
     Task<CatalogIngredient?> ConfirmIngredientAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Pairs of ingredients with similar names or aliases, most similar first, leaving out pairs marked as not
+    /// duplicates. <paramref name="ingredientId"/> limits them to the pairs of one ingredient.
+    /// </summary>
+    Task<IReadOnlyList<PossibleDuplicate>> GetPossibleDuplicatesAsync(
+        Guid? ingredientId = null, int limit = 100, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Marks two different ingredients as not duplicates, so the pair is no longer suggested; false when either does
+    /// not exist.
+    /// </summary>
+    Task<bool> MarkNotDuplicatesAsync(Guid oneIngredientId, Guid otherIngredientId, CancellationToken cancellationToken = default);
 }
+
+/// <summary>Two ingredients that may be the same; <c>Similarity</c> is from 0 to 1 (1 for identical names).</summary>
+public sealed record PossibleDuplicate(CatalogIngredient First, CatalogIngredient Second, double Similarity);
 
 /// <summary>The result of <see cref="ICatalogModule.ResolveIngredientAsync"/>; <c>Created</c> is true for a new ingredient.</summary>
 public sealed record ResolvedIngredient(CatalogIngredient Ingredient, bool Created);
