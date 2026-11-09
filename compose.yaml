@@ -21,7 +21,7 @@ services:
     build: .
     profiles: ["app"]
     environment:
-      ConnectionStrings__Pantry: Host=db;Database=${POSTGRES_DB:-pantry};Username=${POSTGRES_USER:-pantry};Password=${POSTGRES_PASSWORD}
+      ConnectionStrings__Pantry: Host=db;Database=${POSTGRES_DB:-pantry};Username=${POSTGRES_USER:-pantry};Password=${POSTGRES_PASSWORD};Gss Encryption Mode=Disable
     ports:
       - "${APP_PORT:-8080}:8080"
     depends_on:
