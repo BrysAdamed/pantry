@@ -520,6 +520,24 @@
       "bunch": "bunch",
       "handful": "handful",
       "glass": "glass"
+    },
+    "unitAmount": {
+      "g": "g",
+      "kg": "kg",
+      "ml": "ml",
+      "l": "l",
+      "piece": "pc",
+      "clove": "{count, plural, one {clove} other {cloves}}",
+      "tbsp": "tbsp",
+      "tsp": "tsp",
+      "pinch": "{count, plural, one {pinch} other {pinches}}",
+      "can": "{count, plural, one {can} other {cans}}",
+      "jar": "{count, plural, one {jar} other {jars}}",
+      "pack": "{count, plural, one {pack} other {packs}}",
+      "slice": "{count, plural, one {slice} other {slices}}",
+      "bunch": "{count, plural, one {bunch} other {bunches}}",
+      "handful": "{count, plural, one {handful} other {handfuls}}",
+      "glass": "{count, plural, one {glass} other {glasses}}"
     }
   }
 }

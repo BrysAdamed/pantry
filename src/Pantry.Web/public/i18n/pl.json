@@ -520,6 +520,24 @@
       "bunch": "pęczek",
       "handful": "garść",
       "glass": "szklanka"
+    },
+    "unitAmount": {
+      "g": "g",
+      "kg": "kg",
+      "ml": "ml",
+      "l": "l",
+      "piece": "szt.",
+      "clove": "{count, plural, one {ząbek} few {ząbki} many {ząbków} other {ząbka}}",
+      "tbsp": "{count, plural, one {łyżka} few {łyżki} many {łyżek} other {łyżki}}",
+      "tsp": "{count, plural, one {łyżeczka} few {łyżeczki} many {łyżeczek} other {łyżeczki}}",
+      "pinch": "{count, plural, one {szczypta} few {szczypty} many {szczypt} other {szczypty}}",
+      "can": "{count, plural, one {puszka} few {puszki} many {puszek} other {puszki}}",
+      "jar": "{count, plural, one {słoik} few {słoiki} many {słoików} other {słoika}}",
+      "pack": "{count, plural, one {opakowanie} few {opakowania} many {opakowań} other {opakowania}}",
+      "slice": "{count, plural, one {plaster} few {plastry} many {plastrów} other {plastra}}",
+      "bunch": "{count, plural, one {pęczek} few {pęczki} many {pęczków} other {pęczka}}",
+      "handful": "{count, plural, one {garść} few {garście} many {garści} other {garści}}",
+      "glass": "{count, plural, one {szklanka} few {szklanki} many {szklanek} other {szklanki}}"
     }
   }
 }

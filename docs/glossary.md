@@ -25,6 +25,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Alias** | Another name an ingredient is found by (*Alias*, e.g. *cebulka* for *cebula*). Used instead of translations: an ingredient has no per-language names. |
 | **Category** | The group an ingredient belongs to on a shopping list (*Kategoria*): one of a fixed, built-in set in a fixed order (vegetables and fruit, dairy and eggs, meat and fish, bakery, dry and canned, spices, frozen, drinks, other). Default *other*. |
 | **Unit** | A unit a quantity is written in (*Jednostka*), from a fixed vocabulary: `g`, `kg`, `ml`, `l`, `piece`, `clove`, `tbsp`, `tsp`, `pinch`, `can`, `jar`, `pack`, `slice`, `bunch`, `handful`, `glass`. |
+| **Quantity** | An amount in a unit (*Ilość*, e.g. *300 g*). A total that cannot be added up into one unit has several parts, shown as *3 szt. + 300 g*. |
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
 | **Generic conversion** | A conversion that holds for every ingredient: `kg` to `g`, `l` to `ml`, `tbsp` = 15 ml, `tsp` = 5 ml. |
 | **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Takes precedence over a generic conversion. Quantities without a conversion are not summed into the base unit. |
