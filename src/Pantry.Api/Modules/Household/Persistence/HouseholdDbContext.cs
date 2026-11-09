@@ -11,6 +11,8 @@ public sealed class HouseholdDbContext(DbContextOptions<HouseholdDbContext> opti
 
     public DbSet<Member> Members => Set<Member>();
 
+    public DbSet<MealSlot> MealSlots => Set<MealSlot>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema(Schema);
@@ -33,5 +35,19 @@ public sealed class HouseholdDbContext(DbContextOptions<HouseholdDbContext> opti
             member.Property(m => m.PortionFactor).HasPrecision(3, 2);
             member.HasIndex(m => m.UserId).IsUnique();
         });
+
+        builder.Entity<MealSlot>(slot =>
+        {
+            slot.ToTable("meal_slots");
+            slot.Property(s => s.Id).ValueGeneratedNever();
+            slot.Property(s => s.Name).HasMaxLength(MealSlot.NameMaxLength);
+        });
     }
+
+    /// <summary>
+    /// Locks the household row until the current transaction ends, so concurrent meal slot writes that check
+    /// the order or the enabled slots run one after another.
+    /// </summary>
+    public Task LockHouseholdAsync(CancellationToken cancellationToken) =>
+        Database.ExecuteSqlAsync($"SELECT 1 FROM household.households FOR UPDATE", cancellationToken);
 }

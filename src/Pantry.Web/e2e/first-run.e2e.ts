@@ -67,6 +67,7 @@ test('creates the admin passkey and welcomes them home', async ({ page }) => {
   const body = (await completed).postDataJSON();
   expect(body.credential.type).toBe('public-key');
   expect(body.credential.response.attestationObject).toBeTruthy();
+  expect(body.uiLanguage).toBe('en');
   await expect(page.getByTestId('first-run-done')).toHaveText('Welcome home!');
 
   await page.getByTestId('first-run-open-app').click();

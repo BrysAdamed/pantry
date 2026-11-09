@@ -58,7 +58,7 @@ public static class CompleteFirstRun
         var admin = User.CreateAdmin(Guid.Parse(attestation.UserEntity.Id), attestation.UserEntity.DisplayName);
         EnsureSucceeded(await userManager.CreateAsync(admin));
         EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(admin, attestation.Passkey));
-        await household.CompleteFirstRunAsync(new FirstRunAdmin(admin.Id, admin.DisplayName), transaction.GetDbTransaction(), cancellationToken);
+        await household.CompleteFirstRunAsync(new FirstRunAdmin(admin.Id, admin.DisplayName, ToContentLanguage(request.UiLanguage)), transaction.GetDbTransaction(), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         await signInManager.SignInAsync(admin, isPersistent: true);
@@ -67,6 +67,9 @@ public static class CompleteFirstRun
 
         return TypedResults.Ok(CurrentUserResponse.From(admin));
     }
+
+    private static ContentLanguage ToContentLanguage(UiLanguage? language) =>
+        language == UiLanguage.Pl ? ContentLanguage.Pl : ContentLanguage.En;
 
     private static ProblemHttpResult AttestationFailed(string detail) =>
         TypedResults.Problem(title: "Passkey creation failed.", detail: detail, statusCode: StatusCodes.Status400BadRequest);
@@ -81,4 +84,5 @@ public static class CompleteFirstRun
     }
 }
 
-public sealed record CompleteFirstRunRequest(JsonElement Credential);
+/// <summary>The new passkey, and the UI language the admin set the app up in, which names the default meal slots.</summary>
+public sealed record CompleteFirstRunRequest(JsonElement Credential, UiLanguage? UiLanguage = null);

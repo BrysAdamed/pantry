@@ -95,10 +95,6 @@
     "shopping": {
       "title": "Wszystko w koszyku",
       "description": "Na listach nie ma nic do kupienia. Nowa lista powstanie z planu, kiedy będzie potrzebna."
-    },
-    "household": {
-      "title": "Urządź swój dom",
-      "description": "Tu ustawisz domowników, posiłki i zasady planowania dla całego domu."
     }
   },
   "firstRun": {
@@ -219,6 +215,21 @@
         "note": "Link działa 48 godzin i tylko raz. Nowy link unieważnia ten.",
         "done": "Gotowe"
       }
+    },
+    "slots": {
+      "intro": "Pory posiłków to wiersze w planie. Wyłączony posiłek znika z planu, ale nie kasuje historii.",
+      "nameLabel": "Nazwa posiłku {{number}}",
+      "moveUp": "W górę: {{name}}",
+      "moveDown": "W dół: {{name}}",
+      "inPlan": "{{name}} w planie",
+      "newName": "Nowy posiłek",
+      "newNamePlaceholder": "np. Kolacja na mieście",
+      "add": "Dodaj posiłek",
+      "inPlanCount": "Posiłków dziennie w planie: {{count}}.",
+      "lastEnabled": "Co najmniej jeden posiłek zostaje w planie.",
+      "loadFailed": "Nie udało się wczytać posiłków. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
     }
   },
   "signIn": {

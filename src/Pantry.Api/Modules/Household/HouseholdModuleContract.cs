@@ -17,10 +17,28 @@ internal sealed class HouseholdModuleContract(HouseholdDbContext db, DbContextOp
     public Task<decimal> GetHouseholdServingAsync(CancellationToken cancellationToken = default) =>
         db.Members.SumAsync(m => m.PortionFactor, cancellationToken);
 
+    public async Task<IReadOnlyList<HouseholdMealSlot>> GetEnabledMealSlotsAsync(CancellationToken cancellationToken = default) =>
+        await db.MealSlots.AsNoTracking()
+            .Where(s => s.IsEnabled)
+            .OrderBy(s => s.Position)
+            .Select(s => new HouseholdMealSlot(s.Id, s.Name))
+            .ToListAsync(cancellationToken);
+
     public async Task CompleteFirstRunAsync(FirstRunAdmin admin, DbTransaction transaction, CancellationToken cancellationToken = default)
     {
         await using var joined = await JoinAsync(transaction, cancellationToken);
-        joined.Members.Add(new Member { Name = admin.Name, UserId = admin.UserId, Position = 0 });
+
+        if (!await joined.Members.AnyAsync(m => m.UserId == admin.UserId, cancellationToken))
+        {
+            var position = await joined.Members.CountAsync(cancellationToken);
+            joined.Members.Add(new Member { Name = admin.Name, UserId = admin.UserId, Position = position });
+        }
+
+        if (!await joined.MealSlots.AnyAsync(cancellationToken))
+        {
+            joined.MealSlots.AddRange(MealSlot.CreateDefaults(admin.Language));
+        }
+
         await joined.SaveChangesAsync(cancellationToken);
     }
 

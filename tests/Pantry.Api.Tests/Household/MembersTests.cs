@@ -193,13 +193,14 @@ public sealed class MembersTests(PantryApiFactory factory) : IAsyncLifetime
         // Act
         await using (var transaction = await identityDb.Database.BeginTransactionAsync())
         {
-            await household.CompleteFirstRunAsync(new FirstRunAdmin(Guid.NewGuid(), "Rolled back"), transaction.GetDbTransaction());
+            await household.CompleteFirstRunAsync(new FirstRunAdmin(Guid.NewGuid(), "Rolled back", ContentLanguage.En), transaction.GetDbTransaction());
             await transaction.RollbackAsync();
         }
 
         // Assert
         var householdDb = scope.ServiceProvider.GetRequiredService<HouseholdDbContext>();
         Assert.False(await householdDb.Members.AnyAsync());
+        Assert.False(await householdDb.MealSlots.AnyAsync());
     }
 
     private static async Task<Guid> AddAsync(HttpClient client, string name, decimal factor)

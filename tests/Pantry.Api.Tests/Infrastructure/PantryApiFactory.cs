@@ -38,13 +38,13 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         return app.CreateDefaultClient(BaseAddress, new AntiforgeryHandler(cookies), cookies);
     }
 
-    /// <summary>Deletes all users and household members, back to a fresh deployment.</summary>
+    /// <summary>Deletes all users, household members and meal slots, back to a fresh deployment.</summary>
     public async Task DeleteAllUsersAsync()
     {
         _ = Services;
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("TRUNCATE identity.passkey_links, identity.users, household.members CASCADE", connection);
+        await using var command = new NpgsqlCommand("TRUNCATE identity.passkey_links, identity.users, household.members, household.meal_slots CASCADE", connection);
         await command.ExecuteNonQueryAsync();
     }
 

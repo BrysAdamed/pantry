@@ -9,6 +9,13 @@ interface Member {
   userId: string | null;
 }
 
+interface MealSlot {
+  id: string;
+  name: string;
+  position: number;
+  isEnabled: boolean;
+}
+
 const sections = ['Members', 'Meals', "We don't eat", 'Planning rules', 'Content language', 'Access tokens', 'My account'];
 
 async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'admin' | 'user' = 'admin') {
@@ -49,6 +56,33 @@ async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'ad
     members.splice(index, 1);
     return route.fulfill({ status: 204 });
   });
+  const slots: MealSlot[] = ['Breakfast', 'Second breakfast', 'Lunch', 'Snack', 'Dinner'].map((name, position) => ({
+    id: `s${position}`,
+    name,
+    position,
+    isEnabled: position !== 1,
+  }));
+  await page.route('/api/household/meal-slots**', async (route) => {
+    const request = route.request();
+    const [, , , , id, field] = new URL(request.url()).pathname.split('/');
+    if (request.method() === 'GET') {
+      return route.fulfill({ json: [...slots].sort((a, b) => a.position - b.position) });
+    }
+    if (request.method() === 'POST') {
+      const slot: MealSlot = { id: `s${slots.length}`, position: slots.length, isEnabled: true, ...request.postDataJSON() };
+      slots.push(slot);
+      return route.fulfill({ status: 201, json: slot });
+    }
+    if (id === 'order') {
+      (request.postDataJSON().mealSlotIds as string[]).forEach((slotId, position) => {
+        slots.find((s) => s.id === slotId)!.position = position;
+      });
+      return route.fulfill({ status: 204 });
+    }
+    const slot = slots.find((s) => s.id === id)!;
+    Object.assign(slot, field === 'name' ? request.postDataJSON() : { isEnabled: request.postDataJSON().isEnabled });
+    return route.fulfill({ json: slot });
+  });
   await page.addInitScript((lang) => localStorage.setItem('pantry.uiLanguage', lang), language);
 }
 
@@ -64,9 +98,9 @@ test('shows the section list next to the open section on wide screens', async ({
   await expect(list.getByRole('link', { name: /^Members/ })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('heading', { level: 2, name: 'Members' })).toBeVisible();
 
-  await list.getByRole('link', { name: /^Meals/ }).click();
-  await expect(page).toHaveURL('/household/slots');
-  await expect(page.getByRole('heading', { level: 2, name: 'Meals' })).toBeVisible();
+  await list.getByRole('link', { name: /^Planning rules/ }).click();
+  await expect(page).toHaveURL('/household/rules');
+  await expect(page.getByRole('heading', { level: 2, name: 'Planning rules' })).toBeVisible();
   await expect(page.getByTestId('section-placeholder')).toBeVisible();
   await expect(list).toBeVisible();
 });
@@ -150,4 +184,44 @@ test('hides account administration from users who are not admins', async ({ page
 
   await expect(page.getByTestId('member')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Invite' })).toHaveCount(0);
+});
+
+test('reorders, renames, switches off and adds meals', async ({ page }) => {
+  await mockHousehold(page);
+  await page.goto('/household/slots');
+  const names = page.getByTestId('meal-slot').getByRole('textbox');
+  await expect(names).toHaveCount(5);
+  await expect(page.getByTestId('meal-slots-note')).toHaveText('Meals a day in the plan: 4.');
+
+  await page.getByRole('button', { name: 'Move Dinner up', exact: true }).click();
+  await expect(page.getByTestId('meal-slot').nth(3).getByRole('textbox')).toHaveValue('Dinner');
+
+  const lunch = page.getByRole('textbox', { name: 'Name of meal 3' });
+  await lunch.fill('Main meal');
+  await lunch.press('Enter');
+  await page.getByRole('switch', { name: 'Snack in the plan', exact: true }).click();
+  await expect(page.getByTestId('meal-slots-note')).toHaveText('Meals a day in the plan: 3.');
+
+  await page.getByRole('textbox', { name: 'New meal', exact: true }).fill('Dinner out');
+  await page.getByRole('button', { name: 'Add meal', exact: true }).click();
+  await expect(names).toHaveCount(6);
+
+  await page.reload();
+  await expect
+    .poll(() => names.evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value)))
+    .toEqual(['Breakfast', 'Second breakfast', 'Main meal', 'Dinner', 'Snack', 'Dinner out']);
+  await expect(page.getByRole('switch', { name: 'Snack in the plan', exact: true })).toHaveAttribute('aria-checked', 'false');
+});
+
+test('keeps the last meal in the plan', async ({ page }) => {
+  await mockHousehold(page, 'pl');
+  await page.goto('/household/slots');
+  await expect(page.getByRole('heading', { level: 2, name: 'Posiłki' })).toBeVisible();
+
+  for (const name of ['Breakfast', 'Lunch', 'Snack']) {
+    await page.getByRole('switch', { name: `${name} w planie`, exact: true }).click();
+  }
+
+  await expect(page.getByRole('switch', { name: 'Dinner w planie' })).toBeDisabled();
+  await expect(page.getByTestId('meal-slots-note')).toContainText('Co najmniej jeden posiłek zostaje w planie.');
 });

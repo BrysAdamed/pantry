@@ -1,4 +1,5 @@
 using Pantry.Api.Infrastructure.Database;
+using Pantry.Api.Modules.Household.Features.MealSlots;
 using Pantry.Api.Modules.Household.Features.Members;
 using Pantry.Api.Modules.Household.Persistence;
 
@@ -21,6 +22,13 @@ public static class HouseholdModule
         members.MapReorderMembers();
         members.MapUpdateMember();
         members.MapDeleteMember();
+
+        var mealSlots = api.MapGroup("/household/meal-slots");
+        mealSlots.MapGetMealSlots();
+        mealSlots.MapAddMealSlot();
+        mealSlots.MapReorderMealSlots();
+        mealSlots.MapRenameMealSlot();
+        mealSlots.MapSetMealSlotEnabled();
         return api;
     }
 }

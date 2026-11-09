@@ -44,6 +44,32 @@ namespace Pantry.Api.Modules.Household.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Pantry.Api.Modules.Household.Domain.MealSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.HasKey("Id")
+                        .HasName("pk_meal_slots");
+
+                    b.ToTable("meal_slots", "household");
+                });
+
             modelBuilder.Entity("Pantry.Api.Modules.Household.Domain.Member", b =>
                 {
                     b.Property<Guid>("Id")

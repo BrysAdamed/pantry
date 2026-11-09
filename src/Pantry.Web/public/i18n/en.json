@@ -95,10 +95,6 @@
     "shopping": {
       "title": "Everything is in the cart",
       "description": "Nothing left to buy. A new list comes from the plan when you need one."
-    },
-    "household": {
-      "title": "Set up your household",
-      "description": "Members, meals and planning rules for the whole household will live here."
     }
   },
   "firstRun": {
@@ -219,6 +215,21 @@
         "note": "The link works for 48 hours and only once. A new link cancels this one.",
         "done": "Done"
       }
+    },
+    "slots": {
+      "intro": "Meals are the rows of the plan. A disabled meal leaves the plan, but its history stays.",
+      "nameLabel": "Name of meal {{number}}",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "inPlan": "{{name}} in the plan",
+      "newName": "New meal",
+      "newNamePlaceholder": "e.g. Dinner out",
+      "add": "Add meal",
+      "inPlanCount": "Meals a day in the plan: {{count}}.",
+      "lastEnabled": "At least one meal stays in the plan.",
+      "loadFailed": "Meals could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
     }
   },
   "signIn": {
