@@ -10,6 +10,7 @@ import { Icon } from '../shared/icon/icon';
 import { IngredientRow } from './ingredient-row';
 import { IngredientsScreen } from './ingredients-screen';
 import { NEW_INGREDIENT_PATH } from './ingredients-paths';
+import { IngredientMerges } from './merge/ingredient-merges';
 import { TidyUpCard } from './tidy-up-card';
 
 /**
@@ -19,7 +20,7 @@ import { TidyUpCard } from './tidy-up-card';
 @Component({
   selector: 'app-ingredients-page',
   imports: [RouterOutlet, RouterLink, TranslocoDirective, HlmButton, Icon, EmptyState, IngredientRow, TidyUpCard],
-  providers: [IngredientsScreen],
+  providers: [IngredientsScreen, IngredientMerges],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './ingredients-page.html',
 })

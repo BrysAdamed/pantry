@@ -11,6 +11,9 @@ import {
   IngredientFilter,
   IngredientsPage,
   INGREDIENTS_URL,
+  POSSIBLE_DUPLICATES_MAX_LIMIT,
+  POSSIBLE_DUPLICATES_URL,
+  PossibleDuplicates,
 } from '../catalog/catalog-api';
 import { cleanIngredientName, ingredientNameKey } from '../catalog/ingredient-name';
 import { NeedsReviewCount } from '../catalog/needs-review-count';
@@ -57,6 +60,17 @@ export class IngredientsScreen {
 
   private readonly catalogSize = httpResource<IngredientsPage>(() => ({ url: INGREDIENTS_URL, params: filterParams({}, 1, 1) }));
 
+  private readonly duplicates = httpResource<PossibleDuplicates>(() => ({
+    url: POSSIBLE_DUPLICATES_URL,
+    params: { limit: POSSIBLE_DUPLICATES_MAX_LIMIT },
+  }));
+
+  /** Possible duplicates, most similar first; empty until loaded. */
+  readonly duplicatePairs = computed(() => (this.duplicates.hasValue() ? this.duplicates.value().items : []));
+  readonly duplicatesLoaded = computed(() => this.duplicates.hasValue());
+  readonly duplicatesFailed = computed(() => !!this.duplicates.error() && !this.duplicates.hasValue());
+  private readonly duplicateIds = computed(() => new Set(this.duplicatePairs().flatMap((pair) => [pair.first.id, pair.second.id])));
+
   /** The last loaded list, kept while the next one loads so the list does not blink while typing. */
   readonly items = linkedSignal<Ingredient[] | undefined, Ingredient[] | undefined>({
     source: () => (this.list.hasValue() ? this.list.value() : undefined),
@@ -95,14 +109,30 @@ export class IngredientsScreen {
     return next?.id ?? null;
   }
 
-  /** Reads the list and the counts again after an ingredient was added, changed, confirmed or deleted. */
+  isPossibleDuplicate(id: string): boolean {
+    return this.duplicateIds().has(id);
+  }
+
+  /** The ingredients suggested as possible duplicates of `id`. */
+  duplicatesOf(id: string): Ingredient[] {
+    return this.duplicatePairs()
+      .filter((pair) => pair.first.id === id || pair.second.id === id)
+      .map((pair) => (pair.first.id === id ? pair.second : pair.first));
+  }
+
+  /** Reads the list, the counts and the possible duplicates again after an ingredient was added, changed, merged or deleted. */
   changed(): void {
     this.list.reload();
     this.catalogSize.reload();
     this.reviewCount.reload();
+    this.duplicates.reload();
   }
 
   retry(): void {
     this.list.reload();
+  }
+
+  reloadDuplicates(): void {
+    this.duplicates.reload();
   }
 }

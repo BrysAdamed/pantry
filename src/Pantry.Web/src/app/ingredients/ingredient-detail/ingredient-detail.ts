@@ -1,4 +1,3 @@
-import { formatNumber } from '@angular/common';
 import { HttpErrorResponse, HttpStatusCode, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal, signal, TemplateRef, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -16,17 +15,17 @@ import {
   NameConflict,
   nameConflictsOf,
   referencesOf,
-  UnitConversion,
 } from '../../catalog/catalog-api';
 import { ingredientNameKey } from '../../catalog/ingredient-name';
 import { BASE_UNITS, BaseUnit, GENERIC_CONVERSIONS, Unit } from '../../catalog/units';
-import { UiLanguageService } from '../../core/i18n/ui-language.service';
 import { Toasts } from '../../core/toast/toasts';
 import { DialogContext, DialogFrame, Dialogs } from '../../shared/dialog/dialogs';
 import { Icon } from '../../shared/icon/icon';
 import { Switch } from '../../shared/switch/switch';
+import { IngredientTexts, KNOWN_MODULES } from '../ingredient-texts';
 import { IngredientsScreen } from '../ingredients-screen';
 import { ingredientPath, INGREDIENTS_PATH } from '../ingredients-paths';
+import { IngredientMerges } from '../merge/ingredient-merges';
 import {
   aliasProblem,
   AliasProblem,
@@ -40,10 +39,6 @@ import {
   parseAmount,
   sameDraft,
 } from './ingredient-draft';
-
-/** Modules with their own labels; references of any other module show the module code. */
-const KNOWN_MODULES = ['recipes', 'shopping', 'household'];
-const AMOUNT_FORMAT = '1.0-4';
 
 type SaveError = 'failed' | 'invalid' | 'deleteFailed';
 type ConversionError = 'pickUnit' | 'notPositive' | 'invalid';
@@ -77,8 +72,9 @@ export class IngredientDetail {
   private readonly toasts = inject(Toasts);
   private readonly dialogs = inject(Dialogs);
   private readonly transloco = inject(TranslocoService);
+  private readonly texts = inject(IngredientTexts);
+  private readonly merges = inject(IngredientMerges);
   protected readonly screen = inject(IngredientsScreen);
-  protected readonly language = inject(UiLanguageService).current;
 
   protected readonly categories = INGREDIENT_CATEGORIES;
   protected readonly baseUnits = BASE_UNITS;
@@ -88,7 +84,7 @@ export class IngredientDetail {
 
   private readonly baseUnitDialog = viewChild.required<TemplateRef<DialogContext<BaseUnitChange, boolean>>>('baseUnitDialog');
   private readonly deleteDialog = viewChild.required<TemplateRef<DialogContext<string, boolean>>>('deleteDialog');
-  private readonly inUseDialog = viewChild.required<TemplateRef<DialogContext<string, void>>>('inUseDialog');
+  private readonly inUseDialog = viewChild.required<TemplateRef<DialogContext<string, boolean>>>('inUseDialog');
   private readonly discardDialog = viewChild.required<TemplateRef<DialogContext<string | null, boolean>>>('discardDialog');
   private readonly baseUnitGroup = viewChild<ElementRef<HTMLElement>>('baseUnitGroup');
 
@@ -154,18 +150,22 @@ export class IngredientDetail {
   });
   protected readonly conversionLines = computed(() => {
     const draft = this.draft();
-    this.language();
-    return draft ? draft.conversions.map((c) => ({ unit: c.unit, text: this.conversionText(c, draft.baseUnit) })) : [];
+    return draft ? draft.conversions.map((c) => ({ unit: c.unit, text: this.texts.conversion(c, draft.baseUnit) })) : [];
   });
   protected readonly builtIn = computed(() => {
     const draft = this.draft();
-    const language = this.language();
     if (!draft) {
       return '';
     }
-    return GENERIC_CONVERSIONS.filter((c) => c.baseUnit === draft.baseUnit)
-      .map((c) => this.conversionText({ unit: c.unit, amount: c.factor }, draft.baseUnit, language))
-      .join(', ');
+    return this.texts.conversions(
+      GENERIC_CONVERSIONS.filter((c) => c.baseUnit === draft.baseUnit).map((c) => ({ unit: c.unit, amount: c.factor })),
+      draft.baseUnit,
+    );
+  });
+  /** Ingredients suggested as possible duplicates of this one. */
+  protected readonly duplicates = computed(() => {
+    const id = this.id();
+    return id ? this.screen.duplicatesOf(id) : [];
   });
   protected readonly usedIn = computed<ModuleReferenceCount[] | null>(() =>
     this.references.hasValue() ? this.references.value().references : null,
@@ -224,7 +224,7 @@ export class IngredientDetail {
       const change: BaseUnitChange = {
         unit,
         base: draft.baseUnit,
-        list: draft.conversions.map((c) => this.conversionText(c, draft.baseUnit)).join(', '),
+        list: this.texts.conversions(draft.conversions, draft.baseUnit),
       };
       const label = this.transloco.translate('ingredients.dialog.baseUnit.title', { unit: this.unitLabel(unit) });
       if (!(await this.dialogs.open(this.baseUnitDialog(), { label, data: change }))) {
@@ -370,17 +370,39 @@ export class IngredientDetail {
   }
 
   protected unitLabel(unit: Unit): string {
-    return this.transloco.translate(`catalog.unit.${unit}`);
+    return this.texts.unit(unit);
   }
 
   protected usageText(references: ModuleReferenceCount[]): string {
-    return references
-      .map((r) =>
-        KNOWN_MODULES.includes(r.module)
-          ? this.transloco.translate(`ingredients.detail.usage.count.${r.module}`, { count: r.count })
-          : this.transloco.translate('ingredients.detail.usage.count.other', { module: r.module, count: r.count }),
-      )
-      .join(', ');
+    return this.texts.usage(references);
+  }
+
+  /**
+   * Merges this ingredient with `other`, or with one the person picks. Unsaved changes are discarded first (after
+   * asking); when this one is merged away, the one that stays opens instead.
+   */
+  protected async mergeWith(other?: Ingredient): Promise<void> {
+    const saved = this.saved();
+    if (!saved || !(await this.discardBeforeMerge())) {
+      return;
+    }
+    this.afterMerge(await this.merges.merge(saved, other));
+  }
+
+  /** *Merge with it* next to a name clash: the other ingredient is known only by id. */
+  protected async mergeWithClash(otherId: string): Promise<void> {
+    const saved = this.saved();
+    if (!saved || !(await this.discardBeforeMerge())) {
+      return;
+    }
+    this.afterMerge(await this.merges.mergeWithId(saved, otherId));
+  }
+
+  protected notDuplicates(other: Ingredient): void {
+    const saved = this.saved();
+    if (saved) {
+      void this.merges.markNotDuplicates(saved, other);
+    }
   }
 
   private async save(): Promise<Ingredient | null> {
@@ -415,9 +437,33 @@ export class IngredientDetail {
     }
   }
 
+  /** Explains why a used ingredient stays; *Merge with…* there starts a merge. */
   private async showInUse(name: string): Promise<void> {
     const label = this.transloco.translate('ingredients.dialog.inUse.title', { name });
-    await this.dialogs.open(this.inUseDialog(), { label, data: name });
+    if (await this.dialogs.open(this.inUseDialog(), { label, data: name })) {
+      await this.mergeWith();
+    }
+  }
+
+  private async discardBeforeMerge(): Promise<boolean> {
+    if (!(await this.canLeave())) {
+      return false;
+    }
+    this.draft.set(this.initial());
+    this.resetMessages();
+    return true;
+  }
+
+  private afterMerge(merged: Ingredient | null): void {
+    if (!merged) {
+      return;
+    }
+    if (merged.id === this.id()) {
+      this.ingredient.set(merged);
+      this.references.reload();
+    } else {
+      void this.leave(ingredientPath(merged.id), true);
+    }
   }
 
   private async leave(path: string[], replaceUrl = false): Promise<void> {
@@ -434,11 +480,5 @@ export class IngredientDetail {
     this.conflicts.set([]);
     this.aliasError.set(null);
     this.conversionError.set(null);
-  }
-
-  private conversionText(conversion: UnitConversion, baseUnit: Unit, language = this.language()): string {
-    const unit = this.transloco.translate(`catalog.unitAmount.${conversion.unit}`, { count: 1 });
-    const amount = formatNumber(conversion.amount, language, AMOUNT_FORMAT);
-    return `1 ${unit} = ${amount} ${this.unitLabel(baseUnit)}`;
   }
 }

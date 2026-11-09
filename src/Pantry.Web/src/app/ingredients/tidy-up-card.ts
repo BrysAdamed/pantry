@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { Icon } from '../shared/icon/icon';
 import { IngredientsScreen } from './ingredients-screen';
+import { INGREDIENTS_PATH, POSSIBLE_DUPLICATES_PATH } from './ingredients-paths';
 
 /**
- * "Tidy up" at the top of the list: the work that waits for a person. One line per kind of work (ingredients to
- * review; possible duplicates join here), hidden when there is nothing to do.
+ * "Tidy up" at the top of the list: the work that waits for a person, one line per kind (ingredients to review,
+ * possible duplicates), hidden when there is nothing to do.
  */
 @Component({
   selector: 'app-tidy-up-card',
-  imports: [TranslocoDirective, HlmButton, Icon],
+  imports: [TranslocoDirective, RouterLink, HlmButton, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'contents' },
   template: `
@@ -35,6 +37,15 @@ import { IngredientsScreen } from './ingredients-screen';
             </button>
           </div>
         }
+        @if (duplicates() > 0) {
+          <div class="flex min-h-10 items-center gap-2.5 text-sm" data-testid="tidy-up-duplicates">
+            <span class="grid size-6.5 shrink-0 place-items-center rounded-full bg-ingredient-duplicate-surface text-ingredient-duplicate">
+              <app-icon name="twins" class="size-3.5" />
+            </span>
+            <span class="flex-1">{{ t('ingredients.tidy.duplicates', { count: duplicates() }) }}</span>
+            <a hlmBtn variant="outline" size="sm" [routerLink]="duplicatesPath">{{ t('ingredients.tidy.startReview') }}</a>
+          </div>
+        }
       </section>
     }
   `,
@@ -42,7 +53,9 @@ import { IngredientsScreen } from './ingredients-screen';
 export class TidyUpCard {
   protected readonly screen = inject(IngredientsScreen);
   protected readonly needsReview = this.screen.needsReviewCount;
-  protected readonly hasWork = computed(() => this.needsReview() > 0);
+  protected readonly duplicates = computed(() => this.screen.duplicatePairs().length);
+  protected readonly hasWork = computed(() => this.needsReview() > 0 || this.duplicates() > 0);
+  protected readonly duplicatesPath = [INGREDIENTS_PATH, POSSIBLE_DUPLICATES_PATH];
 
   protected toggleReview(): void {
     this.screen.needsReviewOnly.set(!this.screen.needsReviewOnly());

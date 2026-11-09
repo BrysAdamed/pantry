@@ -27,7 +27,7 @@ import { findInName, markMatch } from '../catalog/ingredient-name';
         [title]="t('ingredients.row.baseUnit')"
         >{{ t('catalog.unit.' + ingredient().baseUnit) }}</span
       >
-      @if (alias() || ingredient().needsReview || ingredient().isStaple) {
+      @if (alias() || ingredient().needsReview || duplicate() || ingredient().isStaple) {
         <span class="col-span-full flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
           @if (alias(); as parts) {
             <span data-testid="alias-match">{{ t('catalog.picker.aliasMatch') }} <ng-container *ngTemplateOutlet="marked; context: { $implicit: parts }" /></span>
@@ -37,6 +37,13 @@ import { findInName, markMatch } from '../catalog/ingredient-name';
               class="inline-flex items-center rounded-full border-[1.5px] border-current bg-ingredient-review-surface px-1.75 py-0.5 text-[11px] font-extrabold whitespace-nowrap text-ingredient-review"
               data-testid="badge-needs-review"
               >{{ t('ingredients.badge.needsReview') }}</span
+            >
+          }
+          @if (duplicate()) {
+            <span
+              class="inline-flex items-center rounded-full border-[1.5px] border-current bg-ingredient-duplicate-surface px-1.75 py-0.5 text-[11px] font-extrabold whitespace-nowrap text-ingredient-duplicate"
+              data-testid="badge-duplicate"
+              >{{ t('ingredients.badge.duplicate') }}</span
             >
           }
           @if (ingredient().isStaple) {
@@ -65,6 +72,7 @@ export class IngredientRow {
   readonly ingredient = input.required<Ingredient>();
   readonly search = input('');
   readonly current = input(false);
+  readonly duplicate = input(false);
 
   protected readonly name = computed(() => markMatch(this.ingredient().name, this.search()));
   protected readonly alias = computed(() => {

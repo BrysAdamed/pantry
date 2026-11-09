@@ -515,14 +515,16 @@
       "title": "Porządki",
       "review": "{count, plural, one {# składnik do sprawdzenia} few {# składniki do sprawdzenia} many {# składników do sprawdzenia} other {# składnika do sprawdzenia}}",
       "startReview": "Przejrzyj",
-      "showAll": "Pokaż wszystkie"
+      "showAll": "Pokaż wszystkie",
+      "duplicates": "{count, plural, one {# możliwy duplikat} few {# możliwe duplikaty} many {# możliwych duplikatów} other {# możliwego duplikatu}}"
     },
     "row": {
       "baseUnit": "Jednostka bazowa"
     },
     "badge": {
       "needsReview": "do sprawdzenia",
-      "staple": "podstawowy"
+      "staple": "podstawowy",
+      "duplicate": "możliwy duplikat"
     },
     "noResults": {
       "search": "Nic nie pasuje do „{{query}}”.",
@@ -646,7 +648,57 @@
       "added": "Dodano składnik",
       "saved": "Zapisano składnik",
       "confirmed": "Zatwierdzono",
-      "deleted": "Usunięto składnik"
+      "deleted": "Usunięto składnik",
+      "merged": "Połączono. Zostaje „{{name}}”",
+      "notDuplicates": "Para nie wróci jako duplikat"
+    },
+    "duplicates": {
+      "title": "Możliwe duplikaty",
+      "text": "Pary o podobnych nazwach. Połącz je albo oznacz, że to różne składniki, a para już nie wróci.",
+      "emptyTitle": "Brak duplikatów",
+      "emptyText": "Katalog jest uporządkowany.",
+      "loadFailed": "Nie udało się wczytać możliwych duplikatów.",
+      "notDuplicates": "To nie duplikaty",
+      "notDuplicatesFailed": "Nie udało się tego zapisać. Spróbuj ponownie.",
+      "bannerTitle": "Możliwy duplikat: „{{name}}”",
+      "bannerText": "Podobne nazwy. Jeśli to ten sam składnik, połącz je, a przepisy i listy przejdą na jeden."
+    },
+    "merge": {
+      "label": "Połącz składniki",
+      "step": "{{step}} z 2",
+      "with": "Połącz z…",
+      "withLabel": "Połącz z innym składnikiem",
+      "withIt": "Połącz z nim",
+      "pair": "Połącz…",
+      "pickTitle": "Z czym połączyć „{{name}}”?",
+      "pickText": "Wybierz składnik, który oznacza to samo. W następnym kroku zdecydujesz, który zostaje.",
+      "pickLabel": "Drugi składnik",
+      "keepTitle": "Który zostaje?",
+      "aliases": "aliasy: {{list}}",
+      "noAliases": "bez aliasów",
+      "noConversions": "bez przeliczników",
+      "unused": "nieużywany",
+      "previewTitle": "Co się stanie",
+      "loading": "Sprawdzam, co przejdzie…",
+      "gone": "znika.",
+      "goneAliases": "Jego nazwy zostają aliasami „{{keep}}”: {{list}}.",
+      "moves": "Przechodzi na „{{keep}}”: {{usage}}.",
+      "conversionsAdded": "Dochodzą przeliczniki: {{list}}.",
+      "conversionsSkippedOwn": "Pominięte przeliczniki: {{list}} („{{keep}}” ma już swój).",
+      "conversionsSkippedUnit": "Pominięte przeliczniki: {{list}} (inna jednostka bazowa).",
+      "kept": "Kategoria, jednostka bazowa i „podstawowy” zostają z „{{keep}}”.",
+      "keptConfirmed": "Kategoria, jednostka bazowa i „podstawowy” zostają z „{{keep}}”, a składnik zostaje zatwierdzony.",
+      "unitWarning": "Różne jednostki bazowe ({{keep}} i {{gone}}). Ilości w {{gone}} nie dodadzą się do {{keep}}, dopóki nie dodasz przelicznika.",
+      "tooManyAliases": "„{{keep}}” miałby {{count}} aliasów, a składnik może mieć najwyżej {{max}}. Najpierw usuń część aliasów.",
+      "irreversible": "Tego nie da się cofnąć.",
+      "back": "Wstecz",
+      "cancel": "Anuluj",
+      "confirm": "Połącz",
+      "error": {
+        "gone": "Jednego ze składników już nie ma.",
+        "tooManyAliases": "Po połączeniu byłoby za dużo aliasów. Najpierw usuń część aliasów.",
+        "failed": "Nie udało się połączyć składników. Spróbuj ponownie."
+      }
     }
   },
   "catalog": {

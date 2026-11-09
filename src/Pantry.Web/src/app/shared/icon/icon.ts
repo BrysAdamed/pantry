@@ -28,7 +28,9 @@ export type IconName =
   | 'check'
   | 'trash'
   | 'sparkle'
-  | 'alert';
+  | 'alert'
+  | 'merge'
+  | 'twins';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
 @Component({
@@ -149,6 +151,15 @@ export type IconName =
         @case ('alert') {
           <path d="M12 3l10 18H2z" />
           <path d="M12 10v4M12 17.5v.5" />
+        }
+        @case ('merge') {
+          <path d="M7 3v4a5 5 0 0 0 5 5 5 5 0 0 1 5 5v4" />
+          <path d="M17 3v4a5 5 0 0 1-5 5" />
+          <path d="M4 18l3 3 3-3" />
+        }
+        @case ('twins') {
+          <circle cx="8" cy="12" r="4" />
+          <circle cx="16" cy="12" r="4" />
         }
       }
     </svg>

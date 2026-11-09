@@ -114,7 +114,9 @@
               <ul class="grid gap-1">
                 @for (ingredient of group.items; track ingredient.id) {
                   <li>
-                    <app-ingredient-row [ingredient]="ingredient" [search]="screen.search()" [current]="open() === ingredient.id" />
+                    <app-ingredient-row [ingredient]="ingredient" [search]="screen.search()" [current]="open() === ingredient.id"
+                      [duplicate]="screen.isPossibleDuplicate(ingredient.id)"
+                    />
                   </li>
                 }
               </ul>

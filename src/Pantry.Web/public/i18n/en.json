@@ -515,14 +515,16 @@
       "title": "Tidy up",
       "review": "{count, plural, one {# ingredient to review} other {# ingredients to review}}",
       "startReview": "Review",
-      "showAll": "Show all"
+      "showAll": "Show all",
+      "duplicates": "{count, plural, one {# possible duplicate} other {# possible duplicates}}"
     },
     "row": {
       "baseUnit": "Base unit"
     },
     "badge": {
       "needsReview": "needs review",
-      "staple": "staple"
+      "staple": "staple",
+      "duplicate": "possible duplicate"
     },
     "noResults": {
       "search": "Nothing matches \"{{query}}\".",
@@ -646,7 +648,57 @@
       "added": "Ingredient added",
       "saved": "Ingredient saved",
       "confirmed": "Confirmed",
-      "deleted": "Ingredient deleted"
+      "deleted": "Ingredient deleted",
+      "merged": "Merged. \"{{name}}\" stays",
+      "notDuplicates": "This pair won't come back as a duplicate"
+    },
+    "duplicates": {
+      "title": "Possible duplicates",
+      "text": "Pairs with similar names. Merge them or mark them as different, and the pair will not come back.",
+      "emptyTitle": "No duplicates",
+      "emptyText": "The catalog is tidy.",
+      "loadFailed": "Possible duplicates could not be loaded.",
+      "notDuplicates": "Not duplicates",
+      "notDuplicatesFailed": "That could not be saved. Try again.",
+      "bannerTitle": "Possible duplicate: \"{{name}}\"",
+      "bannerText": "Similar names. If they are the same ingredient, merge them and recipes and lists move to one."
+    },
+    "merge": {
+      "label": "Merge ingredients",
+      "step": "{{step}} of 2",
+      "with": "Merge with…",
+      "withLabel": "Merge with another ingredient",
+      "withIt": "Merge with it",
+      "pair": "Merge…",
+      "pickTitle": "Merge \"{{name}}\" with what?",
+      "pickText": "Pick the ingredient that means the same. Next you choose which one stays.",
+      "pickLabel": "Other ingredient",
+      "keepTitle": "Which one stays?",
+      "aliases": "aliases: {{list}}",
+      "noAliases": "no aliases",
+      "noConversions": "no conversions",
+      "unused": "unused",
+      "previewTitle": "What happens",
+      "loading": "Checking what moves…",
+      "gone": "goes away.",
+      "goneAliases": "Its names become aliases of \"{{keep}}\": {{list}}.",
+      "moves": "Moves to \"{{keep}}\": {{usage}}.",
+      "conversionsAdded": "Conversions added: {{list}}.",
+      "conversionsSkippedOwn": "Conversions skipped: {{list}} (\"{{keep}}\" has its own).",
+      "conversionsSkippedUnit": "Conversions skipped: {{list}} (different base unit).",
+      "kept": "Category, base unit and staple stay from \"{{keep}}\".",
+      "keptConfirmed": "Category, base unit and staple stay from \"{{keep}}\", and it is marked as reviewed.",
+      "unitWarning": "Different base units ({{keep}} and {{gone}}). Amounts in {{gone}} are not added to {{keep}} until you add a conversion.",
+      "tooManyAliases": "\"{{keep}}\" would have {{count}} aliases, and an ingredient can have at most {{max}}. Remove some aliases first.",
+      "irreversible": "This cannot be undone.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "confirm": "Merge",
+      "error": {
+        "gone": "One of the ingredients no longer exists.",
+        "tooManyAliases": "Too many aliases after the merge. Remove some aliases first.",
+        "failed": "The ingredients could not be merged. Try again."
+      }
     }
   },
   "catalog": {

@@ -93,12 +93,51 @@ export interface IngredientReferences {
   references: ModuleReferenceCount[];
 }
 
+/** What a merge into `target` would do (ADR 0020); conversions to add are in the target's base unit, skipped ones in the source's. */
+export interface MergePreview {
+  target: Ingredient;
+  source: Ingredient;
+  aliasesToAdd: string[];
+  aliasCountAfter: number;
+  exceedsAliasLimit: boolean;
+  sameBaseUnit: boolean;
+  conversionsToAdd: UnitConversion[];
+  conversionsSkipped: UnitConversion[];
+  references: MergeReferences[];
+}
+
+/** How many records of one module point at the source (they move) and at the target. */
+export interface MergeReferences {
+  module: string;
+  source: number;
+  target: number;
+}
+
+/** Two ingredients with similar names or aliases (ADR 0022), most similar first. */
+export interface PossibleDuplicate {
+  first: Ingredient;
+  second: Ingredient;
+  similarity: number;
+}
+
+export interface PossibleDuplicates {
+  items: PossibleDuplicate[];
+}
+
+export const POSSIBLE_DUPLICATES_URL = '/api/catalog/possible-duplicates';
+export const NOT_DUPLICATES_URL = '/api/catalog/not-duplicates';
+export const POSSIBLE_DUPLICATES_MAX_LIMIT = 500;
+
 export function ingredientUrl(id: string): string {
   return `${INGREDIENTS_URL}/${id}`;
 }
 
 export function ingredientReferencesUrl(id: string): string {
   return `${ingredientUrl(id)}/references`;
+}
+
+export function mergePreviewUrl(targetId: string): string {
+  return `${ingredientUrl(targetId)}/merge-preview`;
 }
 
 /** The `conflicts` of a 409 from create or update; empty for any other error. */
@@ -168,6 +207,20 @@ export class CatalogApi {
   /** Deletes an unused ingredient; a 409 carries the references (`referencesOf`). */
   deleteIngredient(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(ingredientUrl(id)));
+  }
+
+  ingredient(id: string): Promise<Ingredient> {
+    return firstValueFrom(this.http.get<Ingredient>(ingredientUrl(id)));
+  }
+
+  /** Merges `sourceId` into `targetId`, which stays; 409 when the target would get too many aliases, 404 when one is gone. */
+  mergeIngredients(targetId: string, sourceId: string): Promise<Ingredient> {
+    return firstValueFrom(this.http.post<Ingredient>(`${ingredientUrl(targetId)}/merge`, { sourceId }));
+  }
+
+  /** The pair is no longer suggested as possible duplicates. */
+  markNotDuplicates(firstIngredientId: string, secondIngredientId: string): Promise<void> {
+    return firstValueFrom(this.http.post<void>(NOT_DUPLICATES_URL, { firstIngredientId, secondIngredientId }));
   }
 }
 

@@ -1,5 +1,6 @@
 import { Dialog, DialogRef } from '@angular/cdk/dialog';
 import { Overlay } from '@angular/cdk/overlay';
+import { ComponentType } from '@angular/cdk/portal';
 import { ChangeDetectionStrategy, Component, inject, Injectable, input, TemplateRef } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { DESKTOP_QUERY } from '../../core/layout/media-query';
@@ -19,14 +20,20 @@ export class Dialogs {
   private readonly dialog = inject(Dialog);
   private readonly overlay = inject(Overlay);
 
-  /** Opens `template` and resolves with what it closed with, or undefined when dismissed. */
-  open<R, D = undefined>(template: TemplateRef<DialogContext<D, R>>, options: { label: string; data?: D }): Promise<R | undefined> {
+  /**
+   * Opens a template, or a component that injects `DIALOG_DATA` and `DialogRef`, and resolves with what it closed
+   * with, or undefined when dismissed. `wide` suits dialogs that compare two things side by side.
+   */
+  open<R, D = undefined>(
+    content: TemplateRef<DialogContext<D, R>> | ComponentType<unknown>,
+    options: { label: string; data?: D; wide?: boolean },
+  ): Promise<R | undefined> {
     const sheet = typeof matchMedia === 'function' && !matchMedia(DESKTOP_QUERY).matches;
     const position = this.overlay.position().global().centerHorizontally();
-    const ref = this.dialog.open<R, D, unknown>(template, {
+    const ref = this.dialog.open<R, D, unknown>(content as TemplateRef<unknown> | ComponentType<unknown>, {
       data: options.data,
       ariaLabel: options.label,
-      width: sheet ? '100%' : '28rem',
+      width: sheet ? '100%' : options.wide ? '35rem' : '28rem',
       maxWidth: sheet ? '100%' : 'calc(100vw - 2rem)',
       maxHeight: sheet ? '88dvh' : '92dvh',
       positionStrategy: sheet ? position.bottom('0') : position.centerVertically(),

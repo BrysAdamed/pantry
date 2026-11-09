@@ -24,8 +24,13 @@ const sample: Seed[] = [
 
 const key = (value: string) => value.trim().toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '').replace(/ł/g, 'l');
 
-/** An in-memory catalog behind the `/api/catalog` routes, with reference counts per ingredient. */
-async function mockCatalog(page: Page, seed: Seed[] = sample, references: Record<string, { module: string; count: number }[]> = {}) {
+/** An in-memory catalog behind the `/api/catalog` routes, with reference counts per ingredient and possible duplicates. */
+async function mockCatalog(
+  page: Page,
+  seed: Seed[] = sample,
+  references: Record<string, { module: string; count: number }[]> = {},
+  duplicates: [string, string][] = [],
+) {
   const ingredients: Ingredient[] = seed.map((s) => ({
     aliases: [],
     baseUnit: 'g',
@@ -58,6 +63,37 @@ async function mockCatalog(page: Page, seed: Seed[] = sample, references: Record
     return route.fulfill({ json: { items: items.slice((page - 1) * pageSize, page * pageSize), total: items.length, page, pageSize } });
   };
 
+  const byId = (id: string | null) => ingredients.find((i) => i.id === id);
+  const count = (id: string, module: string) => references[id]?.find((r) => r.module === module)?.count ?? 0;
+  const mergePreview = (target: Ingredient, source: Ingredient) => {
+    const sameBaseUnit = target.baseUnit === source.baseUnit;
+    const conversionsToAdd = sameBaseUnit ? source.conversions.filter((c) => !target.conversions.some((t) => t.unit === c.unit)) : [];
+    const aliasesToAdd = [source.name, ...source.aliases];
+    const modules = [...new Set([...(references[source.id] ?? []), ...(references[target.id] ?? [])].map((r) => r.module))];
+    return {
+      target,
+      source,
+      aliasesToAdd,
+      aliasCountAfter: target.aliases.length + aliasesToAdd.length,
+      exceedsAliasLimit: target.aliases.length + aliasesToAdd.length > 20,
+      sameBaseUnit,
+      conversionsToAdd,
+      conversionsSkipped: source.conversions.filter((c) => !conversionsToAdd.includes(c)),
+      references: modules.map((module) => ({ module, source: count(source.id, module), target: count(target.id, module) })),
+    };
+  };
+
+  await page.route(/\/api\/catalog\/possible-duplicates(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: { items: duplicates.filter(([a, b]) => byId(a) && byId(b)).map(([a, b]) => ({ first: byId(a), second: byId(b), similarity: 0.5 })) },
+    }),
+  );
+  await page.route('/api/catalog/not-duplicates', (route) => {
+    const { firstIngredientId, secondIngredientId } = route.request().postDataJSON();
+    duplicates = duplicates.filter((pair) => !(pair.includes(firstIngredientId) && pair.includes(secondIngredientId)));
+    return route.fulfill({ status: 204 });
+  });
+
   await page.route(/\/api\/catalog\/ingredients(\/.*)?(\?.*)?$/, async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -85,6 +121,23 @@ async function mockCatalog(page: Page, seed: Seed[] = sample, references: Record
     if (action === 'confirm') {
       ingredients[index].needsReview = false;
       return route.fulfill({ json: ingredients[index] });
+    }
+    if (action === 'merge-preview') {
+      const source = byId(url.searchParams.get('sourceId'));
+      return source ? route.fulfill({ json: mergePreview(ingredients[index], source) }) : route.fulfill({ status: 404 });
+    }
+    if (action === 'merge') {
+      const target = ingredients[index];
+      const source = byId(request.postDataJSON().sourceId);
+      if (!source) {
+        return route.fulfill({ status: 404 });
+      }
+      const plan = mergePreview(target, source);
+      target.aliases = [...target.aliases, ...plan.aliasesToAdd];
+      target.conversions = [...target.conversions, ...plan.conversionsToAdd];
+      target.needsReview = false;
+      ingredients.splice(ingredients.indexOf(source), 1);
+      return route.fulfill({ json: target });
     }
     switch (request.method()) {
       case 'PUT': {
@@ -333,4 +386,94 @@ test('welcomes an empty catalog', async ({ page }) => {
   await page.getByRole('link', { name: 'Add an ingredient' }).filter({ visible: true }).click();
   await expect(page).toHaveURL('/ingredients/new');
   await expect(title(page)).toHaveText('New ingredient');
+});
+
+test('reviews possible duplicates from Tidy up: merges one pair and dismisses another', async ({ page }) => {
+  const catalog = await mockCatalog(
+    page,
+    [...sample, { id: 'garlic-cloves', name: 'garlic cloves' }],
+    { 'yellow-onion': [{ module: 'recipes', count: 1 }] },
+    [
+      ['onion', 'yellow-onion'],
+      ['garlic', 'garlic-cloves'],
+    ],
+  );
+  await page.goto('/ingredients');
+
+  await expect(row(page, 'onion').getByTestId('badge-duplicate')).toHaveText('possible duplicate');
+  const duplicatesLine = page.getByTestId('tidy-up-duplicates');
+  await expect(duplicatesLine).toContainText('2 possible duplicates');
+  await duplicatesLine.getByRole('link', { name: 'Review' }).click();
+  await expect(page).toHaveURL('/ingredients/duplicates');
+  const pairs = page.getByTestId('duplicate-pair');
+  await expect(pairs).toHaveCount(2);
+
+  await pairs.first().getByRole('button', { name: 'Merge…' }).click();
+  const merge = page.getByRole('dialog', { name: 'Merge ingredients' });
+  await expect(merge.getByRole('radio', { checked: true })).toContainText('onion');
+  await expect(merge.getByTestId('merge-preview')).toContainText('yellow onion goes away. Its names become aliases of "onion": yellow onion.');
+  await expect(merge.getByTestId('merge-preview')).toContainText('Moves to "onion": 1 recipe.');
+  await merge.getByRole('button', { name: 'Merge', exact: true }).click();
+
+  await expect(page.getByTestId('toast')).toHaveText('Merged. "onion" stays');
+  await expect(pairs).toHaveCount(1);
+  expect(catalog.map((i) => i.id)).not.toContain('yellow-onion');
+  expect(catalog.find((i) => i.id === 'onion')?.aliases).toEqual(['shallot', 'yellow onion']);
+
+  await pairs.getByRole('button', { name: 'Not duplicates' }).click();
+  await expect(page.getByTestId('toast')).toHaveText("This pair won't come back as a duplicate");
+  await expect(page.getByTestId('no-duplicates')).toContainText('No duplicates');
+  await backToList(page);
+  await expect(page.getByTestId('tidy-up-duplicates')).toHaveCount(0);
+  await expect(list(page).getByTestId('badge-duplicate')).toHaveCount(0);
+});
+
+test('merges from an ingredient: picks the other one, chooses which stays, warns about base units', async ({ page }) => {
+  const catalog = await mockCatalog(page);
+  await page.goto('/ingredients/eggs-l');
+
+  await page.getByRole('button', { name: 'Merge with another ingredient' }).click();
+  const merge = page.getByRole('dialog', { name: 'Merge ingredients' });
+  await expect(merge).toContainText('Merge "eggs L" with what?');
+  await merge.getByRole('combobox', { name: 'Other ingredient' }).fill('mil');
+  await merge.getByRole('option', { name: /milk/ }).click();
+
+  await expect(merge).toContainText('Merge ingredients · 2 of 2');
+  await expect(merge.getByRole('radio', { checked: true })).toContainText('milk');
+  await expect(merge.getByTestId('merge-unit-warning')).toContainText('Different base units (ml and pc).');
+  await merge.getByRole('radio', { name: /^eggs L/ }).click();
+  await expect(merge.getByTestId('merge-preview')).toContainText('milk goes away.');
+  await expect(merge.getByTestId('merge-preview')).toContainText('and it is marked as reviewed.');
+  await merge.getByRole('button', { name: 'Merge', exact: true }).click();
+
+  await expect(page.getByTestId('toast')).toHaveText('Merged. "eggs L" stays');
+  await expect(page).toHaveURL('/ingredients/eggs-l');
+  await expect(page.getByTestId('review-banner')).toHaveCount(0);
+  await expect(page.getByTestId('alias')).toHaveText(['milk']);
+  expect(catalog.map((i) => i.id)).not.toContain('milk');
+});
+
+test('merges with the ingredient a name clashes with, and offers a merge instead of deleting a used one', async ({ page }) => {
+  await mockCatalog(page, sample, { 'yellow-onion': [{ module: 'recipes', count: 2 }] });
+  await page.goto('/ingredients/yellow-onion');
+
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Can\'t delete "yellow onion"' }).getByRole('button', { name: 'Merge with…' }).click();
+  await expect(page.getByRole('dialog', { name: 'Merge ingredients' })).toContainText('Merge "yellow onion" with what?');
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await page.getByTestId('ingredient-name-input').fill('Onion');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByTestId('name-error').getByRole('button', { name: 'Merge with it' }).click();
+  await page.getByRole('dialog', { name: 'Discard changes?' }).getByRole('button', { name: 'Discard' }).click();
+
+  const merge = page.getByRole('dialog', { name: 'Merge ingredients' });
+  await expect(merge.getByRole('radio', { checked: true })).toContainText('onion');
+  await expect(merge.getByTestId('merge-preview')).toContainText('Moves to "onion": 2 recipes.');
+  await merge.getByRole('button', { name: 'Merge', exact: true }).click();
+
+  await expect(page.getByTestId('toast')).toHaveText('Merged. "onion" stays');
+  await expect(page).toHaveURL('/ingredients/onion');
+  await expect(title(page)).toHaveText('onion');
 });

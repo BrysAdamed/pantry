@@ -10,9 +10,26 @@
 
   @if (draft(); as d) {
     <header class="grid gap-2">
-      <h2 class="text-[26px] leading-tight [overflow-wrap:anywhere] md:text-[34px]" data-testid="ingredient-title">
-        {{ isNew() ? t('ingredients.detail.newTitle') : saved()?.name }}
-      </h2>
+      <div class="flex items-start justify-between gap-4">
+        <h2 class="text-[26px] leading-tight [overflow-wrap:anywhere] md:text-[34px]" data-testid="ingredient-title">
+          {{ isNew() ? t('ingredients.detail.newTitle') : saved()?.name }}
+        </h2>
+        @if (saved()) {
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            type="button"
+            class="mt-1 shrink-0"
+            data-testid="merge-with"
+            [attr.aria-label]="t('ingredients.merge.withLabel')"
+            (click)="mergeWith()"
+          >
+            <app-icon name="merge" class="size-4" />
+            <span>{{ t('ingredients.merge.with') }}</span>
+          </button>
+        }
+      </div>
       @if (saved(); as s) {
         <p class="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 text-sm text-muted-foreground">
           <span>{{ t('catalog.category.' + s.category) }}</span>
@@ -59,6 +76,27 @@
       </section>
     }
 
+    @for (other of duplicates(); track other.id) {
+      <section
+        class="grid grid-cols-[26px_minmax(0,1fr)] gap-x-2.5 gap-y-1 rounded-control border-2 border-current bg-ingredient-duplicate-surface px-3.5 py-3 text-sm text-ingredient-duplicate"
+        [attr.aria-label]="t('ingredients.duplicates.bannerTitle', { name: other.name })"
+        data-testid="duplicate-banner"
+      >
+        <app-icon name="twins" class="mt-0.5 size-5" />
+        <div class="grid gap-0.5 text-foreground">
+          <h3 class="font-sans text-sm font-extrabold">{{ t('ingredients.duplicates.bannerTitle', { name: other.name }) }}</h3>
+          <p>{{ t('ingredients.duplicates.bannerText') }}</p>
+        </div>
+        <div class="col-start-2 mt-2 flex flex-wrap gap-2">
+          <button hlmBtn variant="outline" size="sm" type="button" (click)="mergeWith(other)">
+            <app-icon name="merge" class="size-4" />
+            {{ t('ingredients.merge.pair') }}
+          </button>
+          <button hlmBtn variant="ghost" size="sm" type="button" (click)="notDuplicates(other)">{{ t('ingredients.duplicates.notDuplicates') }}</button>
+        </div>
+      </section>
+    }
+
     @if (saveError(); as error) {
       <p class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert" data-testid="save-error">
         <app-icon name="alert" class="size-4 text-danger" />
@@ -94,9 +132,14 @@
           />
         </label>
         @if (nameConflict(); as conflict) {
-          <p id="name-error" class="flex items-center gap-1 text-xs font-bold text-danger" data-testid="name-error">
+          <p id="name-error" class="flex flex-wrap items-center gap-1 text-xs font-bold text-danger" data-testid="name-error">
             <app-icon name="alert" class="size-3.5" />
-            {{ t('ingredients.detail.nameTaken', { name: conflict.ingredientName }) }}
+            <span>{{ t('ingredients.detail.nameTaken', { name: conflict.ingredientName }) }}</span>
+            @if (saved()) {
+              <button hlmBtn variant="link" size="xs" type="button" data-testid="merge-with-clash" (click)="mergeWithClash(conflict.ingredientId)">
+                {{ t('ingredients.merge.withIt') }}
+              </button>
+            }
           </p>
         }
 
@@ -387,6 +430,10 @@
       <p>{{ t('ingredients.dialog.inUse.text') }}</p>
       <div class="flex flex-wrap justify-end gap-2.5">
         <button hlmBtn variant="outline" type="button" (click)="dialog.close()">{{ t('ingredients.dialog.inUse.close') }}</button>
+        <button hlmBtn type="button" (click)="dialog.close(true)">
+          <app-icon name="merge" class="size-4" />
+          {{ t('ingredients.merge.with') }}
+        </button>
       </div>
     </app-dialog-frame>
   </ng-template>
