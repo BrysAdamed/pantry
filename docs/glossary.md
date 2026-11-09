@@ -25,6 +25,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Section** | A named group of ingredient lines in a recipe (*Sekcja*, e.g. *Sos*, *Ciasto*). Optional and ordered; lines outside any section come first. |
 | **To taste** | An ingredient line without a quantity or unit (*Do smaku*), like salt. It still names the ingredient, so the shopping list knows it is needed. |
 | **Tag** | A free-text label of a recipe (*Tag*, e.g. *obiad*, *szybkie*), stored trimmed and in lower case. |
+| **History entry** | A record that the household ate a recipe (*Historia*): the recipe, the date and the meal slot of an eaten plan entry. One per plan entry; un-eating the plan entry removes it. Leftovers have none. Kept in Recipes, written by the Planner. |
 | **Archived recipe** | A recipe hidden from the library, the tray and agents (*Zarchiwizowany przepis*). Recipes are never deleted: plan entries and history still show an archived recipe, and it can be restored. |
 | **Ingredient** | A canonical catalog item (*Składnik*, e.g. *onion*): one name in the content language, aliases, a base unit, a category, a staple flag and optional unit conversions. Names and aliases are unique across the catalog regardless of letter case and diacritics. |
 | **Catalog** | All ingredients of the household (*Katalog składników*). Other modules keep only ingredient ids. |
@@ -43,7 +44,10 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Dislike** | A household-wide ingredient preference (*Nie jemy*): *never* (allergy, hard no; optional reason) or *avoid*. One per catalog ingredient; when two disliked ingredients are merged, the stricter kind stays. |
 | **Dislike warning** | A recipe's mark for an ingredient the household dislikes (*Ostrzeżenie*): red for *never*, with its reason, amber for *avoid*. Shown in the library, the detail and the editor; worked out from the current dislikes, never stored on the recipe. |
 | **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |
-| **Rating** | Household feedback on a recipe after it was eaten, plus a *make again* flag. |
+| **Rating** | Household feedback on one history entry (*Ocena*): 1 to 5 stars, added, changed or removed at any time, also for an archived recipe. The answer to *make again?* given with it sets the recipe's flag. A recipe shows the average and the count of its ratings. |
+| **Make again** | A recipe flag (*Zrobić ponownie*), yes by default. The latest rating that answers it sets it, and it can be changed on the recipe at any time. *No* means agents stop proposing the dish. |
+| **Favourite** | A recipe with *make again* yes and an average rating of at least 4 (*Ulubione*). Derived, there is no button. The tray and agents offer favourites first. |
+| **To rate** | History entries from the last 14 days (configurable) without a rating (*Do oceny*). *Later* leaves an entry there until it is rated or too old. |
 | **Cooldown** | Minimum time before a favourite should be planned again. |
 | **Shopping list** | A named list of items. Either *generated* from the plan for a date range or *general* (drugstore, pets...). |
 | **List item** | A line on a shopping list: ingredient or free text, quantity, state (open, have at home, bought). |

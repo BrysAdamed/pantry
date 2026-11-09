@@ -17,6 +17,6 @@ public static class GetRecipe
         var recipe = await db.Recipes.AsNoTracking().AsSplitQuery().SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
         return recipe is null
             ? TypedResults.NotFound()
-            : TypedResults.Ok(await RecipeResponse.FromAsync(recipe, catalog, household, cancellationToken));
+            : TypedResults.Ok(await RecipeResponse.FromAsync(recipe, db, catalog, household, cancellationToken));
     }
 }

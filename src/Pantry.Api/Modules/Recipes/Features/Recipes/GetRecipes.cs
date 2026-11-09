@@ -53,10 +53,12 @@ public static class GetRecipes
         var dislikes = items.ToDictionary(r => r.Id, warnings.Of);
         var dislikedIds = dislikes.Values.SelectMany(d => d).Select(d => d.IngredientId).Distinct().ToList();
         var names = (await catalog.GetIngredientsAsync(dislikedIds, cancellationToken)).ToDictionary(i => i.Id, i => i.Name);
+        var ratings = await RecipeRatings.LoadAsync(db, items, cancellationToken);
 
         return TypedResults.Ok(new RecipesPage(
             items.Select(recipe => RecipeListItem.From(
                     recipe,
+                    ratings[recipe.Id],
                     dislikes[recipe.Id].Select(d => RecipeDislikeResponse.From(d, names.GetValueOrDefault(d.IngredientId))).ToList()))
                 .ToList(),
             total,
@@ -67,7 +69,10 @@ public static class GetRecipes
 
 public sealed record RecipesPage(IReadOnlyList<RecipeListItem> Items, int Total, int Page, int PageSize);
 
-/// <summary>A recipe as the library lists it; <c>Nutrition</c> is per serving, <c>Dislikes</c> are never first.</summary>
+/// <summary>
+/// A recipe as the library lists it; <c>Nutrition</c> is per serving, <c>AverageRating</c> is null while no history entry
+/// is rated, <c>Dislikes</c> are never first.
+/// </summary>
 public sealed record RecipeListItem(
     Guid Id,
     string Name,
@@ -76,12 +81,15 @@ public sealed record RecipeListItem(
     IReadOnlyList<string> Tags,
     Nutrition Nutrition,
     bool MakeAgain,
+    decimal? AverageRating,
+    int RatingCount,
+    bool IsFavourite,
     int? CooldownDays,
     bool IsArchived,
     DateTimeOffset UpdatedAt,
     IReadOnlyList<RecipeDislikeResponse> Dislikes)
 {
-    public static RecipeListItem From(Recipe recipe, IReadOnlyList<RecipeDislikeResponse> dislikes) => new(
+    public static RecipeListItem From(Recipe recipe, RecipeRating rating, IReadOnlyList<RecipeDislikeResponse> dislikes) => new(
         recipe.Id,
         recipe.Name,
         recipe.Servings,
@@ -89,6 +97,9 @@ public sealed record RecipeListItem(
         recipe.TagValues(),
         recipe.Nutrition,
         recipe.MakeAgain,
+        rating.RoundedAverage,
+        rating.RatingCount,
+        rating.IsFavourite,
         recipe.CooldownDays,
         recipe.IsArchived,
         recipe.UpdatedAt,
