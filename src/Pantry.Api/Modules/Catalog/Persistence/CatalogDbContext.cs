@@ -9,14 +9,20 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
 {
     public const string Schema = "catalog";
     public const string NameKeyIndex = "ix_ingredient_names_key";
+    public const string NameKeyTrigramIndex = "ix_ingredient_names_key_trgm";
 
     private const int CodeMaxLength = 32;
-
-    public const string NameKeyTrigramIndex = "ix_ingredient_names_key_trgm";
 
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
 
     public DbSet<NotDuplicatePair> NotDuplicatePairs => Set<NotDuplicatePair>();
+
+    /// <summary>
+    /// Locks the rows of the ingredients until the current transaction ends, always in the same order, so merges and
+    /// deletes of the same ingredients run one after another without deadlocking.
+    /// </summary>
+    public Task LockIngredientsAsync(Guid[] ids, CancellationToken cancellationToken) =>
+        Database.ExecuteSqlAsync($"SELECT 1 FROM catalog.ingredients WHERE id = ANY({ids}) ORDER BY id FOR UPDATE", cancellationToken);
 
     public static bool IsDuplicateName(DbUpdateException exception) =>
         exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: NameKeyIndex };

@@ -120,4 +120,19 @@ public sealed class Ingredient
         Name = cleanName;
         NameKey = IngredientName.KeyOf(cleanName);
     }
+
+    /// <summary>
+    /// Takes over what <paramref name="merge"/> planned to move from the source, which must already be deleted, so its
+    /// names are free, and confirms this ingredient. Name, base unit, category and staple flag stay as they are.
+    /// </summary>
+    public void Absorb(IngredientMerge merge)
+    {
+        if (merge.TargetId != Id)
+        {
+            throw new ArgumentException("The merge was planned for another ingredient.", nameof(merge));
+        }
+
+        SetNames(Name, [.. Aliases, .. merge.AliasesToAdd]);
+        Confirm();
+    }
 }

@@ -16,6 +16,7 @@ public static class CatalogModule
             .Bind(configuration.GetSection(PossibleDuplicateSettings.Section))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+        services.AddScoped<IngredientReferences>();
         return services;
     }
 
@@ -33,6 +34,7 @@ public static class CatalogModule
         ingredients.MapUpdateIngredient();
         ingredients.MapResolveIngredient();
         ingredients.MapConfirmIngredient();
+        ingredients.MapMergeIngredients();
         return api;
     }
 }
