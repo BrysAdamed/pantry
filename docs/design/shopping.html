@@ -507,7 +507,7 @@ function simulateReport() {
   const items = orderItems();
   state.order.report = items.map(i => {
     let r = { item: i, res: 'added', det: `${fmt(i.qty)} ${i.unit}` };
-    if (i.name === 'mleko') r = { item: i, res: 'changed', det: `Chciałeś <b>${fmt(i.qty)} l</b>, w koszyku <b>2 × 1 l</b>: sprzedają tylko kartony` };
+    if (i.name === 'mleko') r = { item: i, res: 'changed', det: `Na liście <b>${fmt(i.qty)} l</b>, w koszyku <b>2 × 1 l</b>: sprzedają tylko kartony` };
     if (i.name === 'łosoś') r = { item: i, res: 'substituted', det: `Zamiast łososia <b>filet z pstrąga, 350 g</b>` };
     if (i.name === 'dynia') r = { item: i, res: 'missing', det: 'Niedostępne w tym terminie dostawy' };
     if (i.name === 'karma dla kota') r = { item: i, res: 'missing', det: 'Brak tej karmy, agent nie wybrał zamiennika' };

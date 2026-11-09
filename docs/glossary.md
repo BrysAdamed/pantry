@@ -14,6 +14,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Empty slot marker** | A plan entry with no recipe that asks an agent to fill it. |
 | **Proposed** | A plan entry created by an agent and not yet accepted by a user. |
 | **Leftover** | A plan entry that eats a dish cooked in an earlier entry. Adds nothing to the shopping list. |
+| **Tray** | The planner side panel (*Szuflada dań*) with favourite, recent and searched recipes to place in the plan. A bottom sheet on phones. |
 | **Recipe** | A dish with ingredient lines (quantity per one serving), steps, tags and optional nutrition. |
 | **Ingredient** | A canonical catalog item (e.g. *onion*), with a base unit and optional conversions. |
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
@@ -32,4 +33,5 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Content language** | Household setting telling agents which language to write recipes and items in. |
 | **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
 | **Theme** | Light or dark look of the app (*Motyw*). Follows the system unless the user picks one. |
+| **Passkey** | The sign-in credential (*Klucz dostępu*) stored by the phone or computer. No passwords (ADR 0004). |
 | **Access token** | Personal token an MCP client uses to call the app. Revocable. |

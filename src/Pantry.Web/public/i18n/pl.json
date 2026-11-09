@@ -42,7 +42,7 @@
       "eaten": "Zjedzone"
     },
     "leftover": "Resztki",
-    "emptySlotMarker": "Puste miejsce"
+    "emptySlotMarker": "Czeka na agenta"
   },
   "listItem": {
     "state": {
@@ -53,7 +53,7 @@
   },
   "cartRunReport": {
     "result": {
-      "added": "Dodane",
+      "added": "Dodano",
       "quantityChanged": "Zmieniona ilość",
       "substituted": "Zamiennik",
       "missing": "Brak"
@@ -62,14 +62,14 @@
   "dislike": {
     "level": {
       "never": "Nigdy",
-      "avoid": "Unikaj"
+      "avoid": "Unikamy"
     }
   },
   "sync": {
     "state": {
-      "online": "Online",
+      "online": "Zapisane",
       "offline": "Offline",
-      "pending": "Czeka na synchronizację"
+      "pending": "Czeka na wysłanie"
     }
   }
 }

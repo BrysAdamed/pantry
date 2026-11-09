@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puste stany</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* PAN-17 empty states and app icon. Tokens mirror src/Pantry.Web/src/styles.css (ADR 0013). */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff4e6, #1b141e);
+  --foreground: light-dark(#2a1b2d, #fbefe3);
+  --card: light-dark(#ffffff, #251c29);
+  --secondary: light-dark(#fde6cc, #322536);
+  --muted-foreground: light-dark(#6e5b70, #c2aec3);
+  --border: light-dark(#f0d9bf, #3d2e42);
+  --outline: light-dark(#2a1b2d, #7a6280);
+  --primary: light-dark(#6e2a5e, #e59cd0);
+  --primary-foreground: light-dark(#fff4e6, #1b141e);
+  --accent: #f4a259;
+  --accent-foreground: light-dark(#2a1b2d, #1b141e);
+  --agent: light-dark(#1c6964, #6fd0c6);
+  --agent-surface: light-dark(#ddf1ee, #173a37);
+  --warning: light-dark(#a8520f, #f4a259);
+  --page: light-dark(#f6efe6, #141113);
+  --ill-ink: light-dark(#2a1b2d, #fbefe3);
+  --ill-fill: light-dark(#fff4e6, #322536);
+  --ill-jam: light-dark(#6e2a5e, #e59cd0);
+  --radius-control: 12px; --radius-card: 16px;
+  --shadow-control: 2px 2px 0 var(--outline);
+  --shadow-card: 3px 3px 0 var(--outline);
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 64px; display: grid; gap: 28px; }
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 700; }
+.pagebar h1 { font-size: clamp(24px, 3vw, 32px); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.ctl { display: grid; gap: 4px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-control); background: var(--secondary); }
+.seg button { border: 0; background: none; padding: 7px 13px; min-height: 36px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow-control); outline: 2px solid var(--outline); outline-offset: -2px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); font-weight: 700; font-size: 14px; }
+.btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.btn.ghost { border-color: transparent; box-shadow: none; background: none; color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.btn:active { translate: 1px 1px; box-shadow: none; }
+
+.icons { display: flex; flex-wrap: wrap; gap: 24px; align-items: end; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; }
+.icons figure { margin: 0; display: grid; gap: 8px; justify-items: center; font-size: 12px; color: var(--muted-foreground); text-align: center; }
+.icons img { display: block; }
+.mask { border-radius: 50%; overflow: hidden; }
+.squircle { border-radius: 28%; overflow: hidden; }
+.homescreen { display: grid; grid-template-columns: repeat(4, 64px); gap: 18px 14px; padding: 18px; border-radius: 22px; background: linear-gradient(160deg, #3a2a44, #1b141e); }
+.homescreen span { display: grid; gap: 4px; justify-items: center; color: #fff; font-size: 11px; }
+.homescreen i { width: 56px; height: 56px; border-radius: 16px; background: rgb(255 255 255 / .16); display: block; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.state { background: var(--background); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 28px 22px; display: grid; gap: 14px; justify-items: center; text-align: center; align-content: start; min-height: 380px; }
+.state .where { justify-self: stretch; text-align: left; }
+.state svg.ill { width: 132px; height: 112px; }
+.state h2 { font-size: 22px; }
+.state p { color: var(--muted-foreground); max-width: 34ch; }
+.state .acts { display: grid; gap: 6px; justify-items: center; margin-top: 4px; }
+.agenthint { font-size: 13px; color: var(--agent); background: var(--agent-surface); border: 2px dashed var(--agent); border-radius: var(--radius-control); padding: 8px 12px; max-width: 34ch; }
+
+.notes { display: grid; gap: 12px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.notes li { max-width: 72ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pagebar">
+    <div>
+      <div class="label">PAN-17 · Spiżarnia</div>
+      <h1 data-t="title"></h1>
+    </div>
+    <div class="switches">
+      <div class="ctl"><span class="label">Język / Language</span><div class="seg" id="lang"><button data-v="pl">Polski</button><button data-v="en">English</button></div></div>
+      <div class="ctl"><span class="label" data-t="theme"></span><div class="seg" id="theme"><button data-v="system">System</button><button data-v="light" data-t="light"></button><button data-v="dark" data-t="dark"></button></div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="label" style="margin-bottom:10px" data-t="iconsLabel"></div>
+    <div class="icons" id="icons"></div>
+  </section>
+
+  <section>
+    <div class="label" style="margin-bottom:10px" data-t="statesLabel"></div>
+    <div class="grid" id="states"></div>
+  </section>
+
+  <section class="notes">
+    <h2 style="font-size:22px" data-t="rulesTitle"></h2>
+    <ul id="rules"></ul>
+  </section>
+</div>
+
+<script>
+const ill = {
+  planner: `<rect x="14" y="18" width="104" height="84" rx="14" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M14 40h104" stroke="var(--ill-ink)" stroke-width="4"/><path d="M38 10v16M94 10v16" stroke="var(--ill-ink)" stroke-width="4" stroke-linecap="round"/><g fill="none" stroke="var(--ill-ink)" stroke-width="3" stroke-dasharray="5 5" opacity=".5"><rect x="26" y="52" width="22" height="18" rx="5"/><rect x="55" y="52" width="22" height="18" rx="5"/><rect x="84" y="52" width="22" height="18" rx="5"/><rect x="26" y="76" width="22" height="18" rx="5"/><rect x="55" y="76" width="22" height="18" rx="5"/></g><rect x="84" y="76" width="22" height="18" rx="5" fill="var(--accent)" stroke="var(--ill-ink)" stroke-width="3"/>`,
+  recipes: `<path d="M24 22h70a10 10 0 0 1 10 10v66H34a10 10 0 0 1-10-10z" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M24 88a10 10 0 0 1 10-10h70" fill="none" stroke="var(--ill-ink)" stroke-width="4"/><path d="M44 40h40M44 52h28" stroke="var(--ill-ink)" stroke-width="4" stroke-linecap="round" opacity=".5"/><circle cx="104" cy="28" r="14" fill="var(--accent)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M104 21v14M97 28h14" stroke="var(--ill-ink)" stroke-width="4" stroke-linecap="round"/>`,
+  lists: `<path d="M30 40h72l-6 58H36z" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-width="4" stroke-linejoin="round"/><path d="M48 40V32a18 18 0 0 1 36 0v8" fill="none" stroke="var(--ill-ink)" stroke-width="4"/><circle cx="96" cy="88" r="16" fill="var(--accent)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M89 88l5 5 9-10" fill="none" stroke="var(--ill-ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  report: `<rect x="26" y="16" width="72" height="88" rx="10" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M42 40h40M42 54h40M42 68h24" stroke="var(--ill-ink)" stroke-width="4" stroke-linecap="round" opacity=".35"/><path d="M104 66l3.6 10.4L118 80l-10.4 3.6L104 94l-3.6-10.4L90 80l10.4-3.6z" fill="var(--agent-surface)" stroke="var(--agent)" stroke-width="3.5" stroke-linejoin="round"/>`,
+  search: `<circle cx="56" cy="50" r="28" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M76 70l26 26" stroke="var(--ill-ink)" stroke-width="7" stroke-linecap="round"/><path d="M46 44q10-8 20 0" fill="none" stroke="var(--ill-ink)" stroke-width="4" stroke-linecap="round" opacity=".5"/>`,
+  offline: `<g transform="translate(26 6)"><rect x="18" y="30" width="44" height="66" rx="14" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-width="4"/><path d="M22 66h36v14a12 12 0 0 1-12 12H34a12 12 0 0 1-12-12z" fill="var(--ill-jam)"/><rect x="18" y="30" width="44" height="66" rx="14" fill="none" stroke="var(--ill-ink)" stroke-width="4"/><rect x="14" y="14" width="52" height="18" rx="6" fill="var(--ill-jam)" stroke="var(--ill-ink)" stroke-width="4"/></g><path d="M100 22l14 14M114 22l-14 14" stroke="var(--warning)" stroke-width="4" stroke-linecap="round"/>`
+};
+
+const T = {
+  pl: {
+    title: 'Ikona i puste stany', theme: 'Motyw', light: 'Jasny', dark: 'Ciemny',
+    iconsLabel: 'Ikona aplikacji · src/Pantry.Web/public/icons', statesLabel: 'Puste stany',
+    icons: ['Ikona (SVG, karta)', 'Maskowalna w kółku (Android)', 'Ekran główny iOS', 'Favicon 32 px', 'Na ekranie telefonu'],
+    rulesTitle: 'Zasady dla pustych stanów',
+    rules: [
+      'Zawsze trzy rzeczy: co tu będzie, dlaczego jest pusto, co zrobić teraz. Nagłówek mówi o celu, nie o braku („Zaplanuj tydzień”, a nie „Brak danych”).',
+      'Jeden główny przycisk. Drugi, cichy, tylko gdy naprawdę jest inna droga.',
+      'Jeśli może to zrobić agent, mówimy to w turkusowej ramce i podajemy przykładowe polecenie. Agent działa w Claude przez MCP, nie w aplikacji.',
+      'Ilustracja w stylu ikony: gruby kontur, kremowe wypełnienie, jeden akcent. Ma 132 × 112 px i jest dekoracją (aria-hidden).',
+      'Pusty stan to nie błąd. Błędy i offline mają własne komunikaty i mówią, co działa dalej.'
+    ],
+    states: [
+      { ill: 'planner', where: 'Planer · pusty tydzień', h: 'Zaplanuj ten tydzień', p: 'Przeciągnij dania z szuflady albo poproś agenta o propozycje. Zaakceptujesz je jednym kliknięciem.', a: 'Otwórz szufladę dań', b: 'Skopiuj ustawienia z zeszłego tygodnia', hint: 'Napisz do Claude: „Zaplanuj obiady na przyszły tydzień w Spiżarni”.' },
+      { ill: 'recipes', where: 'Przepisy · pierwsze uruchomienie', h: 'Dodaj pierwszy przepis', p: 'Wpisz go ręcznie albo daj agentowi link do przepisu ze strony, a on go przepisze i dopasuje składniki.', a: 'Nowy przepis', hint: 'Napisz do Claude: „Dodaj do Spiżarni przepis z tego linku”.' },
+      { ill: 'lists', where: 'Zakupy · wszystko kupione', h: 'Wszystko w koszyku', p: 'Na listach nie ma nic do kupienia. Nowa lista powstanie z planu, kiedy będzie potrzebna.', a: 'Wygeneruj listę z planu', b: 'Nowa lista ogólna' },
+      { ill: 'report', where: 'Zakupy · brak raportu', h: 'Tu pojawi się raport z koszyka', p: 'Gdy agent wypełni koszyk w sklepie internetowym, zobaczysz, co dodał, co zamienił i czego zabrakło.', a: 'Przygotuj zamówienie', hint: 'Napisz do Claude: „Zrób zakupy z zamówienia w Spiżarni”.' },
+      { ill: 'search', where: 'Wyszukiwanie · brak wyników', h: 'Nic tu nie pasuje', p: 'Spróbuj krótszego słowa albo wyłącz filtry. Szukamy w nazwach, tagach i składnikach.', a: 'Wyczyść filtry' },
+      { ill: 'offline', where: 'Offline · brak danych w pamięci', h: 'Ten ekran potrzebuje sieci', p: 'Telefon nie ma jeszcze tych danych. Listy zakupów otwarte wcześniej działają offline.', a: 'Przejdź do zakupów' }
+    ]
+  },
+  en: {
+    title: 'Icon and empty states', theme: 'Theme', light: 'Light', dark: 'Dark',
+    iconsLabel: 'App icon · src/Pantry.Web/public/icons', statesLabel: 'Empty states',
+    icons: ['Icon (SVG, tab)', 'Maskable in a circle (Android)', 'iOS home screen', 'Favicon 32 px', 'On a phone home screen'],
+    rulesTitle: 'Rules for empty states',
+    rules: [
+      'Always three things: what will be here, why it is empty, what to do now. The heading names the goal, not the absence ("Plan this week", not "No data").',
+      'One primary button. A second, quiet one only when there really is another path.',
+      'If an agent can do it, say so in the teal box with an example prompt. The agent runs in Claude over MCP, not inside the app.',
+      'Illustration in the icon style: bold outline, cream fill, one accent. 132 × 112 px, decorative (aria-hidden).',
+      'An empty state is not an error. Errors and offline have their own messages and say what still works.'
+    ],
+    states: [
+      { ill: 'planner', where: 'Planner · empty week', h: 'Plan this week', p: 'Drag dishes from the tray or ask the agent for proposals. You accept them with one click.', a: 'Open the tray', b: 'Copy last week', hint: 'Ask Claude: "Plan next week\'s dinners in Pantry."' },
+      { ill: 'recipes', where: 'Recipes · first run', h: 'Add your first recipe', p: 'Type it in, or give the agent a link to a recipe page and it will copy it and match the ingredients.', a: 'New recipe', hint: 'Ask Claude: "Add the recipe from this link to Pantry."' },
+      { ill: 'lists', where: 'Shopping · all bought', h: 'Everything is in the cart', p: 'Nothing left to buy. A new list comes from the plan when you need one.', a: 'Generate a list from the plan', b: 'New general list' },
+      { ill: 'report', where: 'Shopping · no report yet', h: 'Your cart run report shows up here', p: 'When the agent fills the cart in the online shop, you will see what it added, what it substituted and what was missing.', a: 'Prepare an order', hint: 'Ask Claude: "Do the shopping from my Pantry order."' },
+      { ill: 'search', where: 'Search · no results', h: 'Nothing matches', p: 'Try a shorter word or turn off filters. We search names, tags and ingredients.', a: 'Clear filters' },
+      { ill: 'offline', where: 'Offline · nothing cached', h: 'This screen needs a connection', p: 'Your phone does not have this data yet. Shopping lists you have opened before work offline.', a: 'Go to shopping' }
+    ]
+  }
+};
+
+const ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect x="60" y="60" width="420" height="420" rx="104" fill="#2A1B2D"/><rect x="36" y="36" width="420" height="420" rx="104" fill="#F4A259" stroke="#2A1B2D" stroke-width="16"/><g stroke="#2A1B2D" stroke-width="16" stroke-linejoin="round"><rect x="176" y="166" width="140" height="40" rx="8" fill="#FFF4E6"/><rect x="156" y="196" width="180" height="214" rx="44" fill="#FFF4E6"/><path d="M164 292h164v74a36 36 0 0 1-36 36h-92a36 36 0 0 1-36-36z" fill="#6E2A5E" stroke="none"/><rect x="156" y="196" width="180" height="214" rx="44" fill="none"/><rect x="160" y="114" width="172" height="60" rx="16" fill="#6E2A5E"/></g><path d="M194 234v34" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/></svg>';
+const MASKABLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#F4A259"/><g transform="translate(256 256) scale(1.05) translate(-246 -262)"><g stroke="#2A1B2D" stroke-width="16" stroke-linejoin="round"><rect x="176" y="166" width="140" height="40" rx="8" fill="#FFF4E6"/><rect x="156" y="196" width="180" height="214" rx="44" fill="#FFF4E6"/><path d="M164 292h164v74a36 36 0 0 1-36 36h-92a36 36 0 0 1-36-36z" fill="#6E2A5E" stroke="none"/><rect x="156" y="196" width="180" height="214" rx="44" fill="none"/><rect x="160" y="114" width="172" height="60" rx="16" fill="#6E2A5E"/></g><path d="M194 234v34" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/></g></svg>';
+const ICON = 'data:image/svg+xml,' + encodeURIComponent(ICON_SVG);
+const MASKABLE = 'data:image/svg+xml,' + encodeURIComponent(MASKABLE_SVG);
+let lang = 'pl';
+function render() {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t[el.dataset.t]; });
+  document.getElementById('icons').innerHTML = `
+    <figure><img src="${ICON}" width="128" height="128" alt=""><figcaption>${t.icons[0]}</figcaption></figure>
+    <figure><img class="mask" src="${MASKABLE}" width="128" height="128" alt=""><figcaption>${t.icons[1]}</figcaption></figure>
+    <figure><img class="squircle" src="${MASKABLE}" width="96" height="96" alt=""><figcaption>${t.icons[2]}</figcaption></figure>
+    <figure><img src="${ICON}" width="32" height="32" alt=""><figcaption>${t.icons[3]}</figcaption></figure>
+    <figure><div class="homescreen"><span><i></i>&nbsp;</span><span><img class="mask" src="${MASKABLE}" width="56" height="56" alt="">Pantry</span><span><i></i>&nbsp;</span><span><i></i>&nbsp;</span></div><figcaption>${t.icons[4]}</figcaption></figure>`;
+  document.getElementById('states').innerHTML = t.states.map(s => `
+    <article class="state"><span class="label where">${s.where}</span>
+      <svg class="ill" viewBox="0 0 132 112" aria-hidden="true">${ill[s.ill]}</svg>
+      <h2>${s.h}</h2><p>${s.p}</p>
+      ${s.hint ? `<div class="agenthint">${s.hint}</div>` : ''}
+      <div class="acts"><button class="btn primary">${s.a}</button>${s.b ? `<button class="btn ghost">${s.b}</button>` : ''}</div>
+    </article>`).join('');
+  document.getElementById('rules').innerHTML = t.rules.map(r => `<li>${r}</li>`).join('');
+  document.querySelectorAll('#lang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === lang)));
+}
+document.getElementById('lang').addEventListener('click', ev => { const b = ev.target.closest('button[data-v]'); if (b) { lang = b.dataset.v; render(); } });
+document.getElementById('theme').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-v]'); if (!b) return;
+  if (b.dataset.v === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', b.dataset.v);
+  document.querySelectorAll('#theme button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+});
+document.querySelector('#theme [data-v="system"]').setAttribute('aria-pressed', 'true');
+render();
+</script>
+</body>
+</html>

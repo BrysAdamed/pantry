@@ -456,7 +456,7 @@ function modalHtml(m) {
   if (m.kind === 'token-show') body = `<h3>Token gotowy</h3><p class="sub2">Skopiuj go teraz i wklej w ustawieniach agenta.</p>
       <div class="secret"><span>${m.secret}</span><button class="btn sm" data-act="copy">${icon('copy', 'sm')}Kopiuj</button></div>
       <div class="warnbox">${icon('alert', 'sm')}Nie pokażemy go ponownie. Jeśli go zgubisz, utwórz nowy, a ten unieważnij.</div>
-      <div class="row"><span class="spacer"></span><button class="btn primary" data-act="close-modal">Skopiowałem, zamknij</button></div>`;
+      <div class="row"><span class="spacer"></span><button class="btn primary" data-act="close-modal">Gotowe, zamknij</button></div>`;
   if (m.kind === 'token-revoke') {
     const t = S.tokens.find(x => x.id === m.id);
     body = `<h3>Unieważnić „${esc(t.name)}”?</h3><p class="sub2">Agent, który go używa, od razu straci dostęp. Tego nie da się cofnąć.</p>

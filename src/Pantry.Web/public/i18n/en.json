@@ -42,7 +42,7 @@
       "eaten": "Eaten"
     },
     "leftover": "Leftover",
-    "emptySlotMarker": "Empty slot"
+    "emptySlotMarker": "Waiting for the agent"
   },
   "listItem": {
     "state": {
@@ -67,7 +67,7 @@
   },
   "sync": {
     "state": {
-      "online": "Online",
+      "online": "Saved",
       "offline": "Offline",
       "pending": "Waiting to sync"
     }
