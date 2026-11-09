@@ -21,6 +21,7 @@ namespace Pantry.Api.Modules.Catalog.Persistence.Migrations
                 .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Pantry.Api.Modules.Catalog.Domain.Ingredient", b =>
@@ -73,6 +74,28 @@ namespace Pantry.Api.Modules.Catalog.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Pantry.Api.Modules.Catalog.Domain.NotDuplicatePair", b =>
+                {
+                    b.Property<Guid>("FirstIngredientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("first_ingredient_id");
+
+                    b.Property<Guid>("SecondIngredientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("second_ingredient_id");
+
+                    b.HasKey("FirstIngredientId", "SecondIngredientId")
+                        .HasName("pk_not_duplicate_pairs");
+
+                    b.HasIndex("SecondIngredientId")
+                        .HasDatabaseName("ix_not_duplicate_pairs_second_ingredient_id");
+
+                    b.ToTable("not_duplicate_pairs", "catalog", t =>
+                        {
+                            t.HasCheckConstraint("ck_not_duplicate_pairs_order", "first_ingredient_id < second_ingredient_id");
+                        });
+                });
+
             modelBuilder.Entity("Pantry.Api.Modules.Catalog.Domain.Ingredient", b =>
                 {
                     b.OwnsMany("Pantry.Api.Modules.Catalog.Domain.IngredientName", "Names", b1 =>
@@ -102,6 +125,12 @@ namespace Pantry.Api.Modules.Catalog.Persistence.Migrations
                             b1.HasIndex("Key")
                                 .IsUnique()
                                 .HasDatabaseName("ix_ingredient_names_key");
+
+                            b1.HasIndex(new[] { "Key" }, "ix_ingredient_names_key_trgm")
+                                .HasDatabaseName("ix_ingredient_names_key_trgm");
+
+                            NpgsqlIndexBuilderExtensions.HasMethod(b1.HasIndex(new[] { "Key" }, "ix_ingredient_names_key_trgm"), "gin");
+                            NpgsqlIndexBuilderExtensions.HasOperators(b1.HasIndex(new[] { "Key" }, "ix_ingredient_names_key_trgm"), new[] { "gin_trgm_ops" });
 
                             b1.ToTable("ingredient_names", "catalog");
 
@@ -142,6 +171,23 @@ namespace Pantry.Api.Modules.Catalog.Persistence.Migrations
                     b.Navigation("Conversions");
 
                     b.Navigation("Names");
+                });
+
+            modelBuilder.Entity("Pantry.Api.Modules.Catalog.Domain.NotDuplicatePair", b =>
+                {
+                    b.HasOne("Pantry.Api.Modules.Catalog.Domain.Ingredient", null)
+                        .WithMany()
+                        .HasForeignKey("FirstIngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_not_duplicate_pairs_ingredients_first_ingredient_id");
+
+                    b.HasOne("Pantry.Api.Modules.Catalog.Domain.Ingredient", null)
+                        .WithMany()
+                        .HasForeignKey("SecondIngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_not_duplicate_pairs_ingredients_second_ingredient_id");
                 });
 #pragma warning restore 612, 618
         }

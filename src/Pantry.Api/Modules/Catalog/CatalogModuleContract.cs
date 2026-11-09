@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Pantry.Api.Modules.Catalog.Domain;
+using Pantry.Api.Modules.Catalog.Features.Duplicates;
 using Pantry.Api.Modules.Catalog.Features.Ingredients;
 using Pantry.Api.Modules.Catalog.Persistence;
 
 namespace Pantry.Api.Modules.Catalog;
 
-internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModule
+internal sealed class CatalogModuleContract(CatalogDbContext db, IOptions<PossibleDuplicateSettings> duplicateSettings) : ICatalogModule
 {
     public async Task<CatalogIngredient?> GetIngredientAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -35,6 +37,12 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
         Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default) =>
         (await GetIngredientAsync(ingredientId, cancellationToken))?.ConvertToBaseUnit(quantity, unit);
 
+    public async Task<QuantityTotals> SumQuantitiesAsync(IReadOnlyCollection<QuantityLine> lines, CancellationToken cancellationToken = default)
+    {
+        var ingredients = await GetIngredientsAsync(lines.Select(l => l.IngredientId).Distinct().ToList(), cancellationToken);
+        return QuantityCalculator.Sum(lines, ingredients);
+    }
+
     public async Task<ResolvedIngredient> ResolveIngredientAsync(string name, Unit? unitUsed, CancellationToken cancellationToken = default)
     {
         var cleanName = IngredientName.Clean(name);
@@ -49,6 +57,16 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
 
     public async Task<CatalogIngredient?> ConfirmIngredientAsync(Guid id, CancellationToken cancellationToken = default) =>
         await ConfirmIngredient.ConfirmAsync(db, id, cancellationToken) is { } ingredient ? ToContract(ingredient) : null;
+
+    public async Task<IReadOnlyList<PossibleDuplicate>> GetPossibleDuplicatesAsync(
+        Guid? ingredientId = null, int limit = 100, CancellationToken cancellationToken = default)
+    {
+        var pairs = await GetPossibleDuplicates.FindAsync(db, duplicateSettings.Value.Threshold, ingredientId, limit, cancellationToken);
+        return pairs.Select(p => new PossibleDuplicate(ToContract(p.First), ToContract(p.Second), p.Similarity)).ToList();
+    }
+
+    public Task<bool> MarkNotDuplicatesAsync(Guid oneIngredientId, Guid otherIngredientId, CancellationToken cancellationToken = default) =>
+        MarkNotDuplicates.MarkAsync(db, oneIngredientId, otherIngredientId, cancellationToken);
 
     private static CatalogIngredient ToContract(Ingredient ingredient) => new(
         ingredient.Id,
