@@ -13,7 +13,6 @@ const creationOptions = {
 const admin = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' };
 
 async function mockSetup(page: Page, completeStatus = 200) {
-  await page.route('/api/health', (route) => route.fulfill({ json: { status: 'ok', version: 'e2e' } }));
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: true } }));
   await page.route('/api/setup/passkey-options', (route) => route.fulfill({ json: creationOptions }));
   await page.route('/api/setup/complete', (route) =>
@@ -110,5 +109,5 @@ test('skips the first run once an admin exists', async ({ page }) => {
 
   await page.goto('/first-run');
 
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL('/planner');
 });

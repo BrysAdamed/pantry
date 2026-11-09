@@ -1,17 +1,9 @@
 {
   "app": {
-    "name": "Spiżarnia",
-    "tagline": "Szkielet aplikacji działa. Funkcje pojawią się z kolejnymi epikami."
-  },
-  "health": {
-    "label": "API",
-    "ok": "działa",
-    "unhealthy": "niesprawne",
-    "unreachable": "niedostępne",
-    "checking": "sprawdzanie..."
+    "name": "Spiżarnia"
   },
   "language": {
-    "label": "Język",
+    "label": "Język interfejsu",
     "en": "English",
     "pl": "Polski"
   },
@@ -70,6 +62,43 @@
       "online": "Zapisane",
       "offline": "Offline",
       "pending": "Czeka na wysłanie"
+    },
+    "detail": {
+      "online": "Online · wszystko zapisane",
+      "offline": "Offline · zmiany czekają",
+      "pending": "Online · wysyłanie zmian"
+    }
+  },
+  "shell": {
+    "skipToContent": "Przejdź do treści",
+    "mainNavigation": "Nawigacja główna",
+    "account": "Konto",
+    "signOut": "Wyloguj się"
+  },
+  "nav": {
+    "planner": "Plan",
+    "recipes": "Przepisy",
+    "shopping": "Zakupy",
+    "household": "Dom"
+  },
+  "emptyState": {
+    "planner": {
+      "title": "Zaplanuj ten tydzień",
+      "description": "Przeciągnij dania z szuflady albo poproś agenta o propozycje. Zaakceptujesz je jednym kliknięciem.",
+      "agentHint": "Napisz do Claude: „Zaplanuj obiady na przyszły tydzień w Spiżarni”."
+    },
+    "recipes": {
+      "title": "Dodaj pierwszy przepis",
+      "description": "Wpisz go ręcznie albo daj agentowi link do przepisu ze strony, a on go przepisze i dopasuje składniki.",
+      "agentHint": "Napisz do Claude: „Dodaj do Spiżarni przepis z tego linku”."
+    },
+    "shopping": {
+      "title": "Wszystko w koszyku",
+      "description": "Na listach nie ma nic do kupienia. Nowa lista powstanie z planu, kiedy będzie potrzebna."
+    },
+    "household": {
+      "title": "Urządź swój dom",
+      "description": "Tu ustawisz domowników, posiłki i zasady planowania dla całego domu."
     }
   },
   "firstRun": {

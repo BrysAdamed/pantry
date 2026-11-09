@@ -1,17 +1,9 @@
 {
   "app": {
-    "name": "Pantry",
-    "tagline": "Scaffold is running. Features arrive epic by epic."
-  },
-  "health": {
-    "label": "API",
-    "ok": "ok",
-    "unhealthy": "unhealthy",
-    "unreachable": "unreachable",
-    "checking": "checking..."
+    "name": "Pantry"
   },
   "language": {
-    "label": "Language",
+    "label": "Interface language",
     "en": "English",
     "pl": "Polski"
   },
@@ -70,6 +62,43 @@
       "online": "Saved",
       "offline": "Offline",
       "pending": "Waiting to sync"
+    },
+    "detail": {
+      "online": "Online · everything saved",
+      "offline": "Offline · changes are waiting",
+      "pending": "Online · sending changes"
+    }
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "mainNavigation": "Main navigation",
+    "account": "Account",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "planner": "Plan",
+    "recipes": "Recipes",
+    "shopping": "Shopping",
+    "household": "Household"
+  },
+  "emptyState": {
+    "planner": {
+      "title": "Plan this week",
+      "description": "Drag dishes from the tray or ask the agent for proposals. You accept them with one click.",
+      "agentHint": "Ask Claude: \"Plan next week's dinners in Pantry.\""
+    },
+    "recipes": {
+      "title": "Add your first recipe",
+      "description": "Type it in, or give the agent a link to a recipe page and it will copy it and match the ingredients.",
+      "agentHint": "Ask Claude: \"Add the recipe from this link to Pantry.\""
+    },
+    "shopping": {
+      "title": "Everything is in the cart",
+      "description": "Nothing left to buy. A new list comes from the plan when you need one."
+    },
+    "household": {
+      "title": "Set up your household",
+      "description": "Members, meals and planning rules for the whole household will live here."
     }
   },
   "firstRun": {

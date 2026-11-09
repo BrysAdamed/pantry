@@ -1,26 +1,59 @@
 import { expect, test } from '@playwright/test';
 
+const destinations = [
+  { name: 'Plan', path: '/planner', heading: 'Plan this week' },
+  { name: 'Recipes', path: '/recipes', heading: 'Add your first recipe' },
+  { name: 'Shopping', path: '/shopping', heading: 'Everything is in the cart' },
+  { name: 'Household', path: '/household', heading: 'Set up your household' },
+];
+
 test.beforeEach(async ({ page }) => {
-  await page.route('/api/health', (route) => route.fulfill({ json: { status: 'ok', version: 'e2e' } }));
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem('e2e.seeded')) {
+      localStorage.setItem('pantry.uiLanguage', 'en');
+      sessionStorage.setItem('e2e.seeded', '1');
+    }
+  });
 });
 
-test('shows the app and the API status', async ({ page }) => {
+test('opens the planner and navigates all four destinations', async ({ page }) => {
   await page.goto('/');
+  await expect(page).toHaveURL('/planner');
 
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Pantry');
-  await expect(page.getByTestId('api-status')).toContainText('ok');
+  const navigation = page.getByRole('navigation', { name: 'Main navigation' });
+  for (const destination of destinations) {
+    const link = navigation.getByRole('link', { name: destination.name });
+    await link.click();
+
+    await expect(page).toHaveURL(destination.path);
+    await expect(link).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText(destination.heading);
+  }
 });
 
-test('remembers the chosen UI language', async ({ page }) => {
-  await page.goto('/');
+test('shows the saved sync state', async ({ page }) => {
+  await page.goto('/planner');
 
-  await page.getByTestId('language-pl').click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Spiżarnia');
+  await expect(page.getByRole('status').filter({ visible: true })).toContainText('Saved');
+});
+
+test('remembers the UI language chosen in the avatar menu', async ({ page }) => {
+  await page.goto('/recipes');
+
+  await page.getByRole('button', { name: 'Account' }).filter({ visible: true }).click();
+  await page.getByRole('dialog', { name: 'Account' }).getByTestId('language-pl').click();
+  await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText('Dodaj pierwszy przepis');
   await expect(page).toHaveTitle('Spiżarnia');
 
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
   await page.reload();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Spiżarnia');
+  await expect(page.getByRole('navigation', { name: 'Nawigacja główna' }).getByRole('link', { name: 'Przepisy' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
   await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
 });
 
@@ -29,13 +62,15 @@ test('follows the system theme until a theme is chosen', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
+  await page.getByRole('button', { name: 'Account' }).filter({ visible: true }).click();
   await page.getByTestId('theme-light').click();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
-test('shows the design tokens page', async ({ page }) => {
+test('shows the design tokens page outside the shell', async ({ page }) => {
   await page.goto('/design-system');
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Design tokens');
+  await expect(page.getByRole('navigation')).toHaveCount(0);
 });
