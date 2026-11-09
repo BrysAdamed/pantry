@@ -1,0 +1,714 @@
+<ng-container *transloco="let t; prefix: 'recipes.editor'">
+  <a
+    class="inline-flex min-h-tap items-center gap-1.5 justify-self-start rounded-control pr-3 font-bold text-muted-foreground hover:text-foreground"
+    data-testid="recipe-back"
+    [routerLink]="recipesPath"
+  >
+    <app-icon name="chevronLeft" class="size-5" />
+    {{ t('back') }}
+  </a>
+
+  @if (draft(); as d) {
+    <header class="grid gap-1">
+      <h2
+        class="text-[26px] leading-tight [overflow-wrap:anywhere] md:text-[34px]"
+        data-testid="recipe-editor-title"
+      >
+        {{ isNew() ? t('newTitle') : t('editTitle') }}
+      </h2>
+      @if (saved(); as s) {
+        <p class="text-sm text-muted-foreground [overflow-wrap:anywhere]">{{ s.name }}</p>
+      }
+    </header>
+
+    @if (saveError(); as error) {
+      <p
+        class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm"
+        role="alert"
+        data-testid="save-error"
+      >
+        <app-icon name="alert" class="size-4 text-danger" />
+        {{ error === 'invalid' ? t('invalid') : t('saveFailed') }}
+      </p>
+    }
+    @if (showProblems() && problems().size) {
+      <p
+        class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm"
+        role="alert"
+        data-testid="problems"
+      >
+        <app-icon name="alert" class="size-4 text-danger" />
+        {{ t('problems') }}
+      </p>
+    }
+
+    <form
+      id="recipe-form"
+      class="grid min-w-0 gap-4.5"
+      novalidate
+      (submit)="$event.preventDefault(); save()"
+    >
+      <label class="grid gap-1.5">
+        <span class="text-[13px] font-bold">{{ t('name') }}</span>
+        <input
+          class="min-h-tap w-full rounded-control border-2 border-outline bg-card px-3 py-2 font-display text-[22px] font-extrabold aria-invalid:border-danger"
+          autocomplete="off"
+          data-testid="recipe-name"
+          [maxLength]="limits.nameMaxLength"
+          [placeholder]="t('namePlaceholder')"
+          [value]="d.name"
+          [attr.aria-invalid]="!!problem('name') || null"
+          (input)="update({ name: $any($event.target).value })"
+        />
+        @if (problem('name'); as p) {
+          <span class="text-xs font-bold text-danger" data-testid="problem-name">{{
+            t('problem.' + p)
+          }}</span>
+        }
+      </label>
+
+      <div class="grid gap-4.5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] xl:items-start">
+        <section
+          class="grid min-w-0 gap-3.5 rounded-card border-2 border-outline bg-card px-3.5 py-4 shadow-card sm:px-4.5"
+          aria-labelledby="ingredients-title"
+          data-testid="recipe-ingredients"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h3 id="ingredients-title" class="text-xl">{{ t('ingredients') }}</h3>
+            <label class="flex items-center gap-2 text-sm font-bold">
+              <span>{{ t('servingsBefore') }}</span>
+              <input
+                class="h-10 w-16 rounded-control border-2 border-outline bg-card px-2 text-center font-extrabold aria-invalid:border-danger"
+                inputmode="numeric"
+                autocomplete="off"
+                data-testid="recipe-servings"
+                [value]="d.servings"
+                [attr.aria-label]="t('servings')"
+                [attr.aria-invalid]="!!problem('servings') || null"
+                (input)="update({ servings: $any($event.target).value })"
+              />
+              <span>{{ t('servingsAfter', { count: +d.servings || 0 }) }}</span>
+            </label>
+          </div>
+          <p class="text-xs text-muted-foreground">{{ t('servingsNote') }}</p>
+          @if (problem('servings'); as p) {
+            <p class="text-xs font-bold text-danger" data-testid="problem-servings">
+              {{ t('problem.' + p, { max: limits.maxServings }) }}
+            </p>
+          }
+          @if (problem('lines'); as p) {
+            <p class="text-xs font-bold text-danger">
+              {{ t('problem.' + p, { max: limits.maxLines }) }}
+            </p>
+          }
+
+          @for (group of d.groups; track group.key; let gi = $index) {
+            <div
+              class="grid gap-2"
+              [attr.data-testid]="gi === 0 ? 'lines-loose' : 'recipe-section'"
+            >
+              @if (gi > 0) {
+                <div
+                  class="mt-2 flex items-center gap-1.5 border-t-2 border-dashed border-border pt-3"
+                >
+                  <input
+                    class="h-10 min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3 font-extrabold aria-invalid:border-danger"
+                    autocomplete="off"
+                    data-testid="section-name"
+                    [maxLength]="limits.sectionNameMaxLength"
+                    [value]="group.name"
+                    [placeholder]="t('sectionPlaceholder')"
+                    [attr.aria-label]="t('sectionName')"
+                    [attr.aria-invalid]="!!problem('section.' + group.key) || null"
+                    (input)="renameSection(group, $any($event.target).value)"
+                  />
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [disabled]="gi === 1"
+                    [attr.aria-label]="t('sectionUp', { name: group.name || t('sectionUnnamed') })"
+                    (click)="moveSection(group, -1)"
+                  >
+                    <app-icon name="chevronUp" class="size-4" />
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [disabled]="gi === d.groups.length - 1"
+                    [attr.aria-label]="
+                      t('sectionDown', { name: group.name || t('sectionUnnamed') })
+                    "
+                    (click)="moveSection(group, 1)"
+                  >
+                    <app-icon name="chevronDown" class="size-4" />
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    data-testid="remove-section"
+                    [attr.aria-label]="
+                      t('sectionRemove', { name: group.name || t('sectionUnnamed') })
+                    "
+                    (click)="removeSection(group)"
+                  >
+                    <app-icon name="trash" class="size-4" />
+                  </button>
+                </div>
+                @if (problem('section.' + group.key); as p) {
+                  <p class="text-xs font-bold text-danger" data-testid="problem-section">
+                    {{ t('problem.' + p) }}
+                  </p>
+                }
+              }
+
+              <ol class="grid gap-2">
+                @for (line of group.lines; track line.key; let li = $index, last = $last) {
+                  <li
+                    class="grid gap-1.5 rounded-control border-2 border-border p-2"
+                    data-testid="recipe-line"
+                    [class.border-dislike-never]="hintOf(line)?.kind === 'never'"
+                    [class.border-dislike-avoid]="hintOf(line)?.kind === 'avoid'"
+                  >
+                    <div
+                      class="grid grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[5.5rem_7.5rem_minmax(0,1fr)]"
+                    >
+                      <input
+                        class="h-tap min-w-0 rounded-control border-2 border-outline bg-card px-2.5 text-right font-bold aria-invalid:border-danger"
+                        inputmode="decimal"
+                        autocomplete="off"
+                        data-testid="line-quantity"
+                        [value]="line.quantity"
+                        [placeholder]="t('toTaste')"
+                        [attr.aria-label]="t('quantity')"
+                        [attr.aria-invalid]="!!problem('line.' + line.key + '.quantity') || null"
+                        (input)="setLine(line, { quantity: $any($event.target).value })"
+                      />
+                      <select
+                        class="h-tap min-w-0 rounded-control border-2 border-outline bg-card px-2"
+                        data-testid="line-unit"
+                        [attr.aria-label]="t('unit')"
+                        [class.text-muted-foreground]="!line.quantity.trim()"
+                        (change)="setLine(line, { unit: $any($event.target).value })"
+                      >
+                        <ng-container *transloco="let unitLabel; prefix: 'catalog.unit'">
+                          @for (unit of units; track unit) {
+                            <option [value]="unit" [selected]="unit === line.unit">
+                              {{ unitLabel(unit) }}
+                            </option>
+                          }
+                        </ng-container>
+                      </select>
+                      <div class="col-span-full min-w-0 sm:col-span-1">
+                        @if (line.ingredient; as ingredient) {
+                          <div
+                            class="flex min-h-tap items-center gap-2 rounded-control border-2 border-outline bg-secondary py-1 pr-1 pl-3 font-bold"
+                            data-testid="line-ingredient"
+                          >
+                            <span class="min-w-0 flex-1 truncate">{{
+                              ingredient.name ?? t('unknownIngredient')
+                            }}</span>
+                            @if (ingredient.kind === 'new') {
+                              <span
+                                class="rounded-full border-[1.5px] border-current bg-info-surface px-1.5 py-px text-[11px] font-extrabold text-info"
+                                data-testid="badge-new"
+                              >
+                                {{ t('newIngredient') }}
+                              </span>
+                            }
+                            <button
+                              hlmBtn
+                              variant="ghost"
+                              size="icon-sm"
+                              type="button"
+                              [attr.aria-label]="
+                                t('changeIngredient', {
+                                  name: ingredient.name ?? t('unknownIngredient'),
+                                })
+                              "
+                              (click)="clearIngredient(line)"
+                            >
+                              <app-icon name="close" class="size-4" />
+                            </button>
+                          </div>
+                        } @else {
+                          <app-ingredient-picker
+                            data-testid="line-picker"
+                            [label]="t('ingredient')"
+                            [placeholder]="t('ingredientPlaceholder')"
+                            (picked)="pick(line, $event)"
+                          />
+                        }
+                      </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <input
+                        class="h-10 min-w-40 flex-1 rounded-control border-2 border-border bg-card px-3 text-sm"
+                        autocomplete="off"
+                        data-testid="line-note"
+                        [maxLength]="limits.noteMaxLength"
+                        [value]="line.note"
+                        [placeholder]="t('notePlaceholder')"
+                        [attr.aria-label]="t('note')"
+                        (input)="setLine(line, { note: $any($event.target).value })"
+                      />
+                      <div class="ml-auto flex items-center gap-0.5">
+                        @if (d.groups.length > 1) {
+                          <select
+                            class="h-10 max-w-36 rounded-control border-2 border-border bg-card px-1.5 text-sm"
+                            data-testid="line-section"
+                            [attr.aria-label]="t('moveToSection')"
+                            (change)="moveLineTo(line, $any($event.target).value)"
+                          >
+                            @for (target of d.groups; track target.key; let ti = $index) {
+                              <option [value]="target.key" [selected]="target.key === group.key">
+                                {{ ti === 0 ? t('noSection') : target.name || t('sectionUnnamed') }}
+                              </option>
+                            }
+                          </select>
+                        }
+                        <button
+                          hlmBtn
+                          variant="ghost"
+                          size="icon-sm"
+                          type="button"
+                          [disabled]="li === 0"
+                          [attr.aria-label]="t('lineUp')"
+                          (click)="moveLine(line, -1)"
+                        >
+                          <app-icon name="chevronUp" class="size-4" />
+                        </button>
+                        <button
+                          hlmBtn
+                          variant="ghost"
+                          size="icon-sm"
+                          type="button"
+                          [disabled]="last"
+                          [attr.aria-label]="t('lineDown')"
+                          (click)="moveLine(line, 1)"
+                        >
+                          <app-icon name="chevronDown" class="size-4" />
+                        </button>
+                        <button
+                          hlmBtn
+                          variant="ghost"
+                          size="icon-sm"
+                          type="button"
+                          data-testid="remove-line"
+                          [attr.aria-label]="t('lineRemove')"
+                          (click)="removeLine(line)"
+                        >
+                          <app-icon name="close" class="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                    @if (hintOf(line); as hint) {
+                      @switch (hint.kind) {
+                        @case ('never') {
+                          <p
+                            class="flex items-center gap-1.5 text-xs font-bold text-dislike-never"
+                            data-testid="hint-never"
+                          >
+                            <app-icon name="ban" class="size-4" />
+                            {{
+                              hint.kind === 'never' && hint.reason
+                                ? t('hint.neverWithReason', { reason: hint.reason })
+                                : t('hint.never')
+                            }}
+                          </p>
+                        }
+                        @case ('avoid') {
+                          <p
+                            class="flex items-center gap-1.5 text-xs font-bold text-dislike-avoid"
+                            data-testid="hint-avoid"
+                          >
+                            <app-icon name="alert" class="size-4" />
+                            {{ t('hint.avoid') }}
+                          </p>
+                        }
+                        @case ('new') {
+                          <p
+                            class="flex items-center gap-1.5 text-xs text-info"
+                            data-testid="hint-new"
+                          >
+                            <app-icon name="sparkle" class="size-4" />
+                            {{ t('hint.new') }}
+                          </p>
+                        }
+                      }
+                    }
+                    @if (problem('line.' + line.key + '.quantity'); as p) {
+                      <p class="text-xs font-bold text-danger" data-testid="problem-quantity">
+                        {{ t('problem.' + p) }}
+                      </p>
+                    }
+                    @if (problem('line.' + line.key + '.ingredient'); as p) {
+                      <p class="text-xs font-bold text-danger" data-testid="problem-ingredient">
+                        {{ t('problem.' + p) }}
+                      </p>
+                    }
+                  </li>
+                }
+              </ol>
+              <button
+                hlmBtn
+                variant="ghost"
+                size="sm"
+                type="button"
+                class="justify-self-start"
+                [attr.data-testid]="gi === 0 ? 'add-line' : 'add-section-line'"
+                (click)="addLine(group)"
+              >
+                <app-icon name="plus" class="size-4" />
+                {{
+                  gi === 0
+                    ? t('addLine')
+                    : t('addSectionLine', { name: group.name || t('sectionUnnamed') })
+                }}
+              </button>
+            </div>
+          }
+
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            type="button"
+            class="justify-self-start"
+            data-testid="add-section"
+            (click)="addSection()"
+          >
+            <app-icon name="plus" class="size-4" />
+            {{ t('addSection') }}
+          </button>
+        </section>
+
+        <div class="grid min-w-0 gap-4.5">
+          <section
+            class="grid gap-3.5 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card"
+            aria-labelledby="details-title"
+          >
+            <h3 id="details-title" class="text-xl">{{ t('details') }}</h3>
+
+            <label class="grid gap-1.5">
+              <span class="text-[13px] font-bold">{{ t('prepTime') }}</span>
+              <span class="flex items-center gap-2">
+                <input
+                  class="h-tap w-24 rounded-control border-2 border-outline bg-card px-3 aria-invalid:border-danger"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  data-testid="recipe-prep-time"
+                  [value]="d.prepTime"
+                  [attr.aria-invalid]="!!problem('prepTime') || null"
+                  (input)="update({ prepTime: $any($event.target).value })"
+                />
+                <span class="text-sm text-muted-foreground">{{ t('minutes') }}</span>
+              </span>
+              @if (problem('prepTime'); as p) {
+                <span class="text-xs font-bold text-danger">{{ t('problem.' + p) }}</span>
+              }
+            </label>
+
+            <div class="grid gap-1.5">
+              <label class="text-[13px] font-bold" for="recipe-tag-input">{{ t('tags') }}</label>
+              <div
+                class="flex min-h-tap flex-wrap items-center gap-1.5 rounded-control border-2 border-outline bg-card px-2 py-1.5 focus-within:ring-3 focus-within:ring-ring/50"
+              >
+                @for (tag of d.tags; track tag) {
+                  <span
+                    class="inline-flex min-h-8 items-center gap-0.5 rounded-full border-2 border-outline bg-secondary py-0.5 pr-0.5 pl-2.5 text-sm font-bold"
+                    data-testid="recipe-tag"
+                  >
+                    {{ tag }}
+                    <button
+                      hlmBtn
+                      variant="ghost"
+                      size="icon-sm"
+                      type="button"
+                      class="size-6 rounded-full"
+                      [attr.aria-label]="t('tagRemove', { tag })"
+                      (click)="removeTag(tag)"
+                    >
+                      <app-icon name="close" class="size-3.5" />
+                    </button>
+                  </span>
+                }
+                <input
+                  id="recipe-tag-input"
+                  class="h-8 min-w-28 flex-1 bg-transparent outline-none"
+                  autocomplete="off"
+                  data-testid="recipe-tag-input"
+                  [maxLength]="limits.tagMaxLength"
+                  [value]="tagText()"
+                  [placeholder]="t('tagPlaceholder')"
+                  (input)="tagText.set($any($event.target).value)"
+                  (keydown)="onTagKeydown($event)"
+                  (blur)="addTag(tagText())"
+                />
+              </div>
+              @if (tagProblem(); as p) {
+                <span class="text-xs font-bold text-danger" role="status">{{
+                  t('tagProblem.' + p, { max: limits.maxTags })
+                }}</span>
+              }
+              @if (tagSuggestions().length) {
+                <div
+                  class="flex flex-wrap items-center gap-1.5"
+                  [attr.aria-label]="t('tagSuggestions')"
+                  role="group"
+                  data-testid="tag-suggestions"
+                >
+                  @for (tag of tagSuggestions(); track tag) {
+                    <button
+                      type="button"
+                      class="inline-flex min-h-8 items-center gap-1 rounded-full border-2 border-dashed border-border px-2.5 text-sm font-bold text-muted-foreground hover:border-outline hover:text-foreground"
+                      [attr.aria-label]="t('tagAdd', { tag })"
+                      (mousedown)="$event.preventDefault()"
+                      (click)="addTag(tag)"
+                    >
+                      <app-icon name="plus" class="size-3.5" />
+                      {{ tag }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <label class="grid gap-1.5">
+              <span class="text-[13px] font-bold">{{ t('source') }}</span>
+              <input
+                type="url"
+                class="h-tap w-full rounded-control border-2 border-outline bg-card px-3 aria-invalid:border-danger"
+                autocomplete="off"
+                data-testid="recipe-source"
+                placeholder="https://"
+                [maxLength]="limits.sourceUrlMaxLength"
+                [value]="d.sourceUrl"
+                [attr.aria-invalid]="!!problem('sourceUrl') || null"
+                (input)="update({ sourceUrl: $any($event.target).value })"
+              />
+              @if (problem('sourceUrl'); as p) {
+                <span class="text-xs font-bold text-danger">{{ t('problem.' + p) }}</span>
+              }
+            </label>
+
+            <label class="grid gap-1.5">
+              <span class="text-[13px] font-bold">{{ t('cooldown') }}</span>
+              <span class="flex items-center gap-2">
+                <input
+                  class="h-tap w-24 rounded-control border-2 border-outline bg-card px-3 aria-invalid:border-danger"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  data-testid="recipe-cooldown"
+                  [value]="d.cooldownDays"
+                  [placeholder]="t('cooldownDefault')"
+                  [attr.aria-invalid]="!!problem('cooldownDays') || null"
+                  (input)="update({ cooldownDays: $any($event.target).value })"
+                />
+                <span class="text-sm text-muted-foreground">{{ t('days') }}</span>
+              </span>
+              <span class="text-xs text-muted-foreground">{{ t('cooldownNote') }}</span>
+              @if (problem('cooldownDays'); as p) {
+                <span class="text-xs font-bold text-danger">{{
+                  t('problem.' + p, { max: limits.maxCooldownDays })
+                }}</span>
+              }
+            </label>
+
+            <div class="flex items-center justify-between gap-3">
+              <div class="grid gap-0.5">
+                <span class="text-[13px] font-bold">{{ t('makeAgain') }}</span>
+                <span class="text-xs text-muted-foreground">{{ t('makeAgainNote') }}</span>
+              </div>
+              <app-switch
+                data-testid="recipe-make-again"
+                [checked]="d.makeAgain"
+                [label]="t('makeAgain')"
+                (toggled)="update({ makeAgain: $event })"
+              />
+            </div>
+          </section>
+
+          <section
+            class="grid gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card"
+            aria-labelledby="nutrition-title"
+          >
+            <div class="grid gap-0.5">
+              <h3 id="nutrition-title" class="text-xl">{{ t('nutrition') }}</h3>
+              <p class="text-xs text-muted-foreground">{{ t('nutritionNote') }}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              @for (nutrient of nutrients; track nutrient) {
+                <label class="grid gap-1">
+                  <span class="text-[13px] font-bold">{{ t('nutrient.' + nutrient) }}</span>
+                  <input
+                    class="h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 aria-invalid:border-danger"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    [attr.data-testid]="'nutrition-' + nutrient"
+                    [value]="d.nutrition[nutrient]"
+                    [attr.aria-invalid]="!!problem('nutrition.' + nutrient) || null"
+                    (input)="setNutrient(nutrient, $any($event.target).value)"
+                  />
+                  @if (problem('nutrition.' + nutrient); as p) {
+                    <span class="text-xs font-bold text-danger">{{ t('problem.' + p) }}</span>
+                  }
+                </label>
+              }
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section
+        class="grid gap-3 rounded-card border-2 border-outline bg-card px-3.5 py-4 shadow-card sm:px-4.5"
+        aria-labelledby="steps-title"
+      >
+        <h3 id="steps-title" class="text-xl">{{ t('steps') }}</h3>
+        @if (problem('steps'); as p) {
+          <p class="text-xs font-bold text-danger">
+            {{ t('problem.' + p, { max: limits.maxSteps }) }}
+          </p>
+        }
+        <ol class="grid gap-2.5">
+          @for (step of d.steps; track step.key; let si = $index, last = $last) {
+            <li
+              class="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-start gap-2"
+              data-testid="recipe-step"
+            >
+              <span
+                class="grid size-8 place-items-center rounded-full border-2 border-outline bg-accent font-extrabold"
+                aria-hidden="true"
+                >{{ si + 1 }}</span
+              >
+              <textarea
+                class="min-h-20 w-full rounded-control border-2 border-outline bg-card px-3 py-2"
+                rows="2"
+                data-testid="step-text"
+                [maxLength]="limits.stepMaxLength"
+                [value]="step.text"
+                [placeholder]="t('stepPlaceholder')"
+                [attr.aria-label]="t('step', { number: si + 1 })"
+                (input)="setStep(step.key, $any($event.target).value)"
+              ></textarea>
+              <div class="grid">
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  [disabled]="si === 0"
+                  [attr.aria-label]="t('stepUp', { number: si + 1 })"
+                  (click)="moveStep(step.key, -1)"
+                >
+                  <app-icon name="chevronUp" class="size-4" />
+                </button>
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  [disabled]="last"
+                  [attr.aria-label]="t('stepDown', { number: si + 1 })"
+                  (click)="moveStep(step.key, 1)"
+                >
+                  <app-icon name="chevronDown" class="size-4" />
+                </button>
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  data-testid="remove-step"
+                  [attr.aria-label]="t('stepRemove', { number: si + 1 })"
+                  (click)="removeStep(step.key)"
+                >
+                  <app-icon name="close" class="size-4" />
+                </button>
+              </div>
+            </li>
+          }
+        </ol>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="sm"
+          type="button"
+          class="justify-self-start"
+          data-testid="add-step"
+          (click)="addStep()"
+        >
+          <app-icon name="plus" class="size-4" />
+          {{ t('addStep') }}
+        </button>
+      </section>
+    </form>
+
+    <div
+      class="sticky bottom-20 z-2 flex flex-wrap items-center justify-end gap-2.5 bg-linear-to-b from-transparent to-background to-30% pt-3.5 pb-4.5 md:bottom-0"
+      data-testid="form-bar"
+    >
+      @if (dirty() && !isNew()) {
+        <span
+          class="mr-auto hidden items-center gap-1.5 text-[13px] font-bold text-muted-foreground sm:inline-flex"
+          data-testid="unsaved"
+        >
+          <span
+            class="size-2 rounded-full border-[1.5px] border-outline bg-accent"
+            aria-hidden="true"
+          ></span>
+          {{ t('unsaved') }}
+        </span>
+      }
+      <button hlmBtn variant="outline" type="button" (click)="cancel()">{{ t('cancel') }}</button>
+      <button
+        hlmBtn
+        type="submit"
+        form="recipe-form"
+        data-testid="recipe-save"
+        [disabled]="saving() || (!isNew() && !dirty())"
+      >
+        <app-icon name="check" class="size-4" />
+        {{ isNew() ? t('add') : t('save') }}
+      </button>
+    </div>
+  } @else if (gone()) {
+    <p
+      class="rounded-control border-2 border-border bg-card px-3.5 py-3 text-sm"
+      role="alert"
+      data-testid="recipe-gone"
+    >
+      {{ t('gone') }}
+    </p>
+  } @else if (recipe.error()) {
+    <div
+      class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm"
+      role="alert"
+    >
+      <span class="flex-1">{{ t('loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="recipe.reload()">
+        {{ t('retry') }}
+      </button>
+    </div>
+  }
+
+  <ng-template #discardDialog let-name let-dialog="dialogRef">
+    <app-dialog-frame>
+      <h3 class="text-[22px]">{{ t('discard.title') }}</h3>
+      <p>{{ name ? t('discard.text', { name }) : t('discard.textNew') }}</p>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        <button hlmBtn variant="outline" type="button" (click)="dialog.close(false)">
+          {{ t('discard.keep') }}
+        </button>
+        <button hlmBtn variant="destructive" type="button" (click)="dialog.close(true)">
+          {{ t('discard.discard') }}
+        </button>
+      </div>
+    </app-dialog-frame>
+  </ng-template>
+</ng-container>
