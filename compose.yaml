@@ -22,6 +22,9 @@ services:
     profiles: ["app"]
     environment:
       ConnectionStrings__Pantry: Host=db;Database=${POSTGRES_DB:-pantry};Username=${POSTGRES_USER:-pantry};Password=${POSTGRES_PASSWORD};Gss Encryption Mode=Disable
+      Identity__Passkeys__RelyingPartyId: ${PASSKEY_RP_ID:-localhost}
+      Identity__Passkeys__Origins__0: ${PASSKEY_ORIGIN:-http://localhost:8080}
+      Identity__Session__Lifetime: ${SESSION_LIFETIME:-30.00:00:00}
     ports:
       - "${APP_PORT:-8080}:8080"
     depends_on:

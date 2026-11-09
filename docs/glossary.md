@@ -7,6 +7,8 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Household** | The single group of people a deployment serves. Exactly one per deployment. |
 | **Member** | A person in the household. Has a portion factor. May or may not have a user account (a toddler is a member, not a user). |
 | **User** | Someone who can sign in. Belongs to the household. |
+| **Admin** | A user who can also manage users: invite, issue recovery links, remove users, promote another admin. The first user is the admin; the last admin cannot be removed or demoted. |
+| **First run** | The setup on a fresh deployment (*Pierwsze uruchomienie*): while no user exists, the app asks for a name and creates the admin with a passkey. |
 | **Portion factor** | How much of a standard serving a member eats (e.g. adult 1.0, toddler 0.3). Configurable. |
 | **Household serving** | Sum of portion factors of members eating a meal. Drives shopping quantities. |
 | **Meal slot** | A configured meal of the day (e.g. breakfast, second breakfast, lunch, snack, dinner), with an order. |

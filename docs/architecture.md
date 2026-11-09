@@ -56,6 +56,10 @@ Add a migration (the `dotnet-ef` tool is pinned in `dotnet-tools.json`, run `dot
 dotnet ef migrations add <Name> --project src/Pantry.Api --context CatalogDbContext --output-dir Modules/Catalog/Persistence/Migrations
 ```
 
+## Authentication
+
+See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only; the session is an HttpOnly cookie. Every `/api` endpoint requires a signed-in user; opt out with `.AllowAnonymous()`. Unsafe `/api` requests need the `X-XSRF-TOKEN` header, which Angular's `HttpClient` sends from the `XSRF-TOKEN` cookie. Passkey relying party ID and origins come from `Identity:Passkeys` (`appsettings.Development.json` for dev, `PASSKEY_*` in `.env` for Docker).
+
 ## Frontend
 
 - Angular 21, zoneless, signals, standalone components, `httpResource` for reads.

@@ -1,11 +1,19 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Pantry.Api.Infrastructure.Antiforgery;
 using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Infrastructure.Health;
+using Pantry.Api.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddProblemDetails();
+builder.Services.AddApiAntiforgery();
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 
-// Modules register here: builder.Services.Add<Name>Module() (see docs/architecture.md).
+builder.Services.AddIdentityModule(builder.Configuration);
 
 var app = builder.Build();
 
@@ -15,11 +23,17 @@ await app.MigrateModulesAsync();
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
-var api = app.MapGroup("/api");
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseApiAntiforgery();
+
+// Every /api endpoint requires a signed-in user unless it opts out with AllowAnonymous (ADR 0014).
+var api = app.MapGroup("/api").RequireAuthorization();
 api.MapHealthEndpoint();
+api.MapIdentityEndpoints();
 
 // Unknown /api routes must return 404, everything else falls back to the SPA.
-api.MapFallback(() => Results.NotFound());
+api.MapFallback(() => Results.NotFound()).AllowAnonymous();
 app.MapFallbackToFile("index.html");
 
 app.Run();
