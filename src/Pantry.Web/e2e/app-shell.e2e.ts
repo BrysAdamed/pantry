@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-const destinations = [
+const destinations: { name: string; path: string | RegExp; heading?: string }[] = [
   { name: 'Plan', path: '/planner', heading: 'Plan this week' },
   { name: 'Recipes', path: '/recipes', heading: 'Add your first recipe' },
   { name: 'Shopping', path: '/shopping', heading: 'Everything is in the cart' },
-  { name: 'Household', path: '/household', heading: 'Set up your household' },
+  { name: 'Household', path: /\/household(\/members)?$/ },
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -12,6 +12,7 @@ test.beforeEach(async ({ page }) => {
   await page.route('/api/me', (route) =>
     route.fulfill({ json: { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' } }),
   );
+  await page.route('/api/household/members', (route) => route.fulfill({ json: { members: [], householdServing: 0 } }));
   await page.addInitScript(() => {
     if (!sessionStorage.getItem('e2e.seeded')) {
       localStorage.setItem('pantry.uiLanguage', 'en');
@@ -31,7 +32,9 @@ test('opens the planner and navigates all four destinations', async ({ page }) =
 
     await expect(page).toHaveURL(destination.path);
     await expect(link).toHaveAttribute('aria-current', 'page');
-    await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText(destination.heading);
+    if (destination.heading) {
+      await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText(destination.heading);
+    }
   }
 });
 

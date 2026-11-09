@@ -1,6 +1,24 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export type IconName = 'jar' | 'calendar' | 'book' | 'cart' | 'home' | 'user' | 'signOut';
+export type IconName =
+  | 'jar'
+  | 'calendar'
+  | 'book'
+  | 'cart'
+  | 'home'
+  | 'user'
+  | 'users'
+  | 'clock'
+  | 'ban'
+  | 'rules'
+  | 'globe'
+  | 'key'
+  | 'plus'
+  | 'minus'
+  | 'close'
+  | 'chevronLeft'
+  | 'chevronRight'
+  | 'signOut';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
 @Component({
@@ -41,6 +59,46 @@ export type IconName = 'jar' | 'calendar' | 'book' | 'cart' | 'home' | 'user' | 
         @case ('user') {
           <circle cx="12" cy="8" r="4" />
           <path d="M4 21a8 8 0 0 1 16 0" />
+        }
+        @case ('users') {
+          <circle cx="9" cy="8" r="3.5" />
+          <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+          <path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6" />
+        }
+        @case ('clock') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        }
+        @case ('ban') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="M5.6 5.6l12.8 12.8" />
+        }
+        @case ('rules') {
+          <path d="M9 6h11M9 12h11M9 18h11" />
+          <path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2" />
+        }
+        @case ('globe') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+        }
+        @case ('key') {
+          <circle cx="8" cy="15" r="4" />
+          <path d="M11 12l9-9M16 7l3 3M14 9l2 2" />
+        }
+        @case ('plus') {
+          <path d="M12 5v14M5 12h14" />
+        }
+        @case ('minus') {
+          <path d="M5 12h14" />
+        }
+        @case ('close') {
+          <path d="M6 6l12 12M18 6L6 18" />
+        }
+        @case ('chevronLeft') {
+          <path d="M15 18l-6-6 6-6" />
+        }
+        @case ('chevronRight') {
+          <path d="M9 18l6-6-6-6" />
         }
         @case ('signOut') {
           <path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />

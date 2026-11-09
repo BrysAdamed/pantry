@@ -1,0 +1,153 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.members.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('members.intro') }}</p>
+  </div>
+
+  @if (household.error() && !household.hasValue()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('members.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="household.reload()">{{ t('members.retry') }}</button>
+    </div>
+  } @else if (household.hasValue()) {
+    <div class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card">
+      <ul class="grid" data-testid="members">
+        @for (member of members(); track member.id) {
+          <li
+            class="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border py-2.5 first:border-t-0 md:grid-cols-[44px_minmax(0,1fr)_auto_minmax(44px,auto)]"
+            data-testid="member"
+          >
+            <span
+              class="grid size-10 place-items-center rounded-full border-2 border-outline bg-secondary font-display font-extrabold md:size-11"
+              aria-hidden="true"
+              >{{ member.name.charAt(0) }}</span
+            >
+
+            <div class="grid min-w-0 justify-items-start gap-1">
+              @if (editingId() === member.id) {
+                <input
+                  #nameInput
+                  class="h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 font-extrabold"
+                  [value]="member.name"
+                  [maxLength]="nameMaxLength"
+                  [attr.aria-label]="t('members.nameLabel')"
+                  (keydown.enter)="rename(member, nameInput.value)"
+                  (keydown.escape)="editingId.set(null)"
+                  (blur)="rename(member, nameInput.value)"
+                />
+              } @else {
+                <button
+                  type="button"
+                  class="max-w-full truncate rounded-chip text-left font-extrabold hover:underline"
+                  [attr.aria-label]="t('members.rename', { name: member.name })"
+                  (click)="editingId.set(member.id)"
+                >
+                  {{ member.name }}
+                </button>
+              }
+              @switch (member.account) {
+                @case ('admin') {
+                  <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-success bg-success-surface text-success">{{ t('members.account.admin') }}</span>
+                }
+                @case ('user') {
+                  <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-success bg-success-surface text-success">{{ t('members.account.user') }}</span>
+                }
+                @default {
+                  <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-border text-muted-foreground">{{ t('members.account.none') }}</span>
+                }
+              }
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button
+                hlmBtn
+                variant="outline"
+                size="icon-sm"
+                type="button"
+                [disabled]="member.portionFactor <= bounds.min"
+                [attr.aria-label]="t('members.less', { name: member.name })"
+                (click)="step(member.id, -1)"
+              >
+                <app-icon name="minus" class="size-4" />
+              </button>
+              <output
+                class="min-w-11 text-center font-display text-lg font-extrabold tabular-nums"
+                [attr.aria-label]="t('members.portionFactor', { name: member.name })"
+                data-testid="portion-factor"
+                >{{ member.portionFactor | number: factorFormat : language() }}</output
+              >
+              <button
+                hlmBtn
+                variant="outline"
+                size="icon-sm"
+                type="button"
+                [disabled]="member.portionFactor >= bounds.max"
+                [attr.aria-label]="t('members.more', { name: member.name })"
+                (click)="step(member.id, 1)"
+              >
+                <app-icon name="plus" class="size-4" />
+              </button>
+            </div>
+
+            <div class="col-start-2 col-end-4 flex flex-wrap items-center gap-2 empty:hidden md:col-auto md:justify-self-end">
+              @if (!member.account) {
+                @if (deletingId() === member.id) {
+                  <span class="text-sm font-bold">{{ t('members.confirmDelete', { name: member.name }) }}</span>
+                  <button hlmBtn variant="ghost" size="sm" type="button" (click)="deletingId.set(null)">{{ t('members.cancel') }}</button>
+                  <button hlmBtn variant="destructive" size="sm" type="button" (click)="delete(member)">{{ t('members.confirm') }}</button>
+                } @else {
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [attr.aria-label]="t('members.delete', { name: member.name })"
+                    (click)="deletingId.set(member.id)"
+                  >
+                    <app-icon name="close" class="size-4" />
+                  </button>
+                }
+              }
+            </div>
+          </li>
+        }
+      </ul>
+
+      <div class="flex items-center justify-between border-t-2 border-dashed border-border pt-2.5 font-bold" aria-live="polite">
+        <span>{{ t('members.householdServing') }}</span>
+        <b class="font-display text-[22px] tabular-nums" data-testid="household-serving">{{
+          householdServing() | number: factorFormat : language()
+        }}</b>
+      </div>
+
+      <form class="flex gap-2" (submit)="add($event)">
+        <input
+          class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3"
+          [value]="newName()"
+          [maxLength]="nameMaxLength"
+          [placeholder]="t('members.newName')"
+          [attr.aria-label]="t('members.newName')"
+          (input)="newName.set($any($event.target).value)"
+        />
+        <button hlmBtn variant="outline" type="submit" [disabled]="!canAdd() || adding()">
+          <app-icon name="plus" class="size-4" />
+          {{ t('members.add') }}
+        </button>
+      </form>
+
+      <p class="text-xs text-muted-foreground">
+        {{
+          t('members.bounds', {
+            min: (bounds.min | number: factorFormat : language()),
+            max: (bounds.max | number: factorFormat : language()),
+            step: (bounds.step | number: factorFormat : language())
+          })
+        }}
+      </p>
+    </div>
+
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('members.saveFailed') }}</p>
+    }
+  }
+</ng-container>

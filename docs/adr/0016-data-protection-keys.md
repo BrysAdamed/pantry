@@ -1,4 +1,4 @@
-# 0015 Data Protection keys in Postgres
+# 0016 Data Protection keys in Postgres
 
 **Status:** Accepted, 2026-11-09
 

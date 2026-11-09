@@ -18,4 +18,5 @@ Short records of decisions that shape the project. Format: context, decision, co
 | [0012](0012-module-persistence.md) | Schema per module, migrations on startup | Accepted |
 | [0013](0013-visual-direction-and-tokens.md) | Konfitura visual direction, `light-dark()` tokens, system theme with override | Accepted |
 | [0014](0014-spa-authentication.md) | SPA authentication: Identity passkeys over JSON, cookie session, antiforgery header | Accepted |
-| [0015](0015-data-protection-keys.md) | Data Protection keys in Postgres, so sessions survive container recreation | Accepted |
+| [0015](0015-cross-module-transactions.md) | Cross-module writes share the caller's transaction | Accepted |
+| [0016](0016-data-protection-keys.md) | Data Protection keys in Postgres, so sessions survive container recreation | Accepted |

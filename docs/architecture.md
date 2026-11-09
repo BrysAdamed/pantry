@@ -50,6 +50,8 @@ Rules:
 
 See [ADR 0012](adr/0012-module-persistence.md). A module registers its context with `services.AddModuleDbContext<CatalogDbContext>("catalog")` and sets `HasDefaultSchema("catalog")` in `OnModelCreating`. Pending migrations of all registered modules run on startup.
 
+A write that spans two modules and must be atomic shares the caller's transaction ([ADR 0015](adr/0015-cross-module-transactions.md)): the contract method takes the caller's `DbTransaction`, and the callee joins it with `Database.JoinTransactionAsync` on a context created for that call. First run uses it to create the admin and the admin's member together.
+
 Add a migration (the `dotnet-ef` tool is pinned in `dotnet-tools.json`, run `dotnet tool restore` once):
 
 ```bash
@@ -58,7 +60,7 @@ dotnet ef migrations add <Name> --project src/Pantry.Api --context CatalogDbCont
 
 ## Authentication
 
-See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only; the session is an HttpOnly cookie. Every `/api` endpoint requires a signed-in user; opt out with `.AllowAnonymous()`. Unsafe `/api` requests need the `X-XSRF-TOKEN` header, which Angular's `HttpClient` sends from the `XSRF-TOKEN` cookie. The SPA gets a fresh anonymous token from `GET /api/antiforgery` before signing in. Data Protection keys (cookie encryption) live in the `data_protection` schema ([ADR 0015](adr/0015-data-protection-keys.md)). Passkey relying party ID and origins come from `Identity:Passkeys` (`appsettings.Development.json` for dev, `PASSKEY_*` in `.env` for Docker).
+See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only; the session is an HttpOnly cookie. Every `/api` endpoint requires a signed-in user; opt out with `.AllowAnonymous()`. Unsafe `/api` requests need the `X-XSRF-TOKEN` header, which Angular's `HttpClient` sends from the `XSRF-TOKEN` cookie. The SPA gets a fresh anonymous token from `GET /api/antiforgery` before signing in. Data Protection keys (cookie encryption) live in the `data_protection` schema ([ADR 0016](adr/0016-data-protection-keys.md)). Passkey relying party ID and origins come from `Identity:Passkeys` (`appsettings.Development.json` for dev, `PASSKEY_*` in `.env` for Docker).
 
 ## Frontend
 
@@ -68,7 +70,7 @@ See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only
 - Feature folders mirror backend modules: `src/app/<feature>/`. App-wide services live in `src/app/core/`.
 - The shell (`src/app/shell/`) frames every screen: an icon rail from the `md` breakpoint (768px) up, a header with sync state and avatar plus bottom tabs below it. Each destination (`planner`, `recipes`, `shopping`, `household`) is a lazy route that loads `src/app/<feature>/<feature>.routes.ts`; until its epic lands, that file shows the feature's empty state.
 - Menus and popovers use Angular CDK overlays (ADR 0009) with a focus trap and Escape to close.
-- i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it).
+- i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it). Numbers and dates use Angular's locale pipes with the UI language as the locale (`number: '1.0-2' : language()`); locale data for `pl` is registered in `provideI18n`.
 - PWA: `@angular/service-worker`. Offline writes (shopping lists only) queue in IndexedDB.
 
 ## Development
