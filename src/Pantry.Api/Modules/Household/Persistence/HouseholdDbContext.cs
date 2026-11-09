@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Pantry.Api.Modules.Household.Domain;
 
 namespace Pantry.Api.Modules.Household.Persistence;
@@ -6,6 +7,9 @@ namespace Pantry.Api.Modules.Household.Persistence;
 public sealed class HouseholdDbContext(DbContextOptions<HouseholdDbContext> options) : DbContext(options)
 {
     public const string Schema = "household";
+    public const string DislikeIngredientIndex = "ix_dislikes_ingredient_id";
+
+    private const int DislikeKindMaxLength = 16;
 
     public DbSet<Domain.Household> Households => Set<Domain.Household>();
 
@@ -14,6 +18,11 @@ public sealed class HouseholdDbContext(DbContextOptions<HouseholdDbContext> opti
     public DbSet<MealSlot> MealSlots => Set<MealSlot>();
 
     public DbSet<PlanningRule> PlanningRules => Set<PlanningRule>();
+
+    public DbSet<Dislike> Dislikes => Set<Dislike>();
+
+    public static bool IsDuplicateDislike(DbUpdateException exception) =>
+        exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: DislikeIngredientIndex };
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -35,6 +44,36 @@ public sealed class HouseholdDbContext(DbContextOptions<HouseholdDbContext> opti
             rule.ToTable("planning_rules");
             rule.Property(r => r.Id).ValueGeneratedNever();
             rule.Property(r => r.Text).HasMaxLength(PlanningRule.TextMaxLength);
+        });
+
+        builder.Entity<Dislike>(dislike =>
+        {
+            dislike.ToTable("dislikes", table =>
+            {
+                table.HasCheckConstraint("ck_dislikes_kind", "kind IN ('never', 'avoid')");
+                table.HasCheckConstraint("ck_dislikes_reason", "reason IS NULL OR kind = 'never'");
+            });
+            dislike.Property(d => d.Id).ValueGeneratedNever();
+            dislike.Property(d => d.Kind)
+                .HasConversion(kind => kind == DislikeKind.Never ? "never" : "avoid", code => code == "never" ? DislikeKind.Never : DislikeKind.Avoid)
+                .HasMaxLength(DislikeKindMaxLength);
+            dislike.Property(d => d.Reason).HasMaxLength(Dislike.ReasonMaxLength);
+            dislike.HasIndex(d => d.IngredientId).IsUnique().HasDatabaseName(DislikeIngredientIndex);
+        });
+
+        builder.Entity<Dislike>(dislike =>
+        {
+            dislike.ToTable("dislikes", table =>
+            {
+                table.HasCheckConstraint("ck_dislikes_kind", "kind IN ('never', 'avoid')");
+                table.HasCheckConstraint("ck_dislikes_reason", "reason IS NULL OR kind = 'never'");
+            });
+            dislike.Property(d => d.Id).ValueGeneratedNever();
+            dislike.Property(d => d.Kind)
+                .HasConversion(kind => kind == DislikeKind.Never ? "never" : "avoid", code => code == "never" ? DislikeKind.Never : DislikeKind.Avoid)
+                .HasMaxLength(DislikeKindMaxLength);
+            dislike.Property(d => d.Reason).HasMaxLength(Dislike.ReasonMaxLength);
+            dislike.HasIndex(d => d.IngredientId).IsUnique().HasDatabaseName(DislikeIngredientIndex);
         });
 
         builder.Entity<Member>(member =>

@@ -254,6 +254,36 @@
       "retry": "Spróbuj ponownie",
       "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
     },
+    "dislikes": {
+      "intro": "Dotyczy całego domu. Agent nie proponuje dań ze składnikami z listy „nigdy”, a te z „unikamy” wybiera rzadko i oznacza.",
+      "never": {
+        "title": "Nigdy",
+        "description": "Alergie i twarde „nie”. Przepisy z tymi składnikami mają czerwone ostrzeżenie.",
+        "empty": "Na razie nic tu nie ma.",
+        "add": "Dodaj do „nigdy”",
+        "placeholder": "Składnik, np. orzeszki ziemne",
+        "moveTo": "Przenieś do „nigdy”: {{name}}"
+      },
+      "avoid": {
+        "title": "Unikamy",
+        "description": "Lepiej nie, ale w razie czego da się zjeść.",
+        "empty": "Na razie nic tu nie ma.",
+        "add": "Dodaj do „unikamy”",
+        "placeholder": "Składnik, np. brukselka",
+        "moveTo": "Przenieś do „unikamy”: {{name}}"
+      },
+      "reason": "Powód",
+      "reasonPlaceholder": "Powód, np. alergia",
+      "add": "Dodaj",
+      "remove": "Usuń: {{name}}",
+      "changeIngredient": "Wybierz inny składnik",
+      "newIngredient": "nowy",
+      "newIngredientHint": "Nowy składnik, trafi do katalogu jako „do sprawdzenia”",
+      "alreadyListed": "Ten składnik już jest na liście. Lista jest znowu aktualna.",
+      "loadFailed": "Nie udało się wczytać listy „Nie jemy”. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
     "account": {
       "intro": "Te ustawienia dotyczą tylko Ciebie, na każdym urządzeniu, na którym się logujesz.",
       "language": "Język interfejsu",

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { SignInMethod } from '../identity/identity-api';
@@ -42,6 +42,35 @@ export interface PlanningRule {
   text: string;
   position: number;
   isEnabled: boolean;
+}
+
+export const DISLIKES_URL = '/api/household/dislikes';
+export const DISLIKE_REASON_MAX_LENGTH = 100;
+
+/** `never`: an allergy or a hard no; `avoid`: better not. Never comes first wherever both are shown. */
+export const DISLIKE_KINDS = ['never', 'avoid'] as const;
+
+export type DislikeKind = (typeof DISLIKE_KINDS)[number];
+
+/** A household dislike of a catalog ingredient; only a `never` dislike has a reason. */
+export interface Dislike {
+  id: string;
+  ingredientId: string;
+  ingredientName: string;
+  kind: DislikeKind;
+  reason: string | null;
+}
+
+export interface DislikeChange {
+  kind: DislikeKind;
+  reason: string | null;
+}
+
+/** The id of the dislike the ingredient already has, from a 409 of `addDislike`; null for any other error. */
+export function existingDislikeOf(error: unknown): string | null {
+  return error instanceof HttpErrorResponse && error.status === HttpStatusCode.Conflict && typeof error.error?.dislikeId === 'string'
+    ? error.error.dislikeId
+    : null;
 }
 
 export const CONTENT_LANGUAGE_URL = '/api/household/content-language';
@@ -113,6 +142,19 @@ export class HouseholdApi {
 
   deletePlanningRule(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${PLANNING_RULES_URL}/${id}`));
+  }
+
+  /** Answers 409 when the ingredient already has a dislike (`existingDislikeOf`). */
+  addDislike(ingredientId: string, change: DislikeChange): Promise<Dislike> {
+    return firstValueFrom(this.http.post<Dislike>(DISLIKES_URL, { ingredientId, ...change }));
+  }
+
+  changeDislike(id: string, change: DislikeChange): Promise<Dislike> {
+    return firstValueFrom(this.http.put<Dislike>(`${DISLIKES_URL}/${id}`, change));
+  }
+
+  deleteDislike(id: string): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${DISLIKES_URL}/${id}`));
   }
 
   setContentLanguage(contentLanguage: ContentLanguage): Promise<ContentLanguageSetting> {
