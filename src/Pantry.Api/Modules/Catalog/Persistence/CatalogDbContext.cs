@@ -14,6 +14,13 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
 
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
 
+    /// <summary>
+    /// Locks the rows of the ingredients until the current transaction ends, always in the same order, so merges and
+    /// deletes of the same ingredients run one after another without deadlocking.
+    /// </summary>
+    public Task LockIngredientsAsync(Guid[] ids, CancellationToken cancellationToken) =>
+        Database.ExecuteSqlAsync($"SELECT 1 FROM catalog.ingredients WHERE id = ANY({ids}) ORDER BY id FOR UPDATE", cancellationToken);
+
     public static bool IsDuplicateName(DbUpdateException exception) =>
         exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: NameKeyIndex };
 

@@ -203,6 +203,43 @@ public sealed class IngredientConversionsTests(PantryApiFactory factory) : IAsyn
         Assert.Equal(130m, ingredient!.Conversions[Unit.Glass]);
     }
 
+    [Fact]
+    public async Task Merge_copies_the_conversions_the_target_lacks_when_base_units_match()
+    {
+        // Arrange
+        var garlic = await CreateAsync("Czosnek", "g", ("clove", 5m));
+        var youngGarlic = await CreateAsync("Czosnek młody", "g", ("clove", 8m), ("piece", 60m));
+
+        // Act
+        var preview = await _client.GetFromJsonAsync<JsonElement>($"{IngredientsUrl}/{garlic}/merge-preview?sourceId={youngGarlic}");
+        var response = await _client.PostAsJsonAsync($"{IngredientsUrl}/{garlic}/merge", new { sourceId = youngGarlic });
+
+        // Assert
+        Assert.Equal([("piece", 60m)], Conversions(preview, "conversionsToAdd"));
+        Assert.Equal([("clove", 8m)], Conversions(preview, "conversionsSkipped"));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var merged = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal([("piece", 60m), ("clove", 5m)], Conversions(merged));
+    }
+
+    [Fact]
+    public async Task Merge_skips_all_conversions_when_base_units_differ()
+    {
+        // Arrange
+        var garlic = await CreateAsync("Czosnek", "piece", ("clove", 0.1m));
+        var groundGarlic = await CreateAsync("Czosnek granulowany", "g", ("tsp", 3m));
+
+        // Act
+        var preview = await _client.GetFromJsonAsync<JsonElement>($"{IngredientsUrl}/{garlic}/merge-preview?sourceId={groundGarlic}");
+        var response = await _client.PostAsJsonAsync($"{IngredientsUrl}/{garlic}/merge", new { sourceId = groundGarlic });
+
+        // Assert
+        Assert.Empty(Conversions(preview, "conversionsToAdd"));
+        Assert.Equal([("tsp", 3m)], Conversions(preview, "conversionsSkipped"));
+        var merged = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal([("clove", 0.1m)], Conversions(merged));
+    }
+
     private async Task<Guid> CreateAsync(string name, string baseUnit, params (string Unit, decimal Amount)[] conversions)
     {
         var response = await _client.PostAsJsonAsync(IngredientsUrl, new
@@ -218,8 +255,8 @@ public sealed class IngredientConversionsTests(PantryApiFactory factory) : IAsyn
     private Task<HttpResponseMessage> UpdateAsync(Guid id, params object[] conversions) =>
         _client.PutAsJsonAsync($"{IngredientsUrl}/{id}", new { name = "Czosnek", category = "other", isStaple = false, conversions });
 
-    private static List<(string?, decimal)> Conversions(JsonElement ingredient) =>
-        ingredient.GetProperty("conversions").EnumerateArray()
+    private static List<(string?, decimal)> Conversions(JsonElement element, string property = "conversions") =>
+        element.GetProperty(property).EnumerateArray()
             .Select(c => (c.GetProperty("unit").GetString(), c.GetProperty("amount").GetDecimal()))
             .ToList();
 }

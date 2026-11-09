@@ -10,13 +10,25 @@ public sealed class TestModuleDbContext(DbContextOptions<TestModuleDbContext> op
 
     public DbSet<TestItem> TestItems => Set<TestItem>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.HasDefaultSchema(Schema);
+    public DbSet<TestIngredientReference> IngredientReferences => Set<TestIngredientReference>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema(Schema);
+        modelBuilder.Entity<TestIngredientReference>().HasIndex(r => r.IngredientId);
+    }
 }
 
 public sealed class TestItem
 {
     public Guid Id { get; init; }
     public required string DisplayName { get; set; }
+}
+
+public sealed class TestIngredientReference
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid IngredientId { get; set; }
 }
 
 public sealed class TestModuleDbContextDesignTimeFactory : IDesignTimeDbContextFactory<TestModuleDbContext>

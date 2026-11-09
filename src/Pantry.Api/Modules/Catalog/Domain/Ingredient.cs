@@ -196,4 +196,20 @@ public sealed class Ingredient
     }
 
     public IReadOnlyDictionary<Unit, decimal> ConversionAmounts() => _conversions.ToDictionary(c => c.Unit, c => c.Amount);
+
+    /// <summary>
+    /// Takes over what <paramref name="merge"/> planned to move from the source, which must already be deleted, so its
+    /// names are free, and confirms this ingredient. Name, base unit, category, staple flag and own conversions stay as they are.
+    /// </summary>
+    public void Absorb(IngredientMerge merge)
+    {
+        if (merge.TargetId != Id)
+        {
+            throw new ArgumentException("The merge was planned for another ingredient.", nameof(merge));
+        }
+
+        SetNames(Name, [.. Aliases, .. merge.AliasesToAdd]);
+        SetConversions([.. _conversions.Select(c => (c.Unit, c.Amount)), .. merge.ConversionsToAdd]);
+        Confirm();
+    }
 }
