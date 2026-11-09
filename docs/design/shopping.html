@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zakupy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* PAN-15 shopping prototype. Tokens mirror src/Pantry.Web/src/styles.css (ADR 0013). */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff4e6, #1b141e);
+  --foreground: light-dark(#2a1b2d, #fbefe3);
+  --card: light-dark(#ffffff, #251c29);
+  --secondary: light-dark(#fde6cc, #322536);
+  --muted-foreground: light-dark(#6e5b70, #c2aec3);
+  --border: light-dark(#f0d9bf, #3d2e42);
+  --outline: light-dark(#2a1b2d, #7a6280);
+  --primary: light-dark(#6e2a5e, #e59cd0);
+  --primary-foreground: light-dark(#fff4e6, #1b141e);
+  --accent: #f4a259;
+  --accent-foreground: light-dark(#2a1b2d, #1b141e);
+  --agent: light-dark(#1c6964, #6fd0c6);
+  --agent-surface: light-dark(#ddf1ee, #173a37);
+  --success: light-dark(#28724a, #7dd3a0);
+  --success-surface: light-dark(#e2f2e7, #17311f);
+  --warning: light-dark(#a8520f, #f4a259);
+  --warning-surface: light-dark(#fcead6, #3a2814);
+  --danger: light-dark(#b8342a, #ff8a7a);
+  --danger-surface: light-dark(#fbe3df, #3d1c19);
+  --info: var(--agent);
+  --info-surface: var(--agent-surface);
+  --page: light-dark(#f6efe6, #141113);
+
+  --radius-chip: 8px; --radius-control: 12px; --radius-card: 16px;
+  --shadow-control: 2px 2px 0 var(--outline);
+  --shadow-card: 3px 3px 0 var(--outline);
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.i.sm { width: 14px; height: 14px; }
+svg.i.lg { width: 22px; height: 22px; }
+
+.wrap { max-width: 1340px; margin: 0 auto; padding: 20px 16px 64px; display: grid; gap: 28px; }
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 700; }
+.pagebar h1 { font-size: clamp(24px, 3vw, 32px); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
+.ctl { display: grid; gap: 4px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-control); background: var(--secondary); }
+.seg button { border: 0; background: none; padding: 7px 13px; min-height: 36px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow-control); outline: 2px solid var(--outline); outline-offset: -2px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); font-weight: 700; font-size: 14px; white-space: nowrap; transition: translate .08s, box-shadow .08s; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.btn.accent { background: var(--accent); color: var(--accent-foreground); }
+.btn.agent { background: var(--agent); color: var(--card); }
+.btn.ghost { border-color: transparent; box-shadow: none; background: none; }
+.btn.icon { width: 44px; padding: 0; }
+.btn.icon.sm { width: 36px; }
+.btn:active { translate: 1px 1px; box-shadow: none; }
+.btn:disabled { opacity: .5; pointer-events: none; }
+
+.frame-label { margin-bottom: 10px; }
+.scroller { overflow-x: auto; border-radius: 20px; border: 2px solid var(--outline); box-shadow: var(--shadow-card); }
+.desk { min-width: 1200px; height: 820px; display: grid; grid-template-columns: 84px 300px minmax(0, 1fr); background: var(--background); }
+.side { background: var(--card); border-right: 2px solid var(--outline); padding: 18px 8px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.mark { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--accent); color: var(--accent-foreground); border-radius: 10px; }
+.nav { display: grid; gap: 4px; }
+.nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; min-height: 56px; width: 64px; font-size: 11px; border-radius: var(--radius-control); color: var(--muted-foreground); text-decoration: none; font-weight: 700; border: 2px solid transparent; }
+.nav a.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); }
+
+.listcol { border-right: 2px solid var(--outline); padding: 20px 14px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+.listcol h2 { font-size: 28px; }
+.group { display: grid; gap: 8px; }
+.lbtn { width: 100%; text-align: left; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px; border-radius: var(--radius-control); border: 2px solid var(--outline); background: var(--card); box-shadow: var(--shadow-control); }
+.lbtn[aria-current="true"] { outline: 3px solid var(--primary); outline-offset: 2px; }
+.lbtn .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; border: 2px solid var(--outline); background: var(--secondary); }
+.lbtn .nm { font-weight: 800; font-size: 14px; line-height: 1.2; }
+.lbtn .sub { font-size: 12px; color: var(--muted-foreground); }
+.count { font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted-foreground); }
+.lbtn.dashed { border-style: dashed; box-shadow: none; background: none; color: var(--primary); grid-template-columns: 36px 1fr; }
+.lbtn.dashed .ic { border-style: dashed; background: none; }
+.lbtn.agentish .ic { background: var(--agent-surface); color: var(--agent); border-color: var(--agent); }
+
+.pane { overflow-y: auto; padding: 24px 28px 40px; display: grid; gap: 18px; align-content: start; min-width: 0; position: relative; }
+.phead2 { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.phead2 h2 { font-size: 32px; }
+.sub2 { color: var(--muted-foreground); font-size: 14px; margin-top: 2px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.card { background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.card h3 { font-size: 20px; }
+.chip { border: 2px solid var(--border); background: var(--card); padding: 5px 12px; min-height: 36px; font-size: 13px; font-weight: 700; color: var(--muted-foreground); border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { color: var(--accent-foreground); background: var(--accent); border-color: var(--outline); }
+.field { display: grid; gap: 6px; }
+.field > span { font-size: 13px; font-weight: 700; }
+.input { border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 8px 12px; min-height: 44px; }
+.stat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat div { border: 2px solid var(--border); border-radius: var(--radius-control); padding: 10px 12px; display: grid; gap: 2px; }
+.stat b { font-family: var(--font-display); font-size: 26px; line-height: 1; }
+.stat span { font-size: 12px; color: var(--muted-foreground); }
+.note { font-size: 12px; color: var(--muted-foreground); }
+.toolbar { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+.toggle { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 700; color: var(--muted-foreground); border: 0; background: none; min-height: 36px; padding: 0 4px; }
+.toggle .sw { width: 36px; height: 22px; border-radius: 999px; border: 2px solid var(--outline); background: var(--secondary); position: relative; }
+.toggle .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--outline); transition: left .12s; }
+.toggle[aria-pressed="true"] .sw { background: var(--accent); }
+.toggle[aria-pressed="true"] .sw::after { left: 16px; }
+
+.cat h4 { margin: 4px 0 6px 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-foreground); font-family: var(--font-sans); }
+.items { background: var(--card); border-radius: var(--radius-card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); overflow: hidden; }
+.rrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) 150px 40px; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--border); min-height: 60px; }
+.rrow:first-child { border-top: 0; }
+.homebtn { width: 40px; height: 40px; border-radius: var(--radius-control); border: 2px solid var(--border); background: none; display: grid; place-items: center; color: var(--muted-foreground); }
+.homebtn[aria-pressed="true"] { border-color: var(--outline); background: var(--info-surface); color: var(--info); }
+.rrow .nm { font-weight: 700; }
+.rrow .src { font-size: 12px; color: var(--muted-foreground); }
+.rrow .warn { font-size: 12px; color: var(--warning); font-weight: 700; display: flex; gap: 4px; align-items: center; }
+.qty { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+.qty input { width: 76px; text-align: right; min-height: 40px; padding: 6px 8px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.qty span { min-width: 34px; font-size: 13px; color: var(--muted-foreground); font-weight: 700; }
+.rrow.home .nm { text-decoration: line-through; color: var(--muted-foreground); }
+.rrow.home .qty input { color: var(--muted-foreground); }
+.rrow.staple { background: color-mix(in srgb, var(--secondary) 45%, transparent); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
+.b-home { color: var(--info); background: var(--info-surface); }
+.b-staple { color: var(--muted-foreground); border-color: var(--border); }
+.b-ok { color: var(--success); background: var(--success-surface); }
+.b-warn { color: var(--warning); background: var(--warning-surface); }
+.b-info { color: var(--info); background: var(--info-surface); }
+.b-miss { color: var(--danger); background: var(--danger-surface); }
+.addrow { display: flex; gap: 8px; }
+.addrow .input { flex: 1; }
+
+.olist { display: grid; gap: 8px; }
+.ocheck { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--radius-control); border: 2px solid var(--border); background: var(--card); text-align: left; width: 100%; }
+.ocheck[aria-pressed="true"] { border-color: var(--outline); box-shadow: var(--shadow-control); }
+.box { width: 26px; height: 26px; border-radius: var(--radius-chip); border: 2px solid var(--outline); display: grid; place-items: center; color: transparent; }
+.ocheck[aria-pressed="true"] .box { background: var(--primary); color: var(--primary-foreground); }
+.merged { list-style: none; margin: 0; padding: 0; display: grid; }
+.merged li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 8px 2px; border-top: 1px solid var(--border); }
+.merged li:first-child { border-top: 0; }
+.merged .mem { font-size: 12px; color: var(--muted-foreground); }
+.merged .q { font-weight: 800; font-variant-numeric: tabular-nums; }
+.agentcard { background: var(--agent-surface); border: 2px dashed var(--agent); border-radius: var(--radius-card); padding: 16px; display: grid; gap: 10px; }
+.agentcard h3 { color: var(--agent); font-size: 20px; display: flex; gap: 8px; align-items: center; }
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.steps3 div { border-radius: var(--radius-control); border: 2px solid var(--border); padding: 8px 10px; font-size: 13px; color: var(--muted-foreground); display: flex; gap: 8px; align-items: center; }
+.steps3 div.on { border-color: var(--agent); color: var(--foreground); background: var(--card); font-weight: 700; }
+.steps3 div.done { color: var(--success); border-color: var(--success); }
+.code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-chip); padding: 8px 10px; }
+
+.rep { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 10px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--border); }
+.rep:first-child { border-top: 0; }
+.rep .nm { font-weight: 700; }
+.rep .det { font-size: 13px; color: var(--muted-foreground); }
+.rep .det b { color: var(--foreground); }
+.rep .res { justify-self: end; display: grid; justify-items: end; gap: 4px; }
+.rep .res .badge { font-size: 12px; padding: 4px 10px; }
+.filterchips { display: flex; gap: 6px; flex-wrap: wrap; }
+.filterchips .chip .n { font-variant-numeric: tabular-nums; }
+.c-ok { color: var(--success); } .c-warn { color: var(--warning); } .c-info { color: var(--info); } .c-miss { color: var(--danger); }
+.callout { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-control); border: 2px solid var(--danger); background: var(--danger-surface); font-size: 14px; }
+.callout > svg { color: var(--danger); margin-top: 2px; }
+.empty { text-align: center; color: var(--muted-foreground); padding: 40px 8px; display: grid; gap: 10px; justify-items: center; }
+
+/* Phone */
+.duo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; }
+.phone { width: 390px; max-width: 100%; height: 820px; border-radius: 44px; border: 10px solid #1b1714; background: var(--background); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px -25px rgb(0 0 0 / .45); }
+.statusbar { height: 40px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-size: 13px; font-weight: 700; }
+.shead { padding: 4px 16px 12px; display: grid; gap: 10px; flex: none; }
+.shead .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.shead h2 { font-size: 28px; }
+.sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 6px 10px; border-radius: var(--radius-control); border: 2px solid currentColor; background: var(--card); min-height: 36px; }
+.sync.online { color: var(--success); }
+.sync.offline { color: var(--warning); }
+.sync.pending { color: var(--info); }
+.sync .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.sync.pending svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+.prog { display: grid; gap: 6px; }
+.prog .bar { height: 14px; border-radius: var(--radius-control); background: var(--secondary); overflow: hidden; border: 2px solid var(--outline); }
+.prog .bar i { display: block; height: 100%; background: var(--primary); transition: width .3s; }
+.prog .lbl { font-size: 13px; color: var(--muted-foreground); display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.lchips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.lchips .chip { flex: none; }
+.slist { flex: 1; overflow-y: auto; padding: 0 12px 170px; display: grid; gap: 14px; align-content: start; }
+.sitem { width: 100%; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; min-height: 64px; border: 0; background: transparent; text-align: left; border-top: 1px solid var(--border); }
+.sitem:first-child { border-top: 0; }
+.sitem .box { width: 32px; height: 32px; }
+.sitem .nm { font-weight: 700; font-size: 17px; display: block; line-height: 1.25; }
+.sitem .src { font-size: 12px; color: var(--muted-foreground); }
+.sitem .qty2 { font-weight: 800; font-variant-numeric: tabular-nums; font-size: 15px; }
+.sitem.bought .box { background: var(--success); border-color: var(--success); color: var(--card); }
+.sitem.bought .nm { text-decoration: line-through; color: var(--muted-foreground); font-weight: 600; }
+.sitem.bought .qty2 { color: var(--muted-foreground); }
+.missgroup .items { border-color: var(--danger); box-shadow: 3px 3px 0 var(--danger); }
+.missgroup h4 { color: var(--danger); }
+.thumbbar { position: absolute; left: 0; right: 0; bottom: 76px; z-index: 5; padding: 10px 12px; display: flex; gap: 8px; background: linear-gradient(transparent, var(--background) 35%); }
+.thumbbar .btn { flex: 1; min-height: 52px; }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; height: 76px; padding-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border-top: 2px solid var(--outline); }
+.tabbar a { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-decoration: none; }
+.tabbar a.on { color: var(--primary); }
+.scrim { position: absolute; inset: 0; z-index: 8; background: rgb(20 12 22 / .45); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; background: var(--card); border-top: 2px solid var(--outline); border-radius: 24px 24px 0 0; padding: 8px 18px 26px; display: grid; gap: 14px; animation: up .18s ease-out; }
+@keyframes up { from { translate: 0 30px; opacity: 0; } }
+.handle { width: 44px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto; }
+.toast { position: absolute; left: 50%; bottom: 150px; translate: -50% 0; z-index: 10; background: var(--foreground); color: var(--background); border-radius: var(--radius-control); padding: 10px 16px; font-weight: 700; font-size: 14px; white-space: nowrap; }
+.phone .rrow { grid-template-columns: 40px minmax(0, 1fr) 96px 32px; gap: 6px; padding: 8px; }
+.phone .qty input { width: 56px; }
+.phone .qty span { min-width: 22px; }
+.phone .pane { padding: 0 12px 110px; overflow-y: auto; flex: 1; }
+.phone .phead2 h2 { font-size: 24px; }
+.ptabs { display: flex; gap: 6px; padding: 0 16px 10px; }
+
+.notes { display: grid; gap: 16px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; min-width: 0; }
+.notes h3 { font-size: 22px; }
+.notes .lg { display: grid; gap: 8px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.notes li { max-width: 68ch; }
+.notes p { color: var(--muted-foreground); }
+
+@media (max-width: 900px) { .duo { grid-template-columns: minmax(0, 1fr); } .phone { margin: 0 auto; } }
+@media (max-width: 440px) { .phone { border-width: 6px; border-radius: 32px; height: 760px; } }
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pagebar">
+    <div>
+      <div class="label">PAN-15 · Spiżarnia</div>
+      <h1>Zakupy</h1>
+    </div>
+    <div class="switches">
+      <div class="ctl"><span class="label">Sieć na telefonie</span><div class="seg" id="net">
+        <button data-v="online">Online</button><button data-v="offline">Offline</button>
+      </div></div>
+      <div class="ctl"><span class="label">Motyw</span><div class="seg" id="theme">
+        <button data-v="system">System</button><button data-v="light">Jasny</button><button data-v="dark">Ciemny</button>
+      </div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="label frame-label">Listy, zamówienie i raport · komputer</div>
+    <div class="scroller">
+      <div class="desk">
+        <aside class="side">
+          <span class="mark" data-icon="jar" title="Spiżarnia"></span>
+          <nav class="nav">
+            <a href="#"><span data-icon="cal"></span>Plan</a>
+            <a href="#"><span data-icon="book"></span>Przepisy</a>
+            <a href="#" class="on"><span data-icon="cart"></span>Zakupy</a>
+            <a href="#"><span data-icon="home"></span>Dom</a>
+          </nav>
+        </aside>
+        <div class="listcol" id="listcol"></div>
+        <div class="pane" id="pane"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="duo">
+    <div>
+      <div class="label frame-label">Telefon · w sklepie i przegląd listy</div>
+      <div class="phone" id="phone">
+        <div class="statusbar"><span>17:42</span><span>62%</span></div>
+        <div id="pbody" style="display:flex;flex-direction:column;flex:1;min-height:0"></div>
+        <nav class="tabbar">
+          <a href="#"><span data-icon="cal"></span>Plan</a>
+          <a href="#"><span data-icon="book"></span>Przepisy</a>
+          <a href="#" class="on"><span data-icon="cart"></span>Zakupy</a>
+          <a href="#"><span data-icon="home"></span>Dom</a>
+        </nav>
+        <div id="psheet"></div>
+      </div>
+    </div>
+    <div class="notes">
+      <div>
+        <h3>Jak to działa</h3>
+        <p>Komputer i telefon pokazują te same listy. Przejdź przez całą ścieżkę: wygeneruj listę, przejrzyj ją, złóż zamówienie, symuluj agenta i zatwierdź raport, a potem dokup braki na telefonie w trybie offline.</p>
+      </div>
+      <div class="lg">
+        <div class="label">Generowanie i przegląd</div>
+        <ul>
+          <li>Lista powstaje z planu dla wybranych dni. Resztki nic nie dodają, a składniki podstawowe (sól, oliwa…) są ukryte, ale jeden przełącznik je pokazuje.</li>
+          <li>Ilości są sumowane w jednostkach bazowych. Gdy brakuje przelicznika, pozycja mówi to wprost zamiast liczyć na ślepo.</li>
+          <li>„Mam w domu” to przycisk z domkiem przy każdej pozycji. Taka pozycja zostaje na liście, ale nie trafia do zamówienia ani do sklepu.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Zamówienie i raport</div>
+        <ul>
+          <li>Zamówienie łączy kilka list w jedno dla agenta. Pobiera je przez MCP; w aplikacji widać tylko stan: przygotowane, u agenta, raport gotowy.</li>
+          <li>Pamięć produktów podpowiada agentowi, co było kupione ostatnio.</li>
+          <li>Raport ma cztery wyniki. Dodane, zmienione i zamienione po zatwierdzeniu są kupione. <b>Brakujące zostają otwarte</b> i wskakują na górę listy w sklepie.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">W sklepie</div>
+        <ul>
+          <li>Jeden kciuk: stuknięcie całego wiersza odhacza pozycję. Główne przyciski są na dole ekranu, nad paskiem kart.</li>
+          <li>Offline wszystko działa dalej. Wskaźnik pokazuje liczbę zmian czekających na wysłanie, a po powrocie sieci wysyła je sam.</li>
+          <li>Kupione spadają na dół grupy, a „Ukryj kupione” sprząta je z widoku.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const ICONS = {
+  jar: '<path d="M7 3h10M8 3v3l-2 3v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M6 12h12"/>',
+  cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', left: '<path d="M15 18l-6-6 6-6"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+  wifioff: '<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.7M19 13a10 10 0 0 0-2.3-1.6M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 10.7 5"/><circle cx="12" cy="20" r=".8"/>',
+  sync: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+  scale: '<path d="M12 3v18M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>',
+  swap: '<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/>',
+  bag: '<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  paw: '<circle cx="7" cy="9" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="17" cy="9" r="2"/><path d="M8 17c0-3 2-5 4-5s4 2 4 5a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/>',
+  drop: '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  wand: '<path d="M4 20L15 9M14 4v2M19 9h2M18 5l-1.5 1.5M10 5l1 1M18 13l1 1"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'
+};
+const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const hydrateIcons = root => root.querySelectorAll('[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon, el.classList.contains('sm') ? 'sm' : ''); });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = n => Number(n).toLocaleString('pl-PL', { maximumFractionDigits: 2 });
+const plural = (n, one, few, many) => n === 1 ? one : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? few : many);
+const CATS = ['Warzywa i owoce', 'Nabiał i jajka', 'Mięso i ryby', 'Suche i puszki', 'Przyprawy', 'Chemia', 'Zwierzaki', 'Inne'];
+
+let uid = 0;
+const I = (cat, name, qty, unit, src = [], extra = {}) => ({ id: 'i' + (++uid), cat, name, qty, unit, src, state: 'open', ...extra });
+const GENERATED_ITEMS = () => [
+  I('Warzywa i owoce', 'cebula', 2.5, 'szt.', ['Kurczak curry (wt)', 'Leczo (śr)']),
+  I('Warzywa i owoce', 'cukinia', 350, 'g', ['Leczo (śr)']),
+  I('Warzywa i owoce', 'papryka', 230, 'g', ['Leczo (śr)']),
+  I('Warzywa i owoce', 'ziemniaki', 1150, 'g', ['Łosoś (pt)', 'Pierogi (nd)']),
+  I('Warzywa i owoce', 'dynia', 600, 'g', ['Zupa krem z dyni (cz)']),
+  I('Warzywa i owoce', 'jabłka', 3, 'szt.', ['Owsianka (pn, śr)', 'Jabłko z masłem orzech. (wt)']),
+  I('Warzywa i owoce', 'czosnek', 3, 'ząbki', ['Kurczak curry (wt)', 'Gulasz (so)'], { warn: 'Plus 10 g z gulaszu: brak przelicznika, nie zsumowano' }),
+  I('Nabiał i jajka', 'mleko', 1.4, 'l', ['Owsianka (pn, śr)', 'Naleśniki (cz)']),
+  I('Nabiał i jajka', 'twaróg', 450, 'g', ['Naleśniki (cz)', 'Twarożek (wt)', 'Pierogi (nd)']),
+  I('Nabiał i jajka', 'jajka', 8, 'szt.', ['Jajecznica (wt, pt)', 'Naleśniki (cz)']),
+  I('Nabiał i jajka', 'jogurt naturalny', 400, 'g', ['Jogurt z granolą (pn, pt)']),
+  I('Mięso i ryby', 'pierś z kurczaka', 690, 'g', ['Kurczak curry (wt)']),
+  I('Mięso i ryby', 'łosoś', 345, 'g', ['Łosoś (pt)']),
+  I('Mięso i ryby', 'wołowina gulaszowa', 460, 'g', ['Gulasz (so)']),
+  I('Suche i puszki', 'ryż basmati', 160, 'g', ['Kurczak curry (wt)'], { state: 'home' }),
+  I('Suche i puszki', 'płatki owsiane', 230, 'g', ['Owsianka (pn, śr)'], { state: 'home' }),
+  I('Suche i puszki', 'mleczko kokosowe', 230, 'ml', ['Kurczak curry (wt)']),
+  I('Suche i puszki', 'mąka pszenna', 300, 'g', ['Naleśniki (cz)', 'Pierogi (nd)']),
+  I('Przyprawy', 'sól', 1, 'szczypta', [], { staple: true }),
+  I('Przyprawy', 'pieprz', 1, 'szczypta', [], { staple: true }),
+  I('Suche i puszki', 'oliwa', 45, 'ml', ['Łosoś (pt)'], { staple: true }),
+  I('Suche i puszki', 'cukier', 10, 'g', ['Naleśniki (cz)'], { staple: true }),
+  I('Przyprawy', 'cynamon', 1, 'łyżeczka', ['Owsianka (pn, śr)'], { staple: true })
+];
+const MEMORY = { mleko: 'ostatnio: mleko 2%, karton 1 l', 'pierś z kurczaka': 'ostatnio: filet, tacka ok. 500 g', 'łosoś': 'ostatnio: filet ze skórą', jajka: 'ostatnio: rozmiar L, 10 szt.', 'papier toaletowy': 'ostatnio: 3-warstwowy, 8 rolek', 'mleczko kokosowe': 'ostatnio: puszka 400 ml' };
+
+let lists = [
+  { id: 'drog', name: 'Drogeria', kind: 'general', icon: 'drop', items: [I('Chemia', 'pasta do zębów', 1, 'szt.'), I('Chemia', 'płyn do naczyń', 1, 'szt.'), I('Chemia', 'papier toaletowy', 8, 'rolek')] },
+  { id: 'zwierz', name: 'Zwierzaki', kind: 'general', icon: 'paw', items: [I('Zwierzaki', 'karma dla kota', 2, 'kg'), I('Zwierzaki', 'żwirek', 1, 'worek')] }
+];
+
+const state = {
+  view: 'generate', range: 'next', from: '2026-11-16', to: '2026-11-22', showStaples: false,
+  order: { lists: [], status: 'none', report: null, filter: null },
+  phone: 'shop', phoneList: 'gen', shopLists: null, hideBought: false,
+  net: 'online', pending: 0, syncing: false, sheet: false, toast: ''
+};
+
+const listById = id => lists.find(l => l.id === id);
+const visible = (l, staples) => l.items.filter(i => staples || !i.staple);
+const openCount = l => l.items.filter(i => !i.staple && i.state === 'open').length;
+
+function generate() {
+  lists = lists.filter(l => l.id !== 'gen');
+  lists.unshift({ id: 'gen', name: state.range === 'this' ? 'Tydzień 9–15 lis' : 'Tydzień 16–22 lis', kind: 'generated', icon: 'cal', items: GENERATED_ITEMS() });
+  state.view = 'list:gen';
+  state.order = { lists: ['gen'], status: 'none', report: null, filter: null };
+  state.shopLists = null;
+}
+
+function listColHtml() {
+  const lbtn = (l) => `<button class="lbtn" data-act="view" data-v="list:${l.id}" aria-current="${state.view === 'list:' + l.id}"><span class="ic">${icon(l.icon)}</span><span><span class="nm">${esc(l.name)}</span><br><span class="sub">${l.kind === 'generated' ? 'Z planu' : 'Lista ogólna'}</span></span><span class="count">${openCount(l)}</span></button>`;
+  const gen = lists.filter(l => l.kind === 'generated');
+  const gnr = lists.filter(l => l.kind === 'general');
+  const o = state.order;
+  const orderSub = { none: 'Połącz listy dla agenta', ready: 'Gotowe dla agenta', sent: 'U agenta · koszyk w toku', report: 'Raport gotowy do przejrzenia', done: 'Zatwierdzone' }[o.status];
+  return `<h2>Zakupy</h2>
+    <div class="group"><span class="label">Z planu</span>${gen.map(lbtn).join('')}
+      <button class="lbtn dashed" data-act="view" data-v="generate" aria-current="${state.view === 'generate'}"><span class="ic">${icon('wand')}</span><span class="nm">Wygeneruj z planu</span></button></div>
+    <div class="group"><span class="label">Listy ogólne</span>${gnr.map(lbtn).join('')}
+      <button class="lbtn dashed" data-act="new-list"><span class="ic">${icon('plus')}</span><span class="nm">Nowa lista</span></button></div>
+    <div class="group"><span class="label">Dla agenta</span>
+      <button class="lbtn agentish" data-act="view" data-v="${o.status === 'report' || o.status === 'done' ? 'report' : 'order'}" aria-current="${state.view === 'order' || state.view === 'report'}"><span class="ic">${icon('spark')}</span><span><span class="nm">Zamówienie</span><br><span class="sub">${orderSub}</span></span><span></span></button></div>`;
+}
+
+function generateHtml() {
+  const has = lists.some(l => l.id === 'gen');
+  return `<div class="phead2"><div><h2>Wygeneruj listę z planu</h2><div class="sub2">Policzymy składniki dla wybranych dni na porcje domowe.</div></div></div>
+    <div class="card">
+      <h3>Za jakie dni?</h3>
+      <div class="row">${[['this', 'Ten tydzień · 9–15 lis'], ['next', 'Następny · 16–22 lis'], ['custom', 'Własny zakres']].map(([v, l]) => `<button class="chip" data-act="range" data-v="${v}" aria-pressed="${state.range === v}">${l}</button>`).join('')}</div>
+      ${state.range === 'custom' ? `<div class="row"><label class="field"><span>Od</span><input class="input" type="date" value="${state.from}"></label><label class="field"><span>Do</span><input class="input" type="date" value="${state.to}"></label></div>` : ''}
+      <div class="stat"><div><b>19</b><span>pozycji planu</span></div><div><b>2</b><span>resztki · bez zakupów</span></div><div><b>3</b><span>znaczniki dla agenta · pominięte</span></div><div><b>5</b><span>podstawowe · ukryte</span></div></div>
+      <p class="note">Propozycje agenta, których nie zaakceptowano, nie trafiają na listę.</p>
+      <div class="row">${has ? '<span class="note">Lista na ten okres już istnieje. Nowa ją zastąpi, ale zachowa ręcznie dodane pozycje.</span>' : ''}<span style="flex:1"></span><button class="btn primary" data-act="generate">${icon('wand', 'sm')}Wygeneruj listę</button></div>
+    </div>`;
+}
+
+function rowHtml(item, listId) {
+  const cls = [item.state === 'home' ? 'home' : '', item.staple ? 'staple' : ''].join(' ');
+  const badges = (item.staple ? '<span class="badge b-staple">zwykle w domu</span> ' : '') + (item.missing ? '<span class="badge b-miss">brakowało online</span> ' : '') + (item.state === 'bought' ? '<span class="badge b-ok">kupione</span>' : '');
+  return `<div class="rrow ${cls}">
+    <button class="homebtn" data-act="home" data-l="${listId}" data-i="${item.id}" aria-pressed="${item.state === 'home'}" aria-label="Mam w domu: ${esc(item.name)}" title="Mam w domu">${icon('home')}</button>
+    <div><span class="nm">${esc(item.name)}</span> ${badges}
+      ${item.src.length ? `<div class="src">${item.src.join(' · ')}</div>` : ''}
+      ${item.warn ? `<div class="warn">${icon('alert', 'sm')}${item.warn}</div>` : ''}</div>
+    <div class="qty"><input class="input" type="number" min="0" step="any" value="${item.qty}" data-input="qty" data-l="${listId}" data-i="${item.id}" aria-label="Ilość: ${esc(item.name)}"><span>${item.unit}</span></div>
+    <button class="btn icon sm ghost" data-act="del" data-l="${listId}" data-i="${item.id}" aria-label="Usuń ${esc(item.name)}">${icon('x', 'sm')}</button>
+  </div>`;
+}
+
+function groupedRows(l, rowFn, staples) {
+  const items = visible(l, staples);
+  return CATS.map(c => {
+    const its = items.filter(i => i.cat === c);
+    return its.length ? `<div class="cat"><h4>${c}</h4><div class="items">${its.map(i => rowFn(i, l.id)).join('')}</div></div>` : '';
+  }).join('');
+}
+
+function listHtml(id, where) {
+  const l = listById(id);
+  if (!l) return `<div class="empty">${icon('list')}Nie ma jeszcze listy z planu.<button class="btn primary" data-act="view" data-v="generate">Wygeneruj</button></div>`;
+  const staples = l.items.filter(i => i.staple).length;
+  const home = l.items.filter(i => i.state === 'home').length;
+  const inOrder = state.order.lists.includes(l.id);
+  return `<div class="phead2"><div><h2>${esc(l.name)}</h2><div class="sub2">${openCount(l)} do kupienia${home ? ` · ${home} mamy w domu` : ''}${l.kind === 'generated' ? ' · z planu na porcje domowe' : ''}</div></div>
+      ${where === 'desk' ? `<div class="row"><button class="btn" data-act="to-order" data-l="${l.id}" ${inOrder ? 'disabled' : ''}>${icon('spark', 'sm')}${inOrder ? 'W zamówieniu' : 'Do zamówienia'}</button><button class="btn primary" data-act="shop-this" data-l="${l.id}">${icon('cart', 'sm')}Tryb zakupów</button></div>` : ''}</div>
+    <div class="toolbar">${staples ? `<button class="toggle" data-act="staples" aria-pressed="${state.showStaples}"><span class="sw"></span>Pokaż podstawowe (${staples})</button>` : '<span></span>'}<span class="note">${icon('home', 'sm')} = mam w domu, nie kupuję</span></div>
+    <form class="addrow" data-form="add" data-l="${l.id}"><input class="input" name="name" placeholder="Dodaj pozycję, np. masło 200 g" aria-label="Nowa pozycja"><button class="btn">${icon('plus', 'sm')}Dodaj</button></form>
+    ${groupedRows(l, rowHtml, state.showStaples)}`;
+}
+
+function orderItems() {
+  const merged = new Map();
+  state.order.lists.forEach(id => (listById(id)?.items ?? []).filter(i => !i.staple && i.state === 'open').forEach(i => {
+    const k = i.name + '|' + i.unit;
+    merged.set(k, merged.has(k) ? { ...merged.get(k), qty: merged.get(k).qty + i.qty, refs: [...merged.get(k).refs, i] } : { ...i, refs: [i] });
+  }));
+  return [...merged.values()];
+}
+
+function orderHtml() {
+  const o = state.order;
+  const items = orderItems();
+  const steps = [['Przygotowane', o.status === 'ready' || o.status === 'none'], ['U agenta', o.status === 'sent'], ['Raport', o.status === 'report']];
+  const doneIdx = { none: -1, ready: 0, sent: 1, report: 2, done: 3 }[o.status];
+  return `<div class="phead2"><div><h2>Zamówienie dla agenta</h2><div class="sub2">Połącz listy, a agent wypełni koszyk w sklepie internetowym i wróci z raportem.</div></div></div>
+    <div class="steps3">${steps.map(([l], i) => `<div class="${i < doneIdx ? 'done' : (i === doneIdx || (doneIdx < 0 && i === 0) ? 'on' : '')}">${i < doneIdx ? icon('check', 'sm') : `<b>${i + 1}</b>`}${l}</div>`).join('')}</div>
+    <div class="card"><h3>Które listy?</h3><div class="olist">
+      ${lists.map(l => `<button class="ocheck" data-act="order-toggle" data-l="${l.id}" aria-pressed="${o.lists.includes(l.id)}" ${o.status === 'sent' ? 'disabled' : ''}><span class="box">${icon('check', 'sm')}</span><span><b>${esc(l.name)}</b></span><span class="count">${openCount(l)} poz.</span></button>`).join('')}
+    </div><p class="note">Pozycje „mam w domu” i podstawowe nie trafiają do zamówienia.</p></div>
+    <div class="card"><div class="toolbar"><h3>Razem: ${items.length} ${plural(items.length, 'pozycja', 'pozycje', 'pozycji')}</h3></div>
+      <ul class="merged">${items.map(i => `<li><span><b>${esc(i.name)}</b>${MEMORY[i.name] ? `<div class="mem">${MEMORY[i.name]}</div>` : ''}</span><span class="q">${fmt(i.qty)} ${i.unit}</span></li>`).join('') || '<li><span class="note">Wybierz przynajmniej jedną listę.</span></li>'}</ul></div>
+    <div class="agentcard">
+      <h3>${icon('spark')}${o.status === 'sent' ? 'Agent pracuje nad koszykiem' : 'Przekaż agentowi'}</h3>
+      ${o.status === 'sent'
+        ? `<p>Zamówienie jest zablokowane do czasu raportu. Listy możesz dalej edytować, zmiany trafią do następnego zamówienia.</p><div class="row"><button class="btn agent" data-act="sim-report">${icon('spark', 'sm')}Symuluj: agent skończył</button><button class="btn ghost" data-act="cancel-order">Anuluj zamówienie</button></div>`
+        : `<p>Agent pobiera zamówienie przez serwer MCP. Wystarczy napisać mu na przykład:</p><div class="code">Zrób zakupy z zamówienia w Spiżarni.</div><div class="row"><button class="btn agent" data-act="send" ${items.length ? '' : 'disabled'}>${icon('check', 'sm')}Gotowe dla agenta</button></div>`}
+    </div>`;
+}
+
+const RES = {
+  added: { l: 'Dodano', c: 'b-ok', i: 'check' }, changed: { l: 'Zmieniona ilość', c: 'b-warn', i: 'scale' },
+  substituted: { l: 'Zamiennik', c: 'b-info', i: 'swap' }, missing: { l: 'Brak', c: 'b-miss', i: 'x' }
+};
+function simulateReport() {
+  const items = orderItems();
+  state.order.report = items.map(i => {
+    let r = { item: i, res: 'added', det: `${fmt(i.qty)} ${i.unit}` };
+    if (i.name === 'mleko') r = { item: i, res: 'changed', det: `Chciałeś <b>${fmt(i.qty)} l</b>, w koszyku <b>2 × 1 l</b>: sprzedają tylko kartony` };
+    if (i.name === 'łosoś') r = { item: i, res: 'substituted', det: `Zamiast łososia <b>filet z pstrąga, 350 g</b>` };
+    if (i.name === 'dynia') r = { item: i, res: 'missing', det: 'Niedostępne w tym terminie dostawy' };
+    if (i.name === 'karma dla kota') r = { item: i, res: 'missing', det: 'Brak tej karmy, agent nie wybrał zamiennika' };
+    return r;
+  });
+  state.order.status = 'report';
+  state.view = 'report';
+}
+
+function reportHtml() {
+  const o = state.order;
+  const rep = o.report ?? [];
+  const counts = Object.fromEntries(Object.keys(RES).map(k => [k, rep.filter(r => r.res === k).length]));
+  const shown = o.filter ? rep.filter(r => r.res === o.filter) : rep;
+  const sorted = [...shown].sort((a, b) => ['missing', 'substituted', 'changed', 'added'].indexOf(a.res) - ['missing', 'substituted', 'changed', 'added'].indexOf(b.res));
+  return `<div class="phead2"><div><h2>Raport z koszyka</h2><div class="sub2">${rep.length} pozycji · agent skończył dziś o 16:20</div></div>
+      ${o.status === 'report' ? `<button class="btn primary" data-act="approve">${icon('check', 'sm')}Zatwierdź raport</button>` : '<span class="badge b-ok">Zatwierdzony</span>'}</div>
+    ${counts.missing ? `<div class="callout">${icon('alert')}<div><b>${counts.missing} ${plural(counts.missing, 'pozycja', 'pozycje', 'pozycji')} nie ${plural(counts.missing, 'trafiła', 'trafiły', 'trafiło')} do koszyka.</b> ${o.status === 'done' ? 'Zostały otwarte na liście i są na górze w trybie zakupów.' : 'Po zatwierdzeniu zostaną otwarte na liście, żeby kupić je w sklepie.'}</div></div>` : ''}
+    <div class="filterchips"><button class="chip" data-act="rfilter" data-v="" aria-pressed="${!o.filter}">Wszystkie <span class="n">${rep.length}</span></button>
+      ${Object.entries(RES).map(([k, v]) => `<button class="chip" data-act="rfilter" data-v="${k}" aria-pressed="${o.filter === k}"><span class="${{ added: 'c-ok', changed: 'c-warn', substituted: 'c-info', missing: 'c-miss' }[k]}">${icon(v.i, 'sm')}</span>${v.l} <span class="n">${counts[k]}</span></button>`).join('')}</div>
+    <div class="items">${sorted.map(r => `<div class="rep"><div><div class="nm">${esc(r.item.name)}</div><div class="det">${r.det}</div></div><div class="res"><span class="badge ${RES[r.res].c}">${icon(RES[r.res].i, 'sm')}${RES[r.res].l}</span>${o.status === 'done' ? `<span class="note">${r.res === 'missing' ? 'otwarte na liście' : 'kupione'}</span>` : ''}</div></div>`).join('')}</div>`;
+}
+
+function shopItems() {
+  const ids = state.shopLists ?? lists.map(l => l.id);
+  return ids.map(listById).filter(Boolean).flatMap(l => l.items.filter(i => !i.staple && i.state !== 'home').map(i => ({ ...i, list: l })));
+}
+
+function shopHtml() {
+  const ids = state.shopLists ?? lists.map(l => l.id);
+  const items = shopItems();
+  const done = items.filter(i => i.state === 'bought').length;
+  const sync = state.net === 'offline'
+    ? `<span class="sync offline">${icon('wifioff', 'sm')}Offline${state.pending ? ` · ${state.pending} ${plural(state.pending, 'zmiana', 'zmiany', 'zmian')}` : ''}</span>`
+    : state.syncing ? `<span class="sync pending">${icon('sync', 'sm')}Wysyłanie ${state.pending}…</span>` : `<span class="sync online"><span class="dot"></span>Zapisane</span>`;
+  const row = i => `<button class="sitem ${i.state === 'bought' ? 'bought' : ''}" data-act="tick" data-l="${i.list.id}" data-i="${i.id}" aria-pressed="${i.state === 'bought'}"><span class="box">${icon('check')}</span><span><span class="nm">${esc(i.name)}</span>${ids.length > 1 ? `<span class="src">${esc(i.list.name)}</span>` : ''}</span><span class="qty2">${fmt(i.qty)} ${i.unit}</span></button>`;
+  const order = i => i.state === 'bought' ? 1 : 0;
+  const filt = items.filter(i => !state.hideBought || i.state !== 'bought');
+  const missing = filt.filter(i => i.missing && i.state !== 'bought');
+  const rest = filt.filter(i => !missing.includes(i));
+  const groups = CATS.map(c => {
+    const its = rest.filter(i => i.cat === c).sort((a, b) => order(a) - order(b));
+    return its.length ? `<div class="cat"><h4>${c}</h4><div class="items">${its.map(row).join('')}</div></div>` : '';
+  }).join('');
+  const body = items.length
+    ? (missing.length ? `<div class="cat missgroup"><h4>${icon('alert', 'sm')} Brakowało online · kup tutaj</h4><div class="items">${missing.map(row).join('')}</div></div>` : '') + groups
+    : `<div class="empty">${icon('cart')}Wszystko kupione albo listy są puste.</div>`;
+  return `<div class="shead">
+      <div class="top"><h2>W sklepie</h2>${sync}</div>
+      <div class="lchips">${lists.map(l => `<button class="chip" data-act="shop-list" data-l="${l.id}" aria-pressed="${ids.includes(l.id)}">${esc(l.name)}</button>`).join('')}</div>
+      <div class="prog"><div class="bar"><i style="width:${items.length ? done / items.length * 100 : 0}%"></i></div><div class="lbl"><span>${done} z ${items.length} w koszyku</span><button class="toggle" style="min-height:0;padding:0" data-act="hide-bought" aria-pressed="${state.hideBought}"><span class="sw"></span>Ukryj kupione</button></div></div>
+    </div>
+    <div class="slist">${body}</div>
+    <div class="thumbbar"><button class="btn" data-act="phone-review">${icon('list', 'sm')}Przegląd</button><button class="btn primary" data-act="open-add">${icon('plus', 'sm')}Dodaj</button></div>`;
+}
+
+function phoneReviewHtml() {
+  return `<div class="shead"><div class="top"><button class="btn icon ghost" data-act="phone-shop" aria-label="Wróć do sklepu">${icon('left')}</button><h2 style="flex:1">Przegląd</h2></div>
+      <div class="lchips">${lists.map(l => `<button class="chip" data-act="phone-list" data-l="${l.id}" aria-pressed="${state.phoneList === l.id}">${esc(l.name)}</button>`).join('')}</div></div>
+    <div class="pane">${listHtml(state.phoneList, 'phone')}</div>
+    <div class="thumbbar"><button class="btn primary" data-act="phone-shop">${icon('cart', 'sm')}Do sklepu</button></div>`;
+}
+
+function render() {
+  document.getElementById('listcol').innerHTML = listColHtml();
+  const pane = document.getElementById('pane');
+  const top = pane.scrollTop;
+  const v = state.view;
+  pane.innerHTML = v === 'generate' ? generateHtml() : v === 'order' ? orderHtml() : v === 'report' ? reportHtml() : listHtml(v.slice(5), 'desk');
+  pane.scrollTop = top;
+
+  const pb = document.getElementById('pbody');
+  const scrollEl = pb.querySelector('.slist, .pane');
+  const pt = scrollEl?.scrollTop ?? 0;
+  if (state.phone === 'review' && !listById(state.phoneList)) state.phoneList = lists[0]?.id;
+  pb.innerHTML = state.phone === 'shop' ? shopHtml() : phoneReviewHtml();
+  const ns = pb.querySelector('.slist, .pane');
+  if (ns) ns.scrollTop = pt;
+  document.getElementById('psheet').innerHTML = (state.sheet ? `<div class="scrim" data-act="close-add"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Dodaj pozycję"><div class="handle"></div><h3>Dodaj do listy</h3>
+      <form class="addrow" data-form="add-phone"><input class="input" name="name" placeholder="np. masło 200 g" aria-label="Nowa pozycja" autofocus><button class="btn primary">Dodaj</button></form>
+      <div class="lchips">${lists.map(l => `<button class="chip" data-act="add-target" data-l="${l.id}" aria-pressed="${(state.addTarget ?? lists[0].id) === l.id}">${esc(l.name)}</button>`).join('')}</div>
+      <p class="note">Działa też offline. Pozycja wyśle się po powrocie sieci.</p></div>` : '')
+    + (state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '');
+}
+
+function toast(m) { state.toast = m; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { state.toast = ''; render(); }, 2000); }
+function change() { if (state.net === 'offline') state.pending++; }
+function findItem(l, i) { return listById(l)?.items.find(x => x.id === i); }
+function parseItem(text) {
+  const m = text.trim().match(/^(.*?)\s+(\d+(?:[.,]\d+)?)\s*(\S+)?$/);
+  return m ? { name: m[1], qty: Number(m[2].replace(',', '.')), unit: m[3] ?? 'szt.' } : { name: text.trim(), qty: 1, unit: 'szt.' };
+}
+
+function act(el) {
+  const a = el.dataset.act, l = el.dataset.l, i = el.dataset.i, v = el.dataset.v;
+  switch (a) {
+    case 'view': state.view = v; break;
+    case 'range': state.range = v; break;
+    case 'generate': generate(); toast('Lista gotowa'); return;
+    case 'staples': state.showStaples = !state.showStaples; break;
+    case 'home': { const it = findItem(l, i); it.state = it.state === 'home' ? 'open' : 'home'; change(); break; }
+    case 'del': { const li = listById(l); li.items = li.items.filter(x => x.id !== i); change(); break; }
+    case 'new-list': { const id = 'l' + (++uid); lists.push({ id, name: 'Nowa lista', kind: 'general', icon: 'bag', items: [] }); state.view = 'list:' + id; break; }
+    case 'to-order': if (!state.order.lists.includes(l)) state.order.lists.push(l); if (state.order.status === 'none') state.order.status = 'ready'; state.view = 'order'; break;
+    case 'order-toggle': state.order.lists = state.order.lists.includes(l) ? state.order.lists.filter(x => x !== l) : [...state.order.lists, l]; state.order.status = state.order.lists.length ? 'ready' : 'none'; break;
+    case 'send': state.order.status = 'sent'; break;
+    case 'cancel-order': state.order.status = 'ready'; break;
+    case 'sim-report': simulateReport(); break;
+    case 'rfilter': state.order.filter = v || null; break;
+    case 'approve':
+      state.order.report.forEach(r => r.item.refs.forEach(ref => { if (r.res === 'missing') { ref.missing = true; ref.state = 'open'; } else ref.state = 'bought'; }));
+      state.order.status = 'done';
+      state.shopLists = null;
+      toast('Raport zatwierdzony');
+      return;
+    case 'shop-this': state.shopLists = [l]; state.phone = 'shop'; document.getElementById('phone').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
+    case 'shop-list': { const ids = state.shopLists ?? lists.map(x => x.id); state.shopLists = ids.includes(l) ? ids.filter(x => x !== l) : [...ids, l]; break; }
+    case 'tick': { const it = findItem(l, i); it.state = it.state === 'bought' ? 'open' : 'bought'; change(); if (navigator.vibrate) navigator.vibrate(10); break; }
+    case 'hide-bought': state.hideBought = !state.hideBought; break;
+    case 'phone-review': state.phone = 'review'; state.phoneList = state.phoneList && listById(state.phoneList) ? state.phoneList : lists[0]?.id; break;
+    case 'phone-shop': state.phone = 'shop'; break;
+    case 'phone-list': state.phoneList = l; break;
+    case 'open-add': state.sheet = true; state.addTarget = state.addTarget ?? lists[0]?.id; break;
+    case 'close-add': state.sheet = false; break;
+    case 'add-target': state.addTarget = l; break;
+    default: return;
+  }
+  render();
+}
+
+document.addEventListener('click', ev => { const el = ev.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
+document.addEventListener('submit', ev => {
+  const f = ev.target.closest('[data-form]');
+  if (!f) return;
+  ev.preventDefault();
+  const text = f.elements.name.value;
+  if (!text.trim()) return;
+  const p = parseItem(text);
+  const target = f.dataset.form === 'add-phone' ? state.addTarget : f.dataset.l;
+  listById(target).items.unshift(I('Inne', p.name, p.qty, p.unit));
+  change();
+  if (f.dataset.form === 'add-phone') { state.sheet = false; toast(`Dodano do: ${listById(target).name}`); return; }
+  render();
+  document.querySelector(`#${f.closest('#phone') ? 'phone' : 'pane'} [data-form] input`)?.focus();
+});
+document.addEventListener('change', ev => {
+  if (ev.target.dataset.input !== 'qty') return;
+  const it = findItem(ev.target.dataset.l, ev.target.dataset.i);
+  it.qty = Number(ev.target.value) || 0;
+  change();
+  render();
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && state.sheet) { state.sheet = false; render(); } });
+
+function setSeg(seg, v) { seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v))); }
+const themeSeg = document.getElementById('theme');
+themeSeg.addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-v]'); if (!b) return;
+  if (b.dataset.v === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', b.dataset.v);
+  setSeg(themeSeg, b.dataset.v);
+});
+const netSeg = document.getElementById('net');
+netSeg.addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-v]'); if (!b || b.dataset.v === state.net) return;
+  state.net = b.dataset.v;
+  setSeg(netSeg, state.net);
+  if (state.net === 'online' && state.pending) {
+    state.syncing = true; render();
+    setTimeout(() => { state.syncing = false; state.pending = 0; toast('Zmiany wysłane'); }, 1600);
+  } else render();
+});
+
+hydrateIcons(document);
+setSeg(themeSeg, 'system');
+setSeg(netSeg, 'online');
+render();
+</script>
+</body>
+</html>
