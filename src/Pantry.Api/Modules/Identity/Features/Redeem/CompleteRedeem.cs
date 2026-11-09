@@ -70,9 +70,9 @@ public static class CompleteRedeem
             }
 
             user = existing;
+            await RedeemableLinks.RecoverAsync(user, db, userManager, cancellationToken);
             user.UiLanguage ??= request.UiLanguage;
             RedeemableLinks.EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
-            await RedeemableLinks.RecoverAsync(user, userManager);
         }
         else
         {

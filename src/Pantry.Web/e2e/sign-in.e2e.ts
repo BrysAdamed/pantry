@@ -167,9 +167,16 @@ test('signs in with a passkey picked from the autofill where the browser support
     PublicKeyCredential.isConditionalMediationAvailable = () => Promise.resolve(true);
   });
   await addPasskey(page);
+  let answerSignIn!: () => void;
+  const signInHeld = new Promise<void>((resolve) => (answerSignIn = resolve));
+  await page.route('/api/auth/sign-in', async (route) => {
+    await signInHeld;
+    await route.fallback();
+  });
   await page.goto('/sign-in');
 
   await expect(page.getByTestId('sign-in-user-name')).toHaveAttribute('autocomplete', 'username webauthn');
+  answerSignIn();
 
   await expect(page).toHaveURL('/planner');
 });

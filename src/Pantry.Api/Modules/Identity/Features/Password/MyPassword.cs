@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
@@ -14,20 +15,23 @@ namespace Pantry.Api.Modules.Identity.Features.Password;
 internal static class MyPassword
 {
     /// <summary>
-    /// The signed-in user, read again after taking the lock: the session check earlier in the request may have loaded
-    /// the user into the context before a concurrent change committed.
+    /// The signed-in user, read again after taking the locks: the session check earlier in the request may have loaded
+    /// the user into the context before a concurrent change committed. The password-check lock also serializes with
+    /// password sign-ins of the same user, so failed attempts from both count.
     /// </summary>
     public static async Task<User?> FindLockedAsync(
         string userId, IdentityModuleDbContext db, UserManager<User> userManager, CancellationToken cancellationToken)
     {
         await db.LockUserAdministrationAsync(cancellationToken);
         var user = await userManager.FindByIdAsync(userId);
-        if (user is not null)
+        if (user is null)
         {
-            await db.Entry(user).ReloadAsync(cancellationToken);
+            return null;
         }
 
-        return user;
+        await db.LockUserPasswordChecksAsync(user.Id, cancellationToken);
+        await db.Entry(user).ReloadAsync(cancellationToken);
+        return db.Entry(user).State == EntityState.Detached ? null : user;
     }
 
     /// <summary>

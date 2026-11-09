@@ -58,7 +58,11 @@ public static class CompleteRedeemWithPassword
                 {
                     return taken;
                 }
+            }
 
+            await RedeemableLinks.RecoverAsync(user, db, userManager, cancellationToken);
+            if (newUserName is not null)
+            {
                 RedeemableLinks.EnsureSucceeded(await userManager.SetUserNameAsync(user, newUserName));
             }
 
@@ -69,7 +73,6 @@ public static class CompleteRedeemWithPassword
 
             RedeemableLinks.EnsureSucceeded(await userManager.AddPasswordAsync(user, password));
             user.UiLanguage ??= request.UiLanguage;
-            await RedeemableLinks.RecoverAsync(user, userManager);
         }
         else
         {

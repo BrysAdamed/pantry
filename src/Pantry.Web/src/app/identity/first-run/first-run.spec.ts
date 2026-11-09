@@ -157,4 +157,20 @@ describe('FirstRun', () => {
     expect(navigate).toHaveBeenCalledWith('/');
     expect(await TestBed.inject(SetupStatusService).firstRunNeeded()).toBe(false);
   });
+
+  it('forgets a typed password when the person switches to a passkey and back', async () => {
+    const { page, button, type, typeInto, choose } = await render();
+    await type('Alex');
+    await choose('password');
+    await typeInto('new-user-name', 'alex');
+    await typeInto('new-password', 'pantry shelf 2026');
+    await typeInto('new-password-confirmation', 'pantry shelf 2026');
+    expect(button().disabled).toBe(false);
+
+    await choose('passkey');
+    await choose('password');
+
+    expect(page.querySelector<HTMLInputElement>('[data-testid="new-password"]')!.value).toBe('');
+    expect(button().disabled).toBe(true);
+  });
 });

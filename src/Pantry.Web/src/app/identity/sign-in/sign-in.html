@@ -43,7 +43,7 @@
           autocapitalize="none"
           spellcheck="false"
           data-testid="sign-in-user-name"
-          [attr.autocomplete]="autofill() ? 'username webauthn' : 'username'"
+          autocomplete="username webauthn"
           [placeholder]="autofill() ? t('userNamePlaceholder') : ''"
           [maxLength]="userNameMaxLength"
           [disabled]="busy()"

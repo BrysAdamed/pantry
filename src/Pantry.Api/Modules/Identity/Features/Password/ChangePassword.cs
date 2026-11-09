@@ -6,7 +6,10 @@ using Pantry.Api.Modules.Identity.Persistence;
 
 namespace Pantry.Api.Modules.Identity.Features.Password;
 
-/// <summary>Changes the signed-in user's password, given the current one, and signs out their other devices.</summary>
+/// <summary>
+/// Changes the signed-in user's password, given the current one, and signs out their other devices. A wrong current
+/// password counts towards the same lockout as password sign-in.
+/// </summary>
 public static class ChangePassword
 {
     private const string CurrentPasswordField = "CurrentPassword";
@@ -43,18 +46,29 @@ public static class ChangePassword
             return invalid;
         }
 
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return WrongCurrentPassword();
+        }
+
         var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword ?? string.Empty, request.NewPassword!);
         if (result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.PasswordMismatch)))
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [CurrentPasswordField] = ["The current password is wrong."],
-            });
+            NewCredentials.EnsureSucceeded(await userManager.AccessFailedAsync(user));
+            await transaction.CommitAsync(cancellationToken);
+            return WrongCurrentPassword();
         }
 
         NewCredentials.EnsureSucceeded(result);
+        NewCredentials.EnsureSucceeded(await userManager.ResetAccessFailedCountAsync(user));
         return await MyPassword.FinishAsync(user, transaction, db, userManager, signInManager, cancellationToken);
     }
+
+    /// <summary>Also the answer while the user is locked out, so the lockout does not tell that the guess was right.</summary>
+    private static ValidationProblem WrongCurrentPassword() => TypedResults.ValidationProblem(new Dictionary<string, string[]>
+    {
+        [CurrentPasswordField] = ["The current password is wrong."],
+    });
 }
 
 public sealed record ChangePasswordRequest(string? CurrentPassword, string? NewPassword);

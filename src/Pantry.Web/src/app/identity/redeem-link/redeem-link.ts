@@ -86,8 +86,10 @@ export class RedeemLink implements OnInit {
     }
   }
 
+  /** The password fields start empty each time they are shown, so credentials typed earlier are dropped. */
   protected chooseMethod(method: SignInMethod): void {
     this.method.set(method);
+    this.credentials.set(null);
     if (this.isRetryable()) {
       this.state.set('form');
     }

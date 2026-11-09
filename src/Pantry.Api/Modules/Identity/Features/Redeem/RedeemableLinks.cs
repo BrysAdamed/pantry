@@ -17,6 +17,8 @@ internal static class RedeemableLinks
     /// <summary>
     /// Finds the open link for <paramref name="token"/>. An unknown token answers 404; an expired, used or revoked link
     /// answers 410 with its <c>state</c>. An invite whose member was deleted or got a user meanwhile counts as revoked.
+    /// A recovery link's user is read again from the database: when redeeming, the context may already track the user
+    /// from before the lock was taken.
     /// </summary>
     public static async Task<(RedeemableLink? Link, ProblemHttpResult? Problem)> FindAsync(
         string token, IdentityModuleDbContext db, IHouseholdModule household, DateTimeOffset now, CancellationToken cancellationToken)
@@ -47,15 +49,19 @@ internal static class RedeemableLinks
         }
 
         var user = await db.Users.SingleAsync(u => u.Id == link.UserId, cancellationToken);
+        await db.Entry(user).ReloadAsync(cancellationToken);
         return (new RedeemableLink(link, user.DisplayName, invitedBy, user), null);
     }
 
     /// <summary>
     /// What a recovery link does besides the new passkey or password: ends the user's sessions on every other device,
-    /// which may be the lost one, and lifts a password lockout.
+    /// which may be the lost one, and lifts a password lockout. Call it before changing the user: it takes the user's
+    /// password-check lock, so a password sign-in cannot change the user meanwhile, and reads the user again.
     /// </summary>
-    public static async Task RecoverAsync(User user, UserManager<User> userManager)
+    public static async Task RecoverAsync(User user, IdentityModuleDbContext db, UserManager<User> userManager, CancellationToken cancellationToken)
     {
+        await db.LockUserPasswordChecksAsync(user.Id, cancellationToken);
+        await db.Entry(user).ReloadAsync(cancellationToken);
         EnsureSucceeded(await userManager.ResetAccessFailedCountAsync(user));
         if (await userManager.IsLockedOutAsync(user))
         {

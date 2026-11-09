@@ -48,8 +48,10 @@ export class FirstRun {
   protected readonly showsForm = computed(() => this.state() !== 'done' && this.state() !== 'alreadyDone');
   protected readonly error = computed(() => (this.passkeyUnavailable() ? 'unsupported' : this.isRetryable() ? this.state() : null));
 
+  /** The password fields start empty each time they are shown, so credentials typed earlier are dropped. */
   protected chooseMethod(method: SignInMethod): void {
     this.method.set(method);
+    this.credentials.set(null);
     if (this.isRetryable()) {
       this.state.set('form');
     }

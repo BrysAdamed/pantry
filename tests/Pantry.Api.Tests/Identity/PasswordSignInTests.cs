@@ -2,8 +2,11 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Persistence;
 using Pantry.Api.Tests.Infrastructure;
 using static Pantry.Api.Tests.Identity.IdentityScenarios;
@@ -146,6 +149,66 @@ public sealed class PasswordSignInTests(PantryApiFactory factory) : IAsyncLifeti
         Assert.Equal(HttpStatusCode.Unauthorized, whileLockedOut.StatusCode);
         Assert.InRange(lockoutEnd!.Value - DateTimeOffset.UtcNow, TimeSpan.FromMinutes(14), TimeSpan.FromMinutes(15));
         Assert.Equal(HttpStatusCode.OK, afterLockout.StatusCode);
+    }
+
+    [Fact]
+    public async Task Parallel_wrong_passwords_all_count_towards_the_lockout()
+    {
+        // Arrange
+        await factory.CreateAdminWithPasswordAsync("admin", Password);
+        var clients = Enumerable.Range(0, 10).Select(_ => factory.CreateBrowserClient()).ToList();
+        foreach (var client in clients)
+        {
+            await client.GetAsync("/api/antiforgery");
+        }
+
+        // Act
+        var guesses = await Task.WhenAll(clients.Select((client, i) =>
+            client.PostAsJsonAsync(SignInUrl, new { userName = "admin", password = "parallel guess " + i })));
+        var withTheRightPassword = await SignInWithPasswordAsync(factory.CreateBrowserClient(), "admin", Password);
+
+        // Assert
+        Assert.All(guesses, r => Assert.Equal(HttpStatusCode.Unauthorized, r.StatusCode));
+        Assert.Equal(HttpStatusCode.Unauthorized, withTheRightPassword.StatusCode);
+        Assert.NotNull(await LockoutEndAsync("admin"));
+    }
+
+    [Fact]
+    public async Task Every_refusal_costs_one_password_hash_except_an_over_long_password()
+    {
+        // Arrange
+        var hasher = new CountingPasswordHasher();
+        await using var app = factory.WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => services.AddSingleton<IPasswordHasher<User>>(hasher)));
+        var admin = await factory.CreateAdminWithPasswordAsync("admin", Password);
+        var lockedId = await RedeemWithPasswordAsync(factory.CreateBrowserClient(), await IssueInviteAsync(admin, await AddMemberAsync(admin, "Locked")), "locked", Password);
+        await LockOutAsync(lockedId);
+        var passkeyOnlyId = await RedeemAsync(factory.CreateBrowserClient(), await IssueInviteAsync(admin, await AddMemberAsync(admin, "Passkey")), _authenticator);
+        (string UserName, string Password)[] refusals =
+        [
+            ("nobody", Password),
+            ("admin", "not the password"),
+            ("locked", Password),
+            (passkeyOnlyId.ToString("N"), Password),
+        ];
+
+        // Act
+        var hashes = new List<int>();
+        foreach (var (userName, password) in refusals)
+        {
+            var before = hasher.Count;
+            Assert.Equal(HttpStatusCode.Unauthorized, (await SignInWithPasswordAsync(PantryApiFactory.CreateBrowserClient(app), userName, password)).StatusCode);
+            hashes.Add(hasher.Count - before);
+        }
+
+        var beforeOverLong = hasher.Count;
+        var overLong = await SignInWithPasswordAsync(PantryApiFactory.CreateBrowserClient(app), "admin", new string('x', 129));
+
+        // Assert
+        Assert.Equal([1, 1, 1, 1], hashes);
+        Assert.Equal(HttpStatusCode.Unauthorized, overLong.StatusCode);
+        Assert.Equal(beforeOverLong, hasher.Count);
+        Assert.Equal(0, await AccessFailedCountAsync(passkeyOnlyId));
     }
 
     [Fact]
@@ -329,6 +392,27 @@ public sealed class PasswordSignInTests(PantryApiFactory factory) : IAsyncLifeti
         await scope.ServiceProvider.GetRequiredService<IdentityModuleDbContext>().Users
             .Where(u => u.Id == userId)
             .ExecuteUpdateAsync(s => s.SetProperty(u => u.LockoutEnd, DateTimeOffset.UtcNow.AddMinutes(15)));
+    }
+
+    /// <summary>Identity's hasher, counting every hash and verification.</summary>
+    private sealed class CountingPasswordHasher : IPasswordHasher<User>
+    {
+        private readonly PasswordHasher<User> _inner = new();
+        private int _count;
+
+        public int Count => Volatile.Read(ref _count);
+
+        public string HashPassword(User user, string password)
+        {
+            Interlocked.Increment(ref _count);
+            return _inner.HashPassword(user, password);
+        }
+
+        public PasswordVerificationResult VerifyHashedPassword(User user, string hashedPassword, string providedPassword)
+        {
+            Interlocked.Increment(ref _count);
+            return _inner.VerifyHashedPassword(user, hashedPassword, providedPassword);
+        }
     }
 
     private async Task<int> AccessFailedCountAsync(Guid userId)

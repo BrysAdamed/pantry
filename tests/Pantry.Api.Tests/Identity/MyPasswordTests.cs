@@ -111,6 +111,43 @@ public sealed class MyPasswordTests(PantryApiFactory factory) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Wrong_current_passwords_lock_the_user_out_like_wrong_sign_ins()
+    {
+        // Arrange
+        var client = await factory.CreateAdminWithPasswordAsync("admin", Password);
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            var wrong = await client.PutAsJsonAsync(PasswordUrl, new { currentPassword = "wrong guess " + attempt, newPassword = NewPassword });
+            Assert.Equal(HttpStatusCode.BadRequest, wrong.StatusCode);
+        }
+
+        // Act
+        var withTheRightPassword = await client.PutAsJsonAsync(PasswordUrl, new { currentPassword = Password, newPassword = NewPassword });
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, withTheRightPassword.StatusCode);
+        Assert.True((await withTheRightPassword.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("errors").TryGetProperty("CurrentPassword", out _));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SignInWithPasswordAsync(factory.CreateBrowserClient(), "admin", Password)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SignInWithPasswordAsync(factory.CreateBrowserClient(), "admin", NewPassword)).StatusCode);
+    }
+
+    [Fact]
+    public async Task A_right_current_password_resets_the_failed_attempts()
+    {
+        var client = await factory.CreateAdminWithPasswordAsync("admin", Password);
+        for (var attempt = 0; attempt < 4; attempt++)
+        {
+            await client.PutAsJsonAsync(PasswordUrl, new { currentPassword = "wrong guess " + attempt, newPassword = NewPassword });
+        }
+
+        var changed = await client.PutAsJsonAsync(PasswordUrl, new { currentPassword = Password, newPassword = NewPassword });
+        await SignInWithPasswordAsync(factory.CreateBrowserClient(), "admin", "wrong once more");
+
+        Assert.Equal(HttpStatusCode.OK, changed.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await SignInWithPasswordAsync(factory.CreateBrowserClient(), "admin", NewPassword)).StatusCode);
+    }
+
+    [Fact]
     public async Task Removing_the_password_signs_out_other_devices_and_keeps_the_username()
     {
         // Arrange

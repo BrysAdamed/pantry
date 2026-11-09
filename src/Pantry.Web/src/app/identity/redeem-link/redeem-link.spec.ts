@@ -182,4 +182,21 @@ describe('RedeemLink', () => {
     expect(api.completeRedeemWithPassword).toHaveBeenCalledWith('tok', '', { userName: null, password: 'a brand new password' }, 'en');
     expect(testId('redeem-done')).not.toBeNull();
   });
+
+  it('forgets a typed password when the person switches to a passkey and back', async () => {
+    const { settle, testId, type, choosePassword } = await render();
+    await choosePassword();
+    await type('new-user-name', 'sam');
+    await type('new-password', 'pantry shelf 2026');
+    await type('new-password-confirmation', 'pantry shelf 2026');
+    expect((testId('redeem-create') as HTMLButtonElement).disabled).toBe(false);
+
+    testId('method-passkey')!.click();
+    await settle();
+    expect(testId('new-password')).toBeNull();
+    await choosePassword();
+
+    expect((testId('new-password') as HTMLInputElement).value).toBe('');
+    expect((testId('redeem-create') as HTMLButtonElement).disabled).toBe(true);
+  });
 });
