@@ -15,6 +15,7 @@ public static class IdentityModule
     public static IServiceCollection AddIdentityModule(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<IdentityModuleDbContext>(IdentityModuleDbContext.Schema);
+        services.AddScoped<IIdentityModule, IdentityModuleContract>();
 
         services.AddOptions<PasskeySettings>()
             .Bind(configuration.GetSection(PasskeySettings.Section))

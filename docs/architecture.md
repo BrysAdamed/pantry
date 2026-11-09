@@ -50,6 +50,8 @@ Rules:
 
 See [ADR 0012](adr/0012-module-persistence.md). A module registers its context with `services.AddModuleDbContext<CatalogDbContext>("catalog")` and sets `HasDefaultSchema("catalog")` in `OnModelCreating`. Pending migrations of all registered modules run on startup.
 
+A write that spans two modules and must be atomic shares the caller's transaction ([ADR 0015](adr/0015-cross-module-transactions.md)): the contract method takes the caller's `DbTransaction`, and the callee joins it with `Database.JoinTransactionAsync` on a context created for that call. First run uses it to create the admin and the admin's member together.
+
 Add a migration (the `dotnet-ef` tool is pinned in `dotnet-tools.json`, run `dotnet tool restore` once):
 
 ```bash

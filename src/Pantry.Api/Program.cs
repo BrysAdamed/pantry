@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Pantry.Api.Infrastructure.Antiforgery;
 using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Infrastructure.Health;
+using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 
 builder.Services.AddIdentityModule(builder.Configuration);
+builder.Services.AddHouseholdModule();
 
 var app = builder.Build();
 
@@ -31,6 +33,7 @@ app.UseApiAntiforgery();
 var api = app.MapGroup("/api").RequireAuthorization();
 api.MapHealthEndpoint();
 api.MapIdentityEndpoints();
+api.MapHouseholdEndpoints();
 
 // Unknown /api routes must return 404, everything else falls back to the SPA.
 api.MapFallback(() => Results.NotFound()).AllowAnonymous();
