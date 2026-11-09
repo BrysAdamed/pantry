@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Household.Persistence;
+using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Persistence;
 using Pantry.Api.Tests.Infrastructure;
 
@@ -193,13 +194,14 @@ public sealed class MembersTests(PantryApiFactory factory) : IAsyncLifetime
         // Act
         await using (var transaction = await identityDb.Database.BeginTransactionAsync())
         {
-            await household.CompleteFirstRunAsync(new FirstRunAdmin(Guid.NewGuid(), "Rolled back"), transaction.GetDbTransaction());
+            await household.CompleteFirstRunAsync(new FirstRunAdmin(Guid.NewGuid(), "Rolled back", UiLanguage.En), transaction.GetDbTransaction());
             await transaction.RollbackAsync();
         }
 
         // Assert
         var householdDb = scope.ServiceProvider.GetRequiredService<HouseholdDbContext>();
         Assert.False(await householdDb.Members.AnyAsync());
+        Assert.False(await householdDb.MealSlots.AnyAsync());
     }
 
     private static async Task<Guid> AddAsync(HttpClient client, string name, decimal factor)
