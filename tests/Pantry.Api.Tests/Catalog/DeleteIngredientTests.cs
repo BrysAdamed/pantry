@@ -63,6 +63,33 @@ public sealed class DeleteIngredientTests(PantryApiFactory factory) : IAsyncLife
     }
 
     [Fact]
+    public async Task References_list_the_modules_that_use_the_ingredient()
+    {
+        // Arrange
+        var used = await factory.SeedIngredientAsync("Cebula", [], Unit.Piece);
+        var unused = await factory.SeedIngredientAsync("Czosnek", [], Unit.Piece);
+        await factory.AddTestReferencesAsync(used, 2);
+
+        // Act
+        var usedReferences = await _client.GetFromJsonAsync<JsonElement>($"{IngredientsUrl}/{used}/references");
+        var unusedReferences = await _client.GetFromJsonAsync<JsonElement>($"{IngredientsUrl}/{unused}/references");
+
+        // Assert
+        var reference = Assert.Single(usedReferences.GetProperty("references").EnumerateArray());
+        Assert.Equal(TestIngredientReferenceHandler.ModuleName, reference.GetProperty("module").GetString());
+        Assert.Equal(2, reference.GetProperty("count").GetInt32());
+        Assert.Empty(unusedReferences.GetProperty("references").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task References_of_an_unknown_ingredient_return_404()
+    {
+        var response = await _client.GetAsync($"{IngredientsUrl}/{Guid.NewGuid()}/references");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Unknown_ingredient_returns_404()
     {
         var response = await _client.DeleteAsync($"{IngredientsUrl}/{Guid.NewGuid()}");

@@ -6,15 +6,10 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Icon } from '../../shared/icon/icon';
 import { Ingredient, INGREDIENT_NAME_MAX_LENGTH, IngredientChoice, IngredientsPage, INGREDIENTS_URL } from '../catalog-api';
-import { cleanIngredientName, findInName, ingredientNameKey, TextMatch } from '../ingredient-name';
+import { cleanIngredientName, findInName, ingredientNameKey, markMatch, TextPart } from '../ingredient-name';
 
 export const INGREDIENT_SEARCH_DELAY_MS = 200;
 export const INGREDIENT_PICKER_RESULTS = 8;
-
-interface TextPart {
-  readonly text: string;
-  readonly matched: boolean;
-}
 
 type PickerOption =
   | {
@@ -167,20 +162,10 @@ export class IngredientPicker {
       kind: 'existing',
       id: `${this.listId}-${index}`,
       ingredient,
-      name: parts(ingredient.name, nameMatch),
-      alias: alias ? parts(alias, findInName(alias, term)) : null,
+      name: markMatch(ingredient.name, term),
+      alias: alias ? markMatch(alias, term) : null,
       taken,
     };
   }
 }
 
-function parts(text: string, match: TextMatch | null): TextPart[] {
-  if (!match) {
-    return [{ text, matched: false }];
-  }
-  return [
-    { text: text.slice(0, match.start), matched: false },
-    { text: text.slice(match.start, match.end), matched: true },
-    { text: text.slice(match.end), matched: false },
-  ].filter((part) => part.text);
-}

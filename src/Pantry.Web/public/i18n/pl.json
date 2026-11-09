@@ -74,12 +74,14 @@
     "mainNavigation": "Nawigacja główna",
     "account": "Konto",
     "myAccount": "Moje konto",
-    "signOut": "Wyloguj się"
+    "signOut": "Wyloguj się",
+    "needsReviewBadge": "{{count}} do sprawdzenia"
   },
   "nav": {
     "planner": "Plan",
     "recipes": "Przepisy",
     "shopping": "Zakupy",
+    "ingredients": "Składniki",
     "household": "Dom"
   },
   "emptyState": {
@@ -490,6 +492,162 @@
       "action": "Przejdź do planu"
     },
     "signIn": "Przejdź do logowania"
+  },
+  "ingredients": {
+    "title": "Składniki",
+    "new": "Nowy",
+    "search": "Szukaj składnika",
+    "searchPlaceholder": "Szukaj w nazwach i aliasach",
+    "filters": "Filtry",
+    "filter": {
+      "needsReview": "Do sprawdzenia",
+      "staples": "Podstawowe",
+      "category": "Kategoria",
+      "allCategories": "Wszystkie kategorie"
+    },
+    "count": "{count, plural, one {# składnik} few {# składniki} many {# składników} other {# składnika}}",
+    "countOf": "{count, plural, one {# składnik} few {# składniki} many {# składników} other {# składnika}} (z {total})",
+    "clear": "Wyczyść",
+    "clearFilters": "Wyczyść filtry",
+    "loadFailed": "Nie udało się wczytać składników.",
+    "retry": "Spróbuj ponownie",
+    "tidy": {
+      "title": "Porządki",
+      "review": "{count, plural, one {# składnik do sprawdzenia} few {# składniki do sprawdzenia} many {# składników do sprawdzenia} other {# składnika do sprawdzenia}}",
+      "startReview": "Przejrzyj",
+      "showAll": "Pokaż wszystkie"
+    },
+    "row": {
+      "baseUnit": "Jednostka bazowa"
+    },
+    "badge": {
+      "needsReview": "do sprawdzenia",
+      "staple": "podstawowy"
+    },
+    "noResults": {
+      "search": "Nic nie pasuje do „{{query}}”.",
+      "filters": "Nic nie pasuje do filtrów.",
+      "add": "Dodaj „{{query}}”"
+    },
+    "reviewDone": {
+      "title": "Wszystko sprawdzone",
+      "text": "Nowe składniki od agenta i z przepisów pojawią się tutaj."
+    },
+    "empty": {
+      "title": "Składniki pojawią się same",
+      "description": "Każdy składnik z nowego przepisu trafia tutaj. Agent też je dodaje, a Ty potem je sprawdzasz.",
+      "action": "Dodaj składnik",
+      "agentHint": "Poproś Claude: „Dodaj do Spiżarni przepis na leczo z cukinią.”"
+    },
+    "nothingSelected": "Wybierz składnik z listy.",
+    "back": "Składniki",
+    "detail": {
+      "newTitle": "Nowy składnik",
+      "baseUnitFact": "jednostka {{unit}}",
+      "loadFailed": "Nie udało się wczytać składnika.",
+      "gone": "Tego składnika już nie ma.",
+      "review": {
+        "title": "Do sprawdzenia",
+        "text": "Dodany automatycznie, przez agenta albo z przepisu. Sprawdź kategorię i jednostkę bazową.",
+        "confirm": "Zatwierdź",
+        "saveAndConfirm": "Zapisz i zatwierdź",
+        "confirmAndNext": "Zatwierdź i dalej"
+      },
+      "name": "Nazwa",
+      "namePlaceholder": "np. cebula",
+      "nameTaken": "Taka nazwa albo alias już jest: „{{name}}”.",
+      "aliases": "Aliasy",
+      "aliasInput": "Nowy alias",
+      "aliasPlaceholder": "Dodaj i Enter",
+      "aliasesHint": "Inne nazwy tego samego składnika. Wyszukiwarka i agent je rozpoznają.",
+      "aliasTaken": "„{{alias}}” to już nazwa albo alias składnika „{{name}}”.",
+      "aliasRepeated": "Ten składnik już ma taką nazwę.",
+      "aliasTooMany": "Składnik może mieć najwyżej {{max}} aliasów.",
+      "removeAlias": "Usuń alias {{alias}}",
+      "category": "Kategoria",
+      "categoryHint": "Według kategorii układa się lista zakupów.",
+      "baseUnit": "Jednostka bazowa",
+      "baseUnitHint": "W tej jednostce sumują się ilości na liście zakupów.",
+      "baseUnitKind": {
+        "g": "waga",
+        "ml": "objętość",
+        "piece": "sztuki"
+      },
+      "staple": "Podstawowy",
+      "stapleHint": "Zwykle w domu, jak sól czy olej. Nie trafia na listy z planu.",
+      "conversions": {
+        "title": "Przeliczniki",
+        "none": "Bez przelicznika ilości w innych jednostkach nie dodadzą się do {{base}}, tylko trafią na listę osobno.",
+        "unit": "Jednostka",
+        "unitPlaceholder": "jednostka",
+        "amount": "Ilość w {{base}}",
+        "add": "Dodaj",
+        "remove": "Usuń przelicznik {{unit}}",
+        "pickUnit": "Wybierz jednostkę.",
+        "amountPositive": "Ilość musi być większa od zera.",
+        "amountInvalid": "Najwyżej 4 miejsca po przecinku i nie więcej niż 1 000 000.",
+        "builtIn": "Wbudowane, zawsze działają: {{list}}.",
+        "builtInNone": "Sztuki nie mają wbudowanych przeliczników."
+      },
+      "usage": {
+        "title": "Gdzie używany",
+        "unused": "Nigdzie. Możesz go usunąć.",
+        "loadFailed": "Nie udało się sprawdzić, gdzie jest używany.",
+        "module": {
+          "recipes": "Przepisy",
+          "shopping": "Listy zakupów",
+          "household": "Nie jemy"
+        },
+        "count": {
+          "recipes": "{count, plural, one {# przepis} few {# przepisy} many {# przepisów} other {# przepisu}}",
+          "shopping": "{count, plural, one {# lista zakupów} few {# listy zakupów} many {# list zakupów} other {# listy zakupów}}",
+          "household": "Nie jemy",
+          "other": "{{module}}: {{count}}"
+        }
+      },
+      "unsaved": "Niezapisane zmiany",
+      "delete": "Usuń",
+      "cancel": "Anuluj",
+      "save": "Zapisz",
+      "add": "Dodaj składnik",
+      "saveFailed": "Nie udało się zapisać składnika. Spróbuj ponownie.",
+      "invalid": "Niektóre pola są niepoprawne. Sprawdź je i spróbuj ponownie."
+    },
+    "dialog": {
+      "baseUnit": {
+        "title": "Zmienić jednostkę na {{unit}}?",
+        "text": "Przeliczniki są zapisane w {{base}} i zostaną usunięte: {{list}}.",
+        "note": "Zmiana zapisze się razem z resztą formularza.",
+        "cancel": "Anuluj",
+        "confirm": "Zmień jednostkę"
+      },
+      "delete": {
+        "title": "Usunąć „{{name}}”?",
+        "text": "Nigdzie go nie używasz. Tego nie da się cofnąć.",
+        "cancel": "Anuluj",
+        "confirm": "Usuń",
+        "failed": "Nie udało się usunąć składnika. Spróbuj ponownie."
+      },
+      "inUse": {
+        "title": "Nie można usunąć „{{name}}”",
+        "label": "Jest używany",
+        "text": "Jeśli to duplikat innego składnika, połącz je. Odwołania przejdą na ten, który zostaje.",
+        "close": "Zamknij"
+      },
+      "discard": {
+        "title": "Odrzucić zmiany?",
+        "text": "Zmiany w „{{name}}” nie są zapisane.",
+        "textNew": "Nowy składnik nie jest zapisany.",
+        "keep": "Wróć do edycji",
+        "discard": "Odrzuć"
+      }
+    },
+    "toast": {
+      "added": "Dodano składnik",
+      "saved": "Zapisano składnik",
+      "confirmed": "Zatwierdzono",
+      "deleted": "Usunięto składnik"
+    }
   },
   "catalog": {
     "category": {

@@ -74,12 +74,14 @@
     "mainNavigation": "Main navigation",
     "account": "Account",
     "myAccount": "My account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "needsReviewBadge": "{count, plural, one {# needs review} other {# need review}}"
   },
   "nav": {
     "planner": "Plan",
     "recipes": "Recipes",
     "shopping": "Shopping",
+    "ingredients": "Ingredients",
     "household": "Household"
   },
   "emptyState": {
@@ -490,6 +492,162 @@
       "action": "Go to the plan"
     },
     "signIn": "Go to sign-in"
+  },
+  "ingredients": {
+    "title": "Ingredients",
+    "new": "New",
+    "search": "Search ingredients",
+    "searchPlaceholder": "Search names and aliases",
+    "filters": "Filters",
+    "filter": {
+      "needsReview": "Needs review",
+      "staples": "Staples",
+      "category": "Category",
+      "allCategories": "All categories"
+    },
+    "count": "{count, plural, one {# ingredient} other {# ingredients}}",
+    "countOf": "{count, plural, one {# ingredient} other {# ingredients}} (of {total})",
+    "clear": "Clear",
+    "clearFilters": "Clear filters",
+    "loadFailed": "Ingredients could not be loaded.",
+    "retry": "Try again",
+    "tidy": {
+      "title": "Tidy up",
+      "review": "{count, plural, one {# ingredient to review} other {# ingredients to review}}",
+      "startReview": "Review",
+      "showAll": "Show all"
+    },
+    "row": {
+      "baseUnit": "Base unit"
+    },
+    "badge": {
+      "needsReview": "needs review",
+      "staple": "staple"
+    },
+    "noResults": {
+      "search": "Nothing matches \"{{query}}\".",
+      "filters": "Nothing matches the filters.",
+      "add": "Add \"{{query}}\""
+    },
+    "reviewDone": {
+      "title": "All reviewed",
+      "text": "New ingredients from the agent and recipes show up here."
+    },
+    "empty": {
+      "title": "Ingredients show up on their own",
+      "description": "Every ingredient from a new recipe lands here. The agent adds them too, and you review them later.",
+      "action": "Add an ingredient",
+      "agentHint": "Ask Claude: \"Add a courgette stew recipe to Pantry.\""
+    },
+    "nothingSelected": "Pick an ingredient from the list.",
+    "back": "Ingredients",
+    "detail": {
+      "newTitle": "New ingredient",
+      "baseUnitFact": "unit {{unit}}",
+      "loadFailed": "The ingredient could not be loaded.",
+      "gone": "This ingredient no longer exists.",
+      "review": {
+        "title": "Needs review",
+        "text": "Added automatically, by the agent or from a recipe. Check the category and base unit.",
+        "confirm": "Confirm",
+        "saveAndConfirm": "Save and confirm",
+        "confirmAndNext": "Confirm and next"
+      },
+      "name": "Name",
+      "namePlaceholder": "e.g. onion",
+      "nameTaken": "This name or alias already exists: \"{{name}}\".",
+      "aliases": "Aliases",
+      "aliasInput": "New alias",
+      "aliasPlaceholder": "Type and press Enter",
+      "aliasesHint": "Other names for the same ingredient. Search and the agent recognise them.",
+      "aliasTaken": "\"{{alias}}\" is already the name or an alias of \"{{name}}\".",
+      "aliasRepeated": "This ingredient already has that name.",
+      "aliasTooMany": "An ingredient can have at most {{max}} aliases.",
+      "removeAlias": "Remove the alias {{alias}}",
+      "category": "Category",
+      "categoryHint": "Shopping lists are grouped by category.",
+      "baseUnit": "Base unit",
+      "baseUnitHint": "Shopping list amounts are added up in this unit.",
+      "baseUnitKind": {
+        "g": "weight",
+        "ml": "volume",
+        "piece": "pieces"
+      },
+      "staple": "Staple",
+      "stapleHint": "Usually at home, like salt or oil. Left off lists from the plan.",
+      "conversions": {
+        "title": "Conversions",
+        "none": "Without a conversion, amounts in other units are not added to {{base}}; they go on the list separately.",
+        "unit": "Unit",
+        "unitPlaceholder": "unit",
+        "amount": "Amount in {{base}}",
+        "add": "Add",
+        "remove": "Remove the {{unit}} conversion",
+        "pickUnit": "Pick a unit.",
+        "amountPositive": "The amount must be greater than zero.",
+        "amountInvalid": "Use at most 4 decimal places and no more than 1,000,000.",
+        "builtIn": "Built in, always work: {{list}}.",
+        "builtInNone": "Pieces have no built-in conversions."
+      },
+      "usage": {
+        "title": "Where it is used",
+        "unused": "Nowhere. You can delete it.",
+        "loadFailed": "Could not check where it is used.",
+        "module": {
+          "recipes": "Recipes",
+          "shopping": "Shopping lists",
+          "household": "We don't eat"
+        },
+        "count": {
+          "recipes": "{count, plural, one {# recipe} other {# recipes}}",
+          "shopping": "{count, plural, one {# shopping list} other {# shopping lists}}",
+          "household": "We don't eat",
+          "other": "{{module}}: {{count}}"
+        }
+      },
+      "unsaved": "Unsaved changes",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "add": "Add ingredient",
+      "saveFailed": "The ingredient could not be saved. Try again.",
+      "invalid": "Some fields are not right. Check them and try again."
+    },
+    "dialog": {
+      "baseUnit": {
+        "title": "Change the base unit to {{unit}}?",
+        "text": "Conversions are stored in {{base}} and will be removed: {{list}}.",
+        "note": "The change is saved with the rest of the form.",
+        "cancel": "Cancel",
+        "confirm": "Change unit"
+      },
+      "delete": {
+        "title": "Delete \"{{name}}\"?",
+        "text": "It is not used anywhere. This cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "failed": "The ingredient could not be deleted. Try again."
+      },
+      "inUse": {
+        "title": "Can't delete \"{{name}}\"",
+        "label": "It is in use",
+        "text": "If it duplicates another ingredient, merge them. References move to the one you keep.",
+        "close": "Close"
+      },
+      "discard": {
+        "title": "Discard changes?",
+        "text": "Changes to \"{{name}}\" are not saved.",
+        "textNew": "The new ingredient is not saved.",
+        "keep": "Keep editing",
+        "discard": "Discard"
+      }
+    },
+    "toast": {
+      "added": "Ingredient added",
+      "saved": "Ingredient saved",
+      "confirmed": "Confirmed",
+      "deleted": "Ingredient deleted"
+    }
   },
   "catalog": {
     "category": {

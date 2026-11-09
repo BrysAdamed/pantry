@@ -126,6 +126,8 @@
 
   --color-ingredient-review: var(--info);
   --color-ingredient-review-surface: var(--info-surface);
+  --color-ingredient-duplicate: var(--warning);
+  --color-ingredient-duplicate-surface: var(--warning-surface);
 
   --color-sync-online: var(--success);
   --color-sync-offline: var(--warning);
@@ -158,6 +160,10 @@
   h3 {
     @apply font-display font-extrabold tracking-tight;
   }
+}
+
+.app-dialog-backdrop {
+  background: rgb(20 12 22 / 0.45);
 }
 
 @media (prefers-reduced-motion: reduce) {

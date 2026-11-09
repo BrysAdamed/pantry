@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export type EmptyStateIllustration = 'planner' | 'recipes' | 'lists' | 'household';
+export type EmptyStateIllustration = 'planner' | 'recipes' | 'lists' | 'household' | 'ingredients';
 
 /**
  * Empty state from docs/design/empty-states.html: illustration, heading naming the goal, one sentence,
@@ -49,6 +49,12 @@ export type EmptyStateIllustration = 'planner' | 'recipes' | 'lists' | 'househol
           <path d="M20 54L66 16l46 38v42a6 6 0 0 1-6 6H26a6 6 0 0 1-6-6z" fill="var(--ill-fill)" stroke="var(--ill-ink)" stroke-linejoin="round" />
           <path d="M36 62h18M36 74h12" stroke="var(--ill-ink)" stroke-linecap="round" opacity=".5" />
           <rect x="70" y="62" width="24" height="40" rx="5" fill="var(--accent)" stroke="var(--ill-ink)" />
+        }
+        @case ('ingredients') {
+          <rect x="22" y="14" width="88" height="88" rx="24" fill="var(--ill-fill)" stroke="var(--ill-ink)" />
+          <path d="M76 50L42 84a5 5 0 0 1-7-7l34-34" fill="var(--accent)" stroke="var(--ill-ink)" stroke-linejoin="round" />
+          <path d="M69 43a10 10 0 0 1 14 14" fill="none" stroke="var(--ill-ink)" />
+          <path d="M80 46l14-14M77 37l5-9M89 49l9-5" stroke="var(--ill-ink)" stroke-linecap="round" />
         }
       }
     </svg>

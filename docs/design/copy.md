@@ -139,6 +139,7 @@ Labels for the catalog (`ingredients.html`, PAN-29). Category and unit labels co
 | Review banner title | Do sprawdzenia | Needs review |
 | Review banner text (agent) | Dodany automatycznie przez agenta {date} z przepisu „{recipe}”. Sprawdź kategorię i jednostkę bazową. | Added automatically by the agent on {date} from the recipe "{recipe}". Check the category and base unit. |
 | Review banner text (recipe editor) | Dodany automatycznie w edytorze przepisu {date} … | Added automatically in the recipe editor on {date} … |
+| Review banner text (until the catalog records who added it) | Dodany automatycznie, przez agenta albo z przepisu. Sprawdź kategorię i jednostkę bazową. | Added automatically, by the agent or from a recipe. Check the category and base unit. |
 | Confirm | Zatwierdź / Zapisz i zatwierdź | Confirm / Save and confirm |
 | Confirm and next | Zatwierdź i dalej | Confirm and next |
 | Duplicate banner title | Możliwy duplikat: „{name}” | Possible duplicate: "{name}" |
@@ -171,6 +172,7 @@ Labels for the catalog (`ingredients.html`, PAN-29). Category and unit labels co
 | Base unit change | Zmienić jednostkę na {unit}? · Przeliczniki są zapisane w {base} i zostaną usunięte: {list}. · Zmiana zapisze się razem z resztą formularza. · [Anuluj] [Zmień jednostkę] | Change the base unit to {unit}? · Conversions are stored in {base} and will be removed: {list}. · The change is saved with the rest of the form. · [Cancel] [Change unit] |
 | Delete unused | Usunąć „{name}”? · Nigdzie go nie używasz. Tego nie da się cofnąć. · [Anuluj] [Usuń] | Delete "{name}"? · It is not used anywhere. This cannot be undone. · [Cancel] [Delete] |
 | Delete used | Nie można usunąć „{name}” · Jest używany · {usage}. · Jeśli to duplikat innego składnika, połącz je. Odwołania przejdą na ten, który zostaje. · [Zamknij] [Połącz z…] | Can't delete "{name}" · It is in use · {usage}. · If it duplicates another ingredient, merge them. References move to the one you keep. · [Close] [Merge with…] |
+| Leaving unsaved changes | Odrzucić zmiany? · Zmiany w „{name}” nie są zapisane. / Nowy składnik nie jest zapisany. · [Wróć do edycji] [Odrzuć] | Discard changes? · Changes to "{name}" are not saved. / The new ingredient is not saved. · [Keep editing] [Discard] |
 | Duplicates view | Możliwe duplikaty · Pary o podobnych nazwach. Połącz je albo oznacz, że to różne składniki, a para już nie wróci. | Possible duplicates · Pairs with similar names. Merge them or mark them as different, and the pair will not come back. |
 | No duplicates | Brak duplikatów · Katalog jest uporządkowany. | No duplicates · The catalog is tidy. |
 | Merge step 1 | Połącz składniki · 1 z 2 · Z czym połączyć „{name}”? · Wybierz składnik, który oznacza to samo. W następnym kroku zdecydujesz, który zostaje. | Merge ingredients · 1 of 2 · Merge "{name}" with what? · Pick the ingredient that means the same. Next you choose which one stays. |

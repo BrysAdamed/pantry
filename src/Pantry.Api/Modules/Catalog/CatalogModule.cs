@@ -30,6 +30,7 @@ public static class CatalogModule
         var ingredients = catalog.MapGroup("/ingredients");
         ingredients.MapGetIngredients();
         ingredients.MapGetIngredient();
+        ingredients.MapGetIngredientReferences();
         ingredients.MapCreateIngredient();
         ingredients.MapUpdateIngredient();
         ingredients.MapResolveIngredient();

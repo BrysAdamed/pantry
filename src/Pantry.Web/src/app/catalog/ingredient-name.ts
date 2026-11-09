@@ -31,6 +31,25 @@ export function findInName(text: string, query: string): TextMatch | null {
   return { start: origins[at], end: origins[at + key.length - 1] + 1 };
 }
 
+/** A piece of a name, `matched` when it is the part a search found. */
+export interface TextPart {
+  readonly text: string;
+  readonly matched: boolean;
+}
+
+/** `text` split around where `query` matches it (`findInName`), for marking the match. */
+export function markMatch(text: string, query: string): TextPart[] {
+  const match = findInName(text, query);
+  if (!match) {
+    return [{ text, matched: false }];
+  }
+  return [
+    { text: text.slice(0, match.start), matched: false },
+    { text: text.slice(match.start, match.end), matched: true },
+    { text: text.slice(match.end), matched: false },
+  ].filter((part) => part.text);
+}
+
 function folded(text: string): { text: string; origins: number[] } {
   let result = '';
   const origins: number[] = [];

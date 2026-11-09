@@ -3,7 +3,7 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { EmptyState, EmptyStateIllustration } from '../shared/empty-state/empty-state';
 import { Destination } from './destinations';
 
-export type PlaceholderDestination = Exclude<Destination, 'household'>;
+export type PlaceholderDestination = Exclude<Destination, 'household' | 'ingredients'>;
 
 const PLACEHOLDERS: Record<PlaceholderDestination, { illustration: EmptyStateIllustration; agentHint: boolean }> = {
   planner: { illustration: 'planner', agentHint: true },
