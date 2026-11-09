@@ -62,6 +62,8 @@ dotnet ef migrations add <Name> --project src/Pantry.Api --context CatalogDbCont
 - Tailwind CSS v4 and Spartan UI. Spartan's styled (helm) components are copied into `src/app/shared/ui/` and imported as `@spartan-ng/helm/<name>`. Add one with `npx ng g @spartan-ng/cli:ui <name>`. Design tokens come from E2.
 - Angular CDK for drag and drop in the planner.
 - Feature folders mirror backend modules: `src/app/<feature>/`. App-wide services live in `src/app/core/`.
+- The shell (`src/app/shell/`) frames every screen: an icon rail from the `md` breakpoint (768px) up, a header with sync state and avatar plus bottom tabs below it. Each destination (`planner`, `recipes`, `shopping`, `household`) is a lazy route that loads `src/app/<feature>/<feature>.routes.ts`; until its epic lands, that file shows the feature's empty state.
+- Menus and popovers use Angular CDK overlays (ADR 0009) with a focus trap and Escape to close.
 - i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it).
 - PWA: `@angular/service-worker`. Offline writes (shopping lists only) queue in IndexedDB.
 
