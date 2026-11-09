@@ -1,7 +1,8 @@
 import { registerLocaleData } from '@angular/common';
 import localePl from '@angular/common/locales/pl';
 import { EnvironmentProviders, inject, isDevMode, provideAppInitializer, Provider } from '@angular/core';
-import { provideTransloco } from '@jsverse/transloco';
+import { provideTransloco, TRANSLOCO_TRANSPILER } from '@jsverse/transloco';
+import { IcuTranspiler } from './icu-transpiler';
 import { TranslationLoader } from './translation-loader';
 import { DEFAULT_UI_LANGUAGE, UI_LANGUAGES } from './ui-language';
 import { UiLanguageService } from './ui-language.service';
@@ -25,6 +26,7 @@ export function provideI18n(): (Provider | EnvironmentProviders)[] {
       },
       loader: TranslationLoader,
     }),
+    { provide: TRANSLOCO_TRANSPILER, useClass: IcuTranspiler },
     provideAppInitializer(() => inject(UiLanguageService).init()),
   ];
 }

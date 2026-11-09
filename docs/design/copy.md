@@ -24,7 +24,7 @@ How the app talks, in Polish and English. Labels live in `src/Pantry.Web/public/
   | Czy jesteś pewien? | Na pewno? / Usunąć przepis? |
 
 - **Plurals have three forms** (1 propozycja, 2 propozycje, 5 propozycji; 22 propozycje, 25 propozycji). Never hardcode "(y)" or build plurals by hand in templates; use ICU plural messages in the translation files.
-- **Numbers and units:** decimal comma (2,3 porcji), space before units (200 g, 1,5 l), no space in "°C". Fractional amounts take the genitive singular: "2,5 ząbka", "0,5 łyżki".
+- **Numbers and units:** decimal comma (2,3 porcji), space before units (200 g, 1,5 l), no space in "°C". Fractional amounts take the genitive singular: "2,5 ząbka", "0,5 łyżki". From 1000 g or ml up, write kg or l ("1,5 kg"); amounts in units that do not add up are joined with a plus ("3 szt. + 300 g"). The `quantity` pipe does all of this.
 - **Dates:** day and short month in lowercase, "9 lis", "pn 9"; weekdays in lowercase. Use Angular's locale pipes, never hand-formatted strings.
 - **Buttons are verbs in the imperative:** Dodaj, Zapisz, Akceptuj, Odrzuć, Unieważnij. Not "Dodawanie", not "OK".
 - **Quotes:** Polish quotation marks „…”.
