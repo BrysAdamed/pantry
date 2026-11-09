@@ -16,6 +16,13 @@ interface MealSlot {
   isEnabled: boolean;
 }
 
+interface PlanningRule {
+  id: string;
+  text: string;
+  position: number;
+  isEnabled: boolean;
+}
+
 const sections = ['Members', 'Meals', "We don't eat", 'Planning rules', 'Content language', 'Access tokens', 'My account'];
 
 async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'admin' | 'user' = 'admin') {
@@ -83,6 +90,43 @@ async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'ad
     Object.assign(slot, field === 'name' ? request.postDataJSON() : { isEnabled: request.postDataJSON().isEnabled });
     return route.fulfill({ json: slot });
   });
+  const rules: PlanningRule[] = [
+    { id: 'r0', text: 'Weekday dinners under 30 minutes', position: 0, isEnabled: true },
+    { id: 'r1', text: 'No deep frying', position: 1, isEnabled: false },
+  ];
+  await page.route('/api/household/planning-rules**', async (route) => {
+    const request = route.request();
+    const [, , , , id, field] = new URL(request.url()).pathname.split('/');
+    if (request.method() === 'GET') {
+      return route.fulfill({ json: [...rules].sort((a, b) => a.position - b.position) });
+    }
+    if (request.method() === 'POST') {
+      const rule: PlanningRule = { id: `r${rules.length}`, position: rules.length, isEnabled: true, ...request.postDataJSON() };
+      rules.push(rule);
+      return route.fulfill({ status: 201, json: rule });
+    }
+    if (id === 'order') {
+      (request.postDataJSON().planningRuleIds as string[]).forEach((ruleId, position) => {
+        rules.find((r) => r.id === ruleId)!.position = position;
+      });
+      return route.fulfill({ status: 204 });
+    }
+    const index = rules.findIndex((r) => r.id === id);
+    if (request.method() === 'DELETE') {
+      rules.splice(index, 1);
+      rules.sort((a, b) => a.position - b.position).forEach((r, position) => (r.position = position));
+      return route.fulfill({ status: 204 });
+    }
+    Object.assign(rules[index], field === 'text' ? request.postDataJSON() : { isEnabled: request.postDataJSON().isEnabled });
+    return route.fulfill({ json: rules[index] });
+  });
+  const contentLanguage: { contentLanguage: string } = { contentLanguage: language };
+  await page.route('/api/household/content-language', async (route) => {
+    if (route.request().method() === 'PUT') {
+      contentLanguage.contentLanguage = route.request().postDataJSON().contentLanguage;
+    }
+    return route.fulfill({ json: contentLanguage });
+  });
   await page.addInitScript((lang) => localStorage.setItem('pantry.uiLanguage', lang), language);
 }
 
@@ -98,9 +142,9 @@ test('shows the section list next to the open section on wide screens', async ({
   await expect(list.getByRole('link', { name: /^Members/ })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('heading', { level: 2, name: 'Members' })).toBeVisible();
 
-  await list.getByRole('link', { name: /^Planning rules/ }).click();
-  await expect(page).toHaveURL('/household/rules');
-  await expect(page.getByRole('heading', { level: 2, name: 'Planning rules' })).toBeVisible();
+  await list.getByRole('link', { name: /^We don't eat/ }).click();
+  await expect(page).toHaveURL('/household/dislikes');
+  await expect(page.getByRole('heading', { level: 2, name: "We don't eat" })).toBeVisible();
   await expect(page.getByTestId('section-placeholder')).toBeVisible();
   await expect(list).toBeVisible();
 });
@@ -224,4 +268,44 @@ test('keeps the last meal in the plan', async ({ page }) => {
 
   await expect(page.getByRole('switch', { name: 'Dinner w planie' })).toBeDisabled();
   await expect(page.getByTestId('meal-slots-note')).toContainText('Co najmniej jeden posiłek zostaje w planie.');
+});
+
+test('adds, switches off, reorders and removes planning rules', async ({ page }) => {
+  await mockHousehold(page);
+  await page.goto('/household/rules');
+  const texts = page.getByTestId('planning-rule').getByRole('textbox');
+  await expect(texts).toHaveCount(2);
+  await expect(page.getByTestId('planning-rules-note')).toHaveText('Rules the agent reads: 1.');
+
+  await page.getByRole('textbox', { name: 'New rule', exact: true }).fill('Fish at least once a week');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await expect(texts).toHaveCount(3);
+  await page.getByRole('switch', { name: 'Rule 1 on', exact: true }).click();
+  await expect(page.getByTestId('planning-rules-note')).toHaveText('Rules the agent reads: 1.');
+  await page.getByRole('button', { name: 'Move rule 3 up', exact: true }).click();
+  await expect(texts.nth(1)).toHaveValue('Fish at least once a week');
+
+  await page.getByRole('button', { name: 'Remove rule 3', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove', exact: true }).click();
+  await expect(texts).toHaveCount(2);
+
+  await page.reload();
+  await expect
+    .poll(() => texts.evaluateAll((inputs) => inputs.map((input) => (input as HTMLTextAreaElement).value)))
+    .toEqual(['Weekday dinners under 30 minutes', 'Fish at least once a week']);
+  await expect(page.getByRole('switch', { name: 'Rule 1 on', exact: true })).toHaveAttribute('aria-checked', 'false');
+});
+
+test('picks the content language independently of the interface language', async ({ page }) => {
+  await mockHousehold(page, 'pl');
+  await page.goto('/household/language');
+  await expect(page.getByRole('heading', { level: 2, name: 'Język treści' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: /Polski/ })).toBeChecked();
+
+  await page.getByRole('radio', { name: /Deutsch/ }).check();
+  await expect(page.getByRole('radio', { name: /Deutsch/ })).toBeChecked();
+
+  await page.reload();
+  await expect(page.getByRole('radio', { name: /Deutsch/ })).toBeChecked();
+  await expect(page.getByRole('heading', { level: 2, name: 'Język treści' })).toBeVisible();
 });

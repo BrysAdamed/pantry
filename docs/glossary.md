@@ -25,7 +25,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Quantities without a conversion are not summed into the base unit. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |
 | **Dislike** | A household-wide ingredient preference: *never* (allergy, hard no) or *avoid*. |
-| **Planning rule** | A free-text or structured rule agents follow when planning (e.g. weekday dinners under 30 minutes). |
+| **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |
 | **Rating** | Household feedback on a recipe after it was eaten, plus a *make again* flag. |
 | **Cooldown** | Minimum time before a favourite should be planned again. |
 | **Shopping list** | A named list of items. Either *generated* from the plan for a date range or *general* (drugstore, pets...). |
@@ -34,7 +34,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Cart run** | An agent filling the online shop cart from an order. Happens outside the app. |
 | **Cart run report** | Per-item result of a cart run: *added*, *quantity changed*, *substituted*, *missing*. |
 | **Product memory** | Which shop product was used for an ingredient last time. Shop-agnostic text and URL. |
-| **Content language** | Household setting telling agents which language to write recipes and items in. |
+| **Content language** | Household setting telling agents which language to write recipes and items in (*Język treści*). A BCP 47 code from a short supported list (`pl`, `en`, `de`, ...); the first run sets it from the admin's UI language. Changing it translates nothing that exists. |
 | **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
 | **Theme** | Light or dark look of the app (*Motyw*). Follows the system unless the user picks one. |
 | **Passkey** | The sign-in credential (*Klucz dostępu*) stored by the phone or computer. No passwords (ADR 0004). A user can have several and manages them in *My account*; the last one cannot be removed. |

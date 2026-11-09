@@ -24,9 +24,25 @@ internal sealed class HouseholdModuleContract(HouseholdDbContext db, DbContextOp
             .Select(s => new HouseholdMealSlot(s.Id, s.Name))
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<HouseholdPlanningRule>> GetEnabledPlanningRulesAsync(CancellationToken cancellationToken = default) =>
+        await db.PlanningRules.AsNoTracking()
+            .Where(r => r.IsEnabled)
+            .OrderBy(r => r.Position)
+            .Select(r => new HouseholdPlanningRule(r.Id, r.Text))
+            .ToListAsync(cancellationToken);
+
+    public async Task<ContentLanguage> GetContentLanguageAsync(CancellationToken cancellationToken = default)
+    {
+        var household = await db.Households.AsNoTracking().SingleAsync(cancellationToken);
+        return household.ContentLanguage ?? ContentLanguage.Default;
+    }
+
     public async Task CompleteFirstRunAsync(FirstRunAdmin admin, DbTransaction transaction, CancellationToken cancellationToken = default)
     {
         await using var joined = await JoinAsync(transaction, cancellationToken);
+
+        var household = await joined.Households.SingleAsync(cancellationToken);
+        household.ContentLanguage ??= admin.Language;
 
         if (!await joined.Members.AnyAsync(m => m.UserId == admin.UserId, cancellationToken))
         {
@@ -36,7 +52,7 @@ internal sealed class HouseholdModuleContract(HouseholdDbContext db, DbContextOp
 
         if (!await joined.MealSlots.AnyAsync(cancellationToken))
         {
-            joined.MealSlots.AddRange(MealSlot.CreateDefaults(admin.Language));
+            joined.MealSlots.AddRange(MealSlot.CreateDefaults(household.ContentLanguage));
         }
 
         await joined.SaveChangesAsync(cancellationToken);

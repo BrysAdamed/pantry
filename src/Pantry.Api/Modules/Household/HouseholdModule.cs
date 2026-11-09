@@ -1,6 +1,8 @@
 using Pantry.Api.Infrastructure.Database;
+using Pantry.Api.Modules.Household.Features.Language;
 using Pantry.Api.Modules.Household.Features.MealSlots;
 using Pantry.Api.Modules.Household.Features.Members;
+using Pantry.Api.Modules.Household.Features.PlanningRules;
 using Pantry.Api.Modules.Household.Persistence;
 
 namespace Pantry.Api.Modules.Household;
@@ -29,6 +31,18 @@ public static class HouseholdModule
         mealSlots.MapReorderMealSlots();
         mealSlots.MapRenameMealSlot();
         mealSlots.MapSetMealSlotEnabled();
+
+        var planningRules = api.MapGroup("/household/planning-rules");
+        planningRules.MapGetPlanningRules();
+        planningRules.MapAddPlanningRule();
+        planningRules.MapReorderPlanningRules();
+        planningRules.MapEditPlanningRule();
+        planningRules.MapSetPlanningRuleEnabled();
+        planningRules.MapDeletePlanningRule();
+
+        var contentLanguage = api.MapGroup("/household/content-language");
+        contentLanguage.MapGetContentLanguage();
+        contentLanguage.MapSetContentLanguage();
         return api;
     }
 }

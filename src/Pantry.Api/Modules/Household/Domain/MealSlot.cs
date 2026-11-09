@@ -21,7 +21,10 @@ public sealed class MealSlot
 
     public static bool IsValidName(string name) => name.Length is > 0 and <= NameMaxLength;
 
-    /// <summary>The slots a new household starts with, named in <paramref name="language"/>. Afterwards the names are household data.</summary>
+    /// <summary>
+    /// The slots a new household starts with, named in <paramref name="language"/>, or in English when there are no
+    /// built-in names for it. Afterwards the names are household data.
+    /// </summary>
     public static IReadOnlyList<MealSlot> CreateDefaults(ContentLanguage language) =>
-        DefaultNames[language].Select((name, position) => new MealSlot { Name = name, Position = position }).ToList();
+        DefaultNames.GetValueOrDefault(language, DefaultNames[ContentLanguage.En]).Select((name, position) => new MealSlot { Name = name, Position = position }).ToList();
 }

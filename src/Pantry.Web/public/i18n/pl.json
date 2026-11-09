@@ -270,6 +270,42 @@
         "done": "Inne urządzenia są wylogowane.",
         "failed": "Nie udało się wylogować innych urządzeń. Sprawdź połączenie i spróbuj jeszcze raz."
       }
+    },
+    "rules": {
+      "intro": "Krótkie zdania, które agent czyta przed planowaniem. Wyłączona zasada zostaje na później.",
+      "textLabel": "Zasada {{number}}",
+      "moveUp": "Zasada {{number}} w górę",
+      "moveDown": "Zasada {{number}} w dół",
+      "enabled": "Zasada {{number}} włączona",
+      "delete": "Usuń zasadę {{number}}",
+      "confirmDelete": "Usunąć zasadę {{number}}?",
+      "cancel": "Anuluj",
+      "confirm": "Usuń",
+      "newText": "Nowa zasada",
+      "newTextPlaceholder": "np. Słodkie śniadanie tylko w weekend",
+      "add": "Dodaj",
+      "empty": "Nie ma jeszcze zasad. Agent planuje bez dodatkowych wskazówek.",
+      "agentReads": "Zasady czytane przez agenta: {{count}}.",
+      "loadFailed": "Nie udało się wczytać zasad. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "language": {
+      "intro": "W tym języku agent pisze przepisy, nazwy pozycji na listach i notatki. Język przycisków i menu każdy wybiera sam w swoim koncie.",
+      "note": "Zmiana nie tłumaczy istniejących przepisów. Agent może to zrobić, jeśli go poprosisz.",
+      "options": {
+        "pl": { "name": "Polski", "description": "Przepisy i listy po polsku" },
+        "en": { "name": "English", "description": "Przepisy i listy po angielsku" },
+        "de": { "name": "Deutsch", "description": "Przepisy i listy po niemiecku" },
+        "fr": { "name": "Français", "description": "Przepisy i listy po francusku" },
+        "es": { "name": "Español", "description": "Przepisy i listy po hiszpańsku" },
+        "it": { "name": "Italiano", "description": "Przepisy i listy po włosku" },
+        "cs": { "name": "Čeština", "description": "Przepisy i listy po czesku" },
+        "uk": { "name": "Українська", "description": "Przepisy i listy po ukraińsku" }
+      },
+      "loadFailed": "Nie udało się wczytać języka treści. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
     }
   },
   "signIn": {
