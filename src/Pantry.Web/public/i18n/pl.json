@@ -802,8 +802,78 @@
     }
   },
   "recipes": {
+    "detail": {
+      "back": "Przepisy",
+      "edit": "Edytuj",
+      "addToPlan": "Do planu",
+      "time": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "ratingLabel": "Ocena {{rating}} na 5",
+      "notRated": "Bez oceny",
+      "lastEaten": "Ostatnio: {{date}}",
+      "neverEaten": "Jeszcze nie jedliście",
+      "source": "Źródło",
+      "favourite": "ulubione",
+      "avoidBadge": "unikamy: {{names}}",
+      "tooSoon": "za wcześnie, najlepiej od {{date}}",
+      "archived": {
+        "title": "Przepis w archiwum",
+        "text": "Nie ma go w bibliotece, w szufladzie dań ani w propozycjach agenta. Historia i plan nadal go pokazują."
+      },
+      "restore": "Przywróć",
+      "archive": "Przenieś do archiwum",
+      "never": {
+        "text": "Zawiera: {{names}}. U Was na liście „nigdy”. Agent nie zaproponuje tego przepisu, a do planu dodasz go tylko świadomie.",
+        "textWithReason": "Zawiera: {{names}}. U Was na liście „nigdy” ({{reason}}). Agent nie zaproponuje tego przepisu, a do planu dodasz go tylko świadomie."
+      },
+      "actionFailed": "Nie udało się zapisać zmiany. Spróbuj jeszcze raz.",
+      "ingredients": "Składniki",
+      "servingsLabel": "Liczba porcji",
+      "fewerServings": "Mniej porcji",
+      "moreServings": "Więcej porcji",
+      "scaledFor": "{count, plural, one {Przeliczone na {servings} porcję.} few {Przeliczone na {servings} porcje.} many {Przeliczone na {servings} porcji.} other {Przeliczone na {servings} porcji.}}",
+      "backToHousehold": "Wróć do porcji domowych",
+      "forHousehold": "Na porcje domowe ({{servings}}).",
+      "toTaste": "do smaku",
+      "unknownIngredient": "składnik usunięty z katalogu",
+      "dislike": {
+        "never": "nigdy",
+        "avoid": "unikamy"
+      },
+      "noIngredients": "Ten przepis nie ma jeszcze składników.",
+      "steps": "Przygotowanie",
+      "noSteps": "Ten przepis nie ma jeszcze kroków.",
+      "nutrition": "Wartości odżywcze",
+      "nutrient": {
+        "kcal": "kcal",
+        "protein": "białko",
+        "fat": "tłuszcz",
+        "carbs": "węglowodany"
+      },
+      "perServing": "Na 1 porcję.",
+      "noNutrition": "Ten przepis nie ma danych o wartościach odżywczych. Dni z nim w planie są oznaczone jako niepełne.",
+      "history": "Historia i ocena",
+      "ratingCount": "{count, plural, one {# ocena} few {# oceny} many {# ocen} other {# oceny}}",
+      "entryNotRated": "bez oceny",
+      "noHistory": "Jeszcze nie jedliście tego dania.",
+      "makeAgain": "Ugotować znowu",
+      "makeAgainYes": "Agent może proponować to danie.",
+      "makeAgainNo": "Nie gotujemy znowu, agent je pomija.",
+      "toast": {
+        "archived": "Przepis przeniesiony do archiwum",
+        "restored": "Przepis przywrócony"
+      },
+      "gone": "Nie ma takiego przepisu.",
+      "loadFailed": "Nie udało się wczytać przepisu.",
+      "retry": "Spróbuj ponownie",
+      "loading": "Wczytywanie…"
+    },
     "editor": {
       "back": "Przepisy",
+      "backToRecipe": "Wróć do przepisu",
       "newTitle": "Nowy przepis",
       "editTitle": "Edycja przepisu",
       "name": "Nazwa",

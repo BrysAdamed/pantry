@@ -30,7 +30,10 @@ export type IconName =
   | 'sparkle'
   | 'alert'
   | 'merge'
-  | 'twins';
+  | 'twins'
+  | 'edit'
+  | 'repeat'
+  | 'archive';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
 @Component({
@@ -161,7 +164,19 @@ export type IconName =
           <circle cx="8" cy="12" r="4" />
           <circle cx="16" cy="12" r="4" />
         }
-      }
+        @case ('edit') {
+          <path d="M4 20h4L19 9l-4-4L4 16z" />
+          <path d="M14 6l4 4" />
+        }
+        @case ('repeat') {
+          <path d="M17 2l4 4-4 4" />
+          <path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4" />
+          <path d="M21 13v2a3 3 0 0 1-3 3H3" />
+        }
+        @case ('archive') {
+          <rect x="3" y="4" width="18" height="5" rx="1" />
+          <path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4" />
+        }      }
     </svg>
   `,
 })

@@ -2,10 +2,10 @@
   <a
     class="inline-flex min-h-tap items-center gap-1.5 justify-self-start rounded-control pr-3 font-bold text-muted-foreground hover:text-foreground"
     data-testid="recipe-back"
-    [routerLink]="recipesPath"
+    [routerLink]="backPath()"
   >
     <app-icon name="chevronLeft" class="size-5" />
-    {{ t('back') }}
+    {{ isNew() ? t('back') : t('backToRecipe') }}
   </a>
 
   @if (draft(); as d) {

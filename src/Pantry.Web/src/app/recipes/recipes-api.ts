@@ -64,6 +64,45 @@ export interface RecipeDislike {
   reason: string | null;
 }
 
+/**
+ * When a recipe should come back: the cooldown in effect (0 for none) and the first day that is not *too soon*
+ * (`availableFrom`, last eaten + cooldown). Dates are `yyyy-MM-dd`; null when never eaten, which means available now.
+ */
+export interface RecipeCooldown {
+  days: number;
+  isHouseholdDefault: boolean;
+  lastEaten: string | null;
+  availableFrom: string | null;
+}
+
+/** One time the household ate a recipe; `rating` is 1 to 5 stars, null while not rated. */
+export interface HistoryEntry {
+  id: string;
+  recipeId: string;
+  date: string;
+  mealSlotId: string;
+  planEntryId: string;
+  rating: number | null;
+}
+
+/** What the household now thinks of a recipe, returned by rating writes. */
+export interface RatingSummary {
+  recipeId: string;
+  makeAgain: boolean;
+  averageRating: number | null;
+  ratingCount: number;
+  isFavourite: boolean;
+}
+
+export interface RatingResult {
+  entry: HistoryEntry;
+  recipe: RatingSummary;
+}
+
+export function recipeHistoryUrl(id: string): string {
+  return `${recipeUrl(id)}/history`;
+}
+
 /** A recipe as the detail and the editor read it: `lines` outside any section first, then `sections` in order. */
 export interface Recipe {
   id: string;
@@ -75,8 +114,14 @@ export interface Recipe {
   steps: string[];
   nutrition: Nutrition;
   makeAgain: boolean;
+  /** Over the rated history entries, rounded to one decimal; null when none is rated. */
+  averageRating: number | null;
+  ratingCount: number;
+  /** Make again and an average rating of at least 4. */
+  isFavourite: boolean;
   /** The recipe's own cooldown; null uses the household default. */
   cooldownDays: number | null;
+  cooldown: RecipeCooldown;
   isArchived: boolean;
   archivedAt: string | null;
   createdAt: string;
@@ -132,5 +177,17 @@ export class RecipesApi {
 
   updateRecipe(id: string, change: RecipeChange): Promise<Recipe> {
     return firstValueFrom(this.http.put<Recipe>(recipeUrl(id), change));
+  }
+
+  archiveRecipe(id: string): Promise<Recipe> {
+    return firstValueFrom(this.http.post<Recipe>(`${recipeUrl(id)}/archive`, null));
+  }
+
+  restoreRecipe(id: string): Promise<Recipe> {
+    return firstValueFrom(this.http.post<Recipe>(`${recipeUrl(id)}/restore`, null));
+  }
+
+  setMakeAgain(id: string, makeAgain: boolean): Promise<RatingSummary> {
+    return firstValueFrom(this.http.put<RatingSummary>(`${recipeUrl(id)}/make-again`, { makeAgain }));
   }
 }
