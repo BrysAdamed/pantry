@@ -8,6 +8,7 @@ using Pantry.Api.Infrastructure.Http;
 using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Identity;
+using Pantry.Api.Modules.Recipes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddHouseholdModule();
 builder.Services.AddCatalogModule(builder.Configuration);
+builder.Services.AddRecipesModule(builder.Configuration);
 
 var app = builder.Build();
 
@@ -30,8 +32,8 @@ await app.MigrateModulesAsync();
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
+app.UseApiCaching();
 app.UseAuthentication();
-app.UseApiNoStore();
 app.UseApiAntiforgeryTokens();
 app.UseAuthorization();
 app.UseApiAntiforgeryValidation();
@@ -43,6 +45,7 @@ api.MapAntiforgeryTokenEndpoint();
 api.MapIdentityEndpoints();
 api.MapHouseholdEndpoints();
 api.MapCatalogEndpoints();
+api.MapRecipesEndpoints();
 
 // Unknown /api routes must return 404, everything else falls back to the SPA.
 api.MapFallback(() => Results.NotFound()).AllowAnonymous();

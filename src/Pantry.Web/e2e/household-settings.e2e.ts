@@ -17,6 +17,14 @@ interface MealSlot {
   isEnabled: boolean;
 }
 
+interface Dislike {
+  id: string;
+  ingredientId: string;
+  ingredientName: string;
+  kind: 'never' | 'avoid';
+  reason: string | null;
+}
+
 interface PlanningRule {
   id: string;
   text: string;
@@ -121,12 +129,59 @@ async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'ad
     Object.assign(rules[index], field === 'text' ? request.postDataJSON() : { isEnabled: request.postDataJSON().isEnabled });
     return route.fulfill({ json: rules[index] });
   });
+  const catalog = [
+    { id: 'i-walnuts', name: 'Walnuts' },
+    { id: 'i-coriander', name: 'Coriander' },
+    { id: 'i-peanuts', name: 'Peanuts' },
+  ].map((i) => ({ ...i, aliases: [], baseUnit: 'g', category: 'other', isStaple: false, needsReview: false, conversions: [] }));
+  await page.route(/\/api\/catalog\/ingredients\?.*$/, (route) => {
+    const search = (new URL(route.request().url()).searchParams.get('search') ?? '').toLowerCase();
+    const items = catalog.filter((i) => i.name.toLowerCase().includes(search));
+    return route.fulfill({ json: { items, total: items.length, page: 1, pageSize: 8 } });
+  });
+  await page.route('/api/catalog/ingredients/resolve', (route) => {
+    const ingredient = { ...catalog[0], id: `i-${catalog.length}`, name: route.request().postDataJSON().name, needsReview: true };
+    catalog.push(ingredient);
+    return route.fulfill({ json: ingredient });
+  });
+  const dislikes: Dislike[] = [
+    { id: 'd0', ingredientId: 'i-walnuts', ingredientName: 'Walnuts', kind: 'never', reason: 'allergy' },
+    { id: 'd1', ingredientId: 'i-coriander', ingredientName: 'Coriander', kind: 'avoid', reason: null },
+  ];
+  await page.route('/api/household/dislikes**', async (route) => {
+    const request = route.request();
+    const id = new URL(request.url()).pathname.split('/')[4];
+    if (request.method() === 'GET') {
+      return route.fulfill({ json: [...dislikes].sort((a, b) => a.kind.localeCompare(b.kind) * -1) });
+    }
+    if (request.method() === 'POST') {
+      const { ingredientId, kind, reason } = request.postDataJSON();
+      const name = catalog.find((i) => i.id === ingredientId)!.name;
+      const dislike: Dislike = { id: `d${dislikes.length}`, ingredientId, ingredientName: name, kind, reason };
+      dislikes.push(dislike);
+      return route.fulfill({ status: 201, json: dislike });
+    }
+    const index = dislikes.findIndex((d) => d.id === id);
+    if (request.method() === 'DELETE') {
+      dislikes.splice(index, 1);
+      return route.fulfill({ status: 204 });
+    }
+    Object.assign(dislikes[index], request.postDataJSON());
+    return route.fulfill({ json: dislikes[index] });
+  });
   const contentLanguage: { contentLanguage: string } = { contentLanguage: language };
   await page.route('/api/household/content-language', async (route) => {
     if (route.request().method() === 'PUT') {
       contentLanguage.contentLanguage = route.request().postDataJSON().contentLanguage;
     }
     return route.fulfill({ json: contentLanguage });
+  });
+  const cooldown = { cooldownDays: 21 };
+  await page.route('/api/household/cooldown', async (route) => {
+    if (route.request().method() === 'PUT') {
+      cooldown.cooldownDays = route.request().postDataJSON().cooldownDays;
+    }
+    return route.fulfill({ json: cooldown });
   });
   await page.addInitScript((lang) => localStorage.setItem('pantry.uiLanguage', lang), language);
 }
@@ -146,8 +201,39 @@ test('shows the section list next to the open section on wide screens', async ({
   await list.getByRole('link', { name: /^We don't eat/ }).click();
   await expect(page).toHaveURL('/household/dislikes');
   await expect(page.getByRole('heading', { level: 2, name: "We don't eat" })).toBeVisible();
-  await expect(page.getByTestId('section-placeholder')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Never' })).toBeVisible();
   await expect(list).toBeVisible();
+});
+
+test('adds, moves and removes dislikes in the never and avoid columns', async ({ page }) => {
+  await mockHousehold(page);
+  await page.goto('/household/dislikes');
+  const never = page.getByTestId('dislikes-never');
+  const avoid = page.getByTestId('dislikes-avoid');
+  await expect(never.getByTestId('dislike')).toHaveText(['Walnuts · allergy']);
+  await expect(avoid.getByTestId('dislike')).toHaveText(['Coriander']);
+
+  await never.getByRole('combobox', { name: 'Add to "never"' }).fill('pea');
+  await never.getByRole('option', { name: /Peanuts/ }).click();
+  await expect(never.getByTestId('dislike-chosen')).toHaveText('Peanuts');
+  await never.getByRole('textbox', { name: 'Reason' }).fill('allergy');
+  await never.getByRole('button', { name: 'Add', exact: true }).click();
+  await expect(never.getByTestId('dislike')).toHaveText(['Walnuts · allergy', 'Peanuts · allergy']);
+
+  await avoid.getByRole('combobox', { name: 'Add to "avoid"' }).fill('Okra');
+  await avoid.getByTestId('new-option').click();
+  await expect(avoid.getByTestId('dislike-chosen')).toContainText('new');
+  await avoid.getByRole('button', { name: 'Add', exact: true }).click();
+  await expect(avoid.getByTestId('dislike')).toHaveText(['Coriander', 'Okra']);
+
+  await never.getByRole('button', { name: 'Move Walnuts to "avoid"' }).click();
+  await expect(avoid.getByTestId('dislike')).toHaveText(['Coriander', 'Okra', 'Walnuts']);
+  await avoid.getByRole('button', { name: 'Remove Coriander' }).click();
+  await expect(avoid.getByTestId('dislike')).toHaveText(['Okra', 'Walnuts']);
+
+  await page.reload();
+  await expect(never.getByTestId('dislike')).toHaveText(['Peanuts · allergy']);
+  await expect(avoid.getByTestId('dislike')).toHaveCount(2);
 });
 
 test('drills down from the section list on phones', async ({ page, isMobile }) => {
@@ -295,6 +381,24 @@ test('adds, switches off, reorders and removes planning rules', async ({ page })
     .poll(() => texts.evaluateAll((inputs) => inputs.map((input) => (input as HTMLTextAreaElement).value)))
     .toEqual(['Weekday dinners under 30 minutes', 'Fish at least once a week']);
   await expect(page.getByRole('switch', { name: 'Rule 1 on', exact: true })).toHaveAttribute('aria-checked', 'false');
+});
+
+test('changes the household break before a repeat', async ({ page }) => {
+  await mockHousehold(page, 'pl');
+  await page.goto('/household/rules');
+  const days = page.getByTestId('cooldown').getByRole('spinbutton');
+  await expect(days).toHaveValue('21');
+
+  await days.fill('400');
+  await days.press('Enter');
+  await expect(page.getByTestId('cooldown').getByRole('alert')).toHaveText('Wpisz pełną liczbę dni od 0 do 365.');
+
+  await days.fill('14');
+  await days.press('Enter');
+  await expect(page.getByTestId('cooldown').getByRole('alert')).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByTestId('cooldown').getByRole('spinbutton')).toHaveValue('14');
 });
 
 test('picks the content language independently of the interface language', async ({ page }) => {

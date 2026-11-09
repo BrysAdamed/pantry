@@ -1,4 +1,7 @@
 using Pantry.Api.Infrastructure.Database;
+using Pantry.Api.Modules.Catalog;
+using Pantry.Api.Modules.Household.Features.Cooldown;
+using Pantry.Api.Modules.Household.Features.Dislikes;
 using Pantry.Api.Modules.Household.Features.Language;
 using Pantry.Api.Modules.Household.Features.MealSlots;
 using Pantry.Api.Modules.Household.Features.Members;
@@ -13,6 +16,7 @@ public static class HouseholdModule
     {
         services.AddModuleDbContext<HouseholdDbContext>(HouseholdDbContext.Schema);
         services.AddScoped<IHouseholdModule, HouseholdModuleContract>();
+        services.AddScoped<IIngredientReferenceHandler, DislikeIngredientReferences>();
         return services;
     }
 
@@ -32,6 +36,12 @@ public static class HouseholdModule
         mealSlots.MapRenameMealSlot();
         mealSlots.MapSetMealSlotEnabled();
 
+        var dislikes = api.MapGroup("/household/dislikes");
+        dislikes.MapGetDislikes();
+        dislikes.MapAddDislike();
+        dislikes.MapChangeDislike();
+        dislikes.MapDeleteDislike();
+
         var planningRules = api.MapGroup("/household/planning-rules");
         planningRules.MapGetPlanningRules();
         planningRules.MapAddPlanningRule();
@@ -43,6 +53,8 @@ public static class HouseholdModule
         var contentLanguage = api.MapGroup("/household/content-language");
         contentLanguage.MapGetContentLanguage();
         contentLanguage.MapSetContentLanguage();
+
+        api.MapGroup("/household/cooldown").MapCooldown();
         return api;
     }
 }

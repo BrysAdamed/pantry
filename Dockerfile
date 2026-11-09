@@ -21,5 +21,6 @@ WORKDIR /app
 COPY --from=api /app ./
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
+RUN mkdir -p /data/recipe-photos && chown app:app /data/recipe-photos
 USER app
 ENTRYPOINT ["dotnet", "Pantry.Api.dll"]

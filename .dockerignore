@@ -5,3 +5,4 @@
 **/.angular
 .git
 .env
+src/Pantry.Api/data

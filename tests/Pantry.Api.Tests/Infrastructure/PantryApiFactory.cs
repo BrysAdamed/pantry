@@ -21,12 +21,19 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
 
     public string ConnectionString => _database.GetConnectionString();
 
+    /// <summary>The recipe photo folder of this test run, deleted at the end.</summary>
+    public string PhotosPath { get; } = Path.Combine(Path.GetTempPath(), $"pantry-tests-photos-{Guid.NewGuid():N}");
+
     public Task InitializeAsync() => _database.StartAsync();
 
     public new async Task DisposeAsync()
     {
         await base.DisposeAsync();
         await _database.DisposeAsync();
+        if (Directory.Exists(PhotosPath))
+        {
+            Directory.Delete(PhotosPath, recursive: true);
+        }
     }
 
     /// <summary>A browser-like client: keeps cookies over HTTPS (session cookies are Secure) and sends the antiforgery header.</summary>
@@ -46,8 +53,8 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
         await using var command = new NpgsqlCommand(
-            "TRUNCATE identity.passkey_links, identity.users, household.members, household.meal_slots, household.planning_rules CASCADE; " +
-            "UPDATE household.households SET content_language = NULL;",
+            "TRUNCATE identity.passkey_links, identity.users, household.members, household.meal_slots, household.planning_rules, household.dislikes CASCADE; " +
+            "UPDATE household.households SET content_language = NULL, cooldown_days = 21;",
             connection);
         await command.ExecuteNonQueryAsync();
     }
@@ -58,7 +65,17 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         _ = Services;
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("TRUNCATE catalog.ingredients, test_module.ingredient_references CASCADE;", connection);
+        await using var command = new NpgsqlCommand("TRUNCATE catalog.ingredients, test_module.ingredient_references, household.dislikes CASCADE;", connection);
+        await command.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>Empties the recipe library.</summary>
+    public async Task DeleteAllRecipesAsync()
+    {
+        _ = Services;
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("TRUNCATE recipes.recipes CASCADE;", connection);
         await command.ExecuteNonQueryAsync();
     }
 
@@ -69,6 +86,7 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting("Identity:Passkeys:RelyingPartyId", RelyingPartyId);
         builder.UseSetting("Identity:Passkeys:Origins:0", Origin);
         builder.UseSetting("Identity:Session:ValidationInterval", "00:00:00");
+        builder.UseSetting("Recipes:Photos:Path", PhotosPath);
         builder.ConfigureTestServices(services =>
         {
             services.AddModuleDbContext<TestModuleDbContext>(TestModuleDbContext.Schema);

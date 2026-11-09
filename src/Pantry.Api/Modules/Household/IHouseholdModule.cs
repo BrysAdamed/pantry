@@ -20,8 +20,17 @@ public interface IHouseholdModule
     /// <summary>Enabled planning rules in household order: what agents follow when planning. Disabled rules are left out.</summary>
     Task<IReadOnlyList<HouseholdPlanningRule>> GetEnabledPlanningRulesAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Every dislike of the household, never first: what recipes warn about and agents leave out (never) or choose
+    /// rarely (avoid). Ingredients are catalog ids; their names come from the catalog.
+    /// </summary>
+    Task<IReadOnlyList<HouseholdDislike>> GetDislikesAsync(CancellationToken cancellationToken = default);
+
     /// <summary>The language agents write and translate household content into (ADR 0010).</summary>
     Task<ContentLanguage> GetContentLanguageAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Days before a recipe should be planned again, for recipes without their own cooldown; 0 for none.</summary>
+    Task<int> GetCooldownDaysAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets up the household for the admin created by the first run, inside the caller's transaction (ADR 0015):
@@ -45,6 +54,9 @@ public sealed record HouseholdMember(Guid Id, string Name, decimal PortionFactor
 public sealed record HouseholdMealSlot(Guid Id, string Name);
 
 public sealed record HouseholdPlanningRule(Guid Id, string Text);
+
+/// <summary>A dislike of a catalog ingredient; only a <see cref="DislikeKind.Never"/> dislike can have a reason.</summary>
+public sealed record HouseholdDislike(Guid IngredientId, DislikeKind Kind, string? Reason);
 
 /// <summary>The admin of the first run. <c>Language</c> becomes the content language and names the default meal slots.</summary>
 public sealed record FirstRunAdmin(Guid UserId, string Name, ContentLanguage Language);

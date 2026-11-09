@@ -12,9 +12,9 @@ describe('FeaturePlaceholder', () => {
   }
 
   it('shows the empty state with an agent hint where the agent can help', () => {
-    const page = render('recipes');
+    const page = render('planner');
 
-    expect(page.querySelector('h2')?.textContent).toContain('Add your first recipe');
+    expect(page.querySelector('h2')?.textContent).toContain('Plan this week');
     expect(page.textContent).toContain('Ask Claude');
     expect(page.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
   });

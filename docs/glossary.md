@@ -19,7 +19,15 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Proposed** | A plan entry created by an agent and not yet accepted by a user. |
 | **Leftover** | A plan entry that eats a dish cooked in an earlier entry. Adds nothing to the shopping list. |
 | **Tray** | The planner side panel (*Szuflada dań*) with favourite, recent and searched recipes to place in the plan. A bottom sheet on phones. |
-| **Recipe** | A dish with ingredient lines (quantity per one serving), steps, tags and optional nutrition. |
+| **Recipe** | A dish (*Przepis*) with ingredient lines (quantity per one serving), steps, tags, prep time, source URL and optional nutrition per serving. |
+| **Recipe servings** | How many servings a recipe's quantities were entered for (*Liczba porcji*, e.g. 4). Quantities are also stored per one serving, which is what the planner and the shopping list use. |
+| **Ingredient line** | One line of a recipe (*Składnik przepisu*): a catalog ingredient, a quantity and unit or *to taste*, an optional note (e.g. *drobno posiekana*), and its section. |
+| **Section** | A named group of ingredient lines in a recipe (*Sekcja*, e.g. *Sos*, *Ciasto*). Optional and ordered; lines outside any section come first. |
+| **To taste** | An ingredient line without a quantity or unit (*Do smaku*), like salt. It still names the ingredient, so the shopping list knows it is needed. |
+| **Tag** | A free-text label of a recipe (*Tag*, e.g. *obiad*, *szybkie*), stored trimmed and in lower case. |
+| **History entry** | A record that the household ate a recipe (*Historia*): the recipe, the date and the meal slot of an eaten plan entry. One per plan entry; un-eating the plan entry removes it. Leftovers have none. Kept in Recipes, written by the Planner. |
+| **Archived recipe** | A recipe hidden from the library, the tray and agents (*Zarchiwizowany przepis*). Recipes are never deleted: plan entries and history still show an archived recipe, and it can be restored. |
+| **Recipe photo** | The optional picture of a recipe (*Zdjęcie*), one at most, kept as a square *card* for tiles and a *detail* size. Without one the recipe shows a coloured tile with its initial. Archiving keeps it. |
 | **Ingredient** | A canonical catalog item (*Składnik*, e.g. *onion*): one name in the content language, aliases, a base unit, a category, a staple flag and optional unit conversions. Names and aliases are unique across the catalog regardless of letter case and diacritics. |
 | **Catalog** | All ingredients of the household (*Katalog składników*). Other modules keep only ingredient ids. |
 | **Alias** | Another name an ingredient is found by (*Alias*, e.g. *cebulka* for *cebula*). Used instead of translations: an ingredient has no per-language names. |
@@ -34,10 +42,16 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Merge** | Turning two ingredients into one (*Scal*): the source's names become aliases of the target, every module moves its references to the target, and the source is deleted. The target keeps its base unit, category and staple flag and is confirmed. The **merge preview** shows what will move before anything changes. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |
 | **Possible duplicate** | Two ingredients with similar names or aliases that may mean the same thing (*Możliwy duplikat*). People either merge them or mark them *not duplicates*, and a dismissed pair is not suggested again. Found by how many three-letter sequences the names share (*similarity*, 0 to 1), ignoring case and diacritics. |
-| **Dislike** | A household-wide ingredient preference: *never* (allergy, hard no) or *avoid*. |
+| **Dislike** | A household-wide ingredient preference (*Nie jemy*): *never* (allergy, hard no; optional reason) or *avoid*. One per catalog ingredient; when two disliked ingredients are merged, the stricter kind stays. |
+| **Dislike warning** | A recipe's mark for an ingredient the household dislikes (*Ostrzeżenie*): red for *never*, with its reason, amber for *avoid*. Shown in the library, the detail and the editor; worked out from the current dislikes, never stored on the recipe. |
 | **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |
-| **Rating** | Household feedback on a recipe after it was eaten, plus a *make again* flag. |
-| **Cooldown** | Minimum time before a favourite should be planned again. |
+| **Rating** | Household feedback on one history entry (*Ocena*): 1 to 5 stars, added, changed or removed at any time, also for an archived recipe. The answer to *make again?* given with it sets the recipe's flag. A recipe shows the average and the count of its ratings. |
+| **Make again** | A recipe flag (*Zrobić ponownie*), yes by default. The latest rating that answers it sets it, and it can be changed on the recipe at any time. *No* means agents stop proposing the dish. |
+| **Favourite** | A recipe with *make again* yes and an average rating of at least 4 (*Ulubione*). Derived, there is no button. The tray and agents offer favourites first. |
+| **To rate** | History entries from the last 14 days (configurable) without a rating (*Do oceny*). *Later* leaves an entry there until it is rated or too old. |
+| **Cooldown** | How long after a recipe was eaten it should not come back (*Przerwa*), in days: the recipe's own cooldown, or else the household one (21 by default); 0 means none. Applies to every recipe. Its *available from* date is last eaten + cooldown; a recipe never eaten is available now. Planning it earlier is *too soon* (*Za wcześnie*), a soft hint: nothing is blocked, and agents read it. |
+| **Recipe library** | The Recipes destination (*Biblioteka przepisów*): recipes searched by name, tag or ingredient, filtered by tags and *without never* (*Bez „nigdy”*), sorted by name, rating, recently eaten, *not eaten lately* or prep time. |
+| **Not eaten lately** | A library sort (*Dawno nie było*): recipes never eaten first, then the ones eaten longest ago, to bring forgotten dishes back. |
 | **Shopping list** | A named list of items. Either *generated* from the plan for a date range or *general* (drugstore, pets...). |
 | **List item** | A line on a shopping list: ingredient or free text, quantity, state (open, have at home, bought). |
 | **Order** | A merged set of list items handed to an agent for a cart run. |

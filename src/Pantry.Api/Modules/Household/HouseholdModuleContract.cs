@@ -31,11 +31,21 @@ internal sealed class HouseholdModuleContract(HouseholdDbContext db, DbContextOp
             .Select(r => new HouseholdPlanningRule(r.Id, r.Text))
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<HouseholdDislike>> GetDislikesAsync(CancellationToken cancellationToken = default) =>
+        await db.Dislikes.AsNoTracking()
+            .OrderBy(d => d.Kind == DislikeKind.Never ? 0 : 1)
+            .ThenBy(d => d.Id)
+            .Select(d => new HouseholdDislike(d.IngredientId, d.Kind, d.Reason))
+            .ToListAsync(cancellationToken);
+
     public async Task<ContentLanguage> GetContentLanguageAsync(CancellationToken cancellationToken = default)
     {
         var household = await db.Households.AsNoTracking().SingleAsync(cancellationToken);
         return household.ContentLanguage ?? ContentLanguage.Default;
     }
+
+    public Task<int> GetCooldownDaysAsync(CancellationToken cancellationToken = default) =>
+        db.Households.Select(h => h.CooldownDays).SingleAsync(cancellationToken);
 
     public async Task CompleteFirstRunAsync(FirstRunAdmin admin, DbTransaction transaction, CancellationToken cancellationToken = default)
     {

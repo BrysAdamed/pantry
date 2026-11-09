@@ -1,0 +1,44 @@
+<ng-container *transloco="let t; prefix: 'household.cooldown'">
+  <div class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card" data-testid="cooldown">
+    <div class="grid gap-1">
+      <h3 class="text-lg font-extrabold">{{ t('title') }}</h3>
+      <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('intro') }}</p>
+    </div>
+
+    @if (resource.error() && !resource.hasValue()) {
+      <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+        <span class="flex-1">{{ t('loadFailed') }}</span>
+        <button hlmBtn variant="outline" size="sm" type="button" (click)="resource.reload()">{{ t('retry') }}</button>
+      </div>
+    } @else if (resource.hasValue()) {
+      <label class="flex flex-wrap items-center gap-2.5">
+        <span class="font-bold">{{ t('label') }}</span>
+        <span class="flex items-center gap-2">
+          <input
+            #daysInput
+            type="number"
+            inputmode="numeric"
+            class="h-tap w-24 rounded-control border-2 border-outline bg-card px-3 text-right"
+            [class.border-danger]="invalid()"
+            [min]="limits.min"
+            [max]="limits.max"
+            step="1"
+            [value]="resource.value().cooldownDays"
+            [attr.aria-invalid]="invalid()"
+            (change)="save(daysInput)"
+            (keydown.enter)="$event.preventDefault(); daysInput.blur()"
+          />
+          <span class="text-sm text-muted-foreground">{{ t('days') }}</span>
+        </span>
+      </label>
+      @if (invalid()) {
+        <p class="text-sm text-danger" role="alert">{{ t('invalid', limits) }}</p>
+      }
+      <p class="text-xs text-muted-foreground">{{ t('note') }}</p>
+    }
+
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('saveFailed') }}</p>
+    }
+  </div>
+</ng-container>

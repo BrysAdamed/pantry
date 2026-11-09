@@ -23,6 +23,42 @@ namespace Pantry.Api.Modules.Household.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Pantry.Api.Modules.Household.Domain.Dislike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("IngredientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ingredient_id");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("pk_dislikes");
+
+                    b.HasIndex("IngredientId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_dislikes_ingredient_id");
+
+                    b.ToTable("dislikes", "household", t =>
+                        {
+                            t.HasCheckConstraint("ck_dislikes_kind", "kind IN ('never', 'avoid')");
+
+                            t.HasCheckConstraint("ck_dislikes_reason", "reason IS NULL OR kind = 'never'");
+                        });
+                });
+
             modelBuilder.Entity("Pantry.Api.Modules.Household.Domain.Household", b =>
                 {
                     b.Property<int>("Id")
@@ -34,18 +70,25 @@ namespace Pantry.Api.Modules.Household.Persistence.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("content_language");
 
+                    b.Property<int>("CooldownDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("cooldown_days");
+
                     b.HasKey("Id")
                         .HasName("pk_households");
 
                     b.ToTable("households", "household", t =>
                         {
+                            t.HasCheckConstraint("ck_households_cooldown_days", "cooldown_days BETWEEN 0 AND 365");
+
                             t.HasCheckConstraint("ck_households_singleton", "id = 1");
                         });
 
                     b.HasData(
                         new
                         {
-                            Id = 1
+                            Id = 1,
+                            CooldownDays = 21
                         });
                 });
 

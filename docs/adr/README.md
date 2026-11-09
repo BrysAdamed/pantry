@@ -26,3 +26,6 @@ Short records of decisions that shape the project. Format: context, decision, co
 | [0020](0020-merging-ingredients.md) | Merging ingredients: target wins, conversions copied only between equal base units, alias limit holds, one transaction with rows locked in id order | Accepted |
 | [0021](0021-icu-plural-labels.md) | ICU plural and select labels rendered by an in-app transpiler with `Intl.PluralRules` | Accepted |
 | [0022](0022-possible-duplicates.md) | Possible duplicates: `pg_trgm` similarity of name keys with a configurable threshold, not duplicates stored per pair and removed with either ingredient | Accepted |
+| [0023](0023-recipe-model.md) | Recipe model: quantities per serving next to the entered ones, sections as a name on the line, ingredients by catalog id, archive instead of delete | Accepted |
+| [0024](0024-recipe-history.md) | Recipe history lives in Recipes, written by the Planner through `IRecipesModule` in its transaction, idempotent per plan entry, leftovers excluded | Accepted |
+| [0025](0025-recipe-photos.md) | Recipe photos as files on a volume named by a photo id, resized to WebP with SkiaSharp, served through the API with immutable caching | Accepted |

@@ -254,6 +254,36 @@
       "retry": "Spróbuj ponownie",
       "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
     },
+    "dislikes": {
+      "intro": "Dotyczy całego domu. Agent nie proponuje dań ze składnikami z listy „nigdy”, a te z „unikamy” wybiera rzadko i oznacza.",
+      "never": {
+        "title": "Nigdy",
+        "description": "Alergie i twarde „nie”. Przepisy z tymi składnikami mają czerwone ostrzeżenie.",
+        "empty": "Na razie nic tu nie ma.",
+        "add": "Dodaj do „nigdy”",
+        "placeholder": "Składnik, np. orzeszki ziemne",
+        "moveTo": "Przenieś do „nigdy”: {{name}}"
+      },
+      "avoid": {
+        "title": "Unikamy",
+        "description": "Lepiej nie, ale w razie czego da się zjeść.",
+        "empty": "Na razie nic tu nie ma.",
+        "add": "Dodaj do „unikamy”",
+        "placeholder": "Składnik, np. brukselka",
+        "moveTo": "Przenieś do „unikamy”: {{name}}"
+      },
+      "reason": "Powód",
+      "reasonPlaceholder": "Powód, np. alergia",
+      "add": "Dodaj",
+      "remove": "Usuń: {{name}}",
+      "changeIngredient": "Wybierz inny składnik",
+      "newIngredient": "nowy",
+      "newIngredientHint": "Nowy składnik, trafi do katalogu jako „do sprawdzenia”",
+      "alreadyListed": "Ten składnik już jest na liście. Lista jest znowu aktualna.",
+      "loadFailed": "Nie udało się wczytać listy „Nie jemy”. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
     "account": {
       "intro": "Te ustawienia dotyczą tylko Ciebie, na każdym urządzeniu, na którym się logujesz.",
       "language": "Język interfejsu",
@@ -353,6 +383,17 @@
         "uk": { "name": "Українська", "description": "Przepisy i listy po ukraińsku" }
       },
       "loadFailed": "Nie udało się wczytać języka treści. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "cooldown": {
+      "title": "Przerwa przed powtórką",
+      "intro": "Ile dni po zjedzeniu przepis jest oznaczony jako za wcześnie. Agent też to widzi, ale nic nie jest blokowane.",
+      "label": "Przerwa",
+      "days": "dni",
+      "note": "Przepis może mieć własną przerwę. 0 wyłącza przerwę.",
+      "invalid": "Wpisz pełną liczbę dni od {{min}} do {{max}}.",
+      "loadFailed": "Nie udało się wczytać przerwy. Sprawdź połączenie.",
       "retry": "Spróbuj ponownie",
       "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
     }
@@ -758,6 +799,293 @@
       "bunch": "{count, plural, one {pęczek} few {pęczki} many {pęczków} other {pęczka}}",
       "handful": "{count, plural, one {garść} few {garście} many {garści} other {garści}}",
       "glass": "{count, plural, one {szklanka} few {szklanki} many {szklanek} other {szklanki}}"
+    }
+  },
+  "recipes": {
+    "library": {
+      "title": "Przepisy",
+      "new": "Nowy przepis",
+      "search": "Szukaj przepisu",
+      "searchPlaceholder": "Szukaj w nazwach, tagach, składnikach",
+      "filters": "Filtry",
+      "filter": {
+        "withoutNever": "Bez „nigdy”",
+        "archived": "Archiwum"
+      },
+      "count": "{count, plural, one {# przepis} few {# przepisy} many {# przepisów} other {# przepisu}}",
+      "archivedCount": "{count, plural, one {# przepis w archiwum} few {# przepisy w archiwum} many {# przepisów w archiwum} other {# przepisu w archiwum}}",
+      "sortBy": "Sortuj:",
+      "sort": {
+        "rating": "Ocena",
+        "recentlyEaten": "Ostatnio jedzone",
+        "notEatenLately": "Dawno nie było",
+        "prepTime": "Czas",
+        "name": "Nazwa"
+      },
+      "rating": "Ocena {{rating}} na 5",
+      "notRated": "bez oceny",
+      "neverEaten": "jeszcze nie jedzone",
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "kcal": "{{kcal}} kcal",
+      "badge": {
+        "never": "nigdy",
+        "avoid": "unikamy",
+        "notAgain": "nie gotujemy znowu",
+        "tooSoon": "za wcześnie"
+      },
+      "noResults": {
+        "title": "Nic tu nie pasuje",
+        "description": "Spróbuj krótszego słowa albo wyłącz filtry. Szukamy w nazwach, tagach i składnikach.",
+        "archive": "Archiwum jest puste. Zarchiwizowany przepis znika z biblioteki, ale zostaje w historii."
+      },
+      "clearFilters": "Wyczyść filtry",
+      "showMore": "Pokaż więcej",
+      "loadFailed": "Nie udało się wczytać przepisów. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "nothingSelected": "Wybierz przepis z listy, żeby zobaczyć szczegóły."
+    },
+    "rating": {
+      "label": "Jak smakowało?",
+      "dialogLabel": "Ocena: {{name}}",
+      "household": "ocena całego domu",
+      "day": {
+        "today": "Dziś",
+        "yesterday": "Wczoraj"
+      },
+      "stars": "Ocena",
+      "starLabel": "{{stars}} na 5, {{word}}",
+      "word": {
+        "1": "Nie smakowało",
+        "2": "Takie sobie",
+        "3": "Dobre",
+        "4": "Bardzo dobre",
+        "5": "Rewelacja"
+      },
+      "makeAgain": "Ugotować znowu?",
+      "yes": "Tak",
+      "no": "Raczej nie",
+      "noHint": "Agent przestanie proponować to danie. Możesz to zmienić w przepisie.",
+      "later": "Później",
+      "cancel": "Anuluj",
+      "remove": "Usuń ocenę",
+      "save": "Zapisz ocenę",
+      "error": {
+        "gone": "Tego posiłku nie ma już w historii.",
+        "failed": "Nie udało się zapisać oceny. Spróbuj jeszcze raz."
+      },
+      "toast": {
+        "rated": "Dzięki! Ocena zapisana",
+        "removed": "Ocena usunięta"
+      },
+      "toRate": "Do oceny",
+      "toRateLabel": "Do oceny: {{name}}",
+      "rate": "Oceń"
+    },
+    "detail": {
+      "back": "Przepisy",
+      "edit": "Edytuj",
+      "photoAlt": "Zdjęcie: {{name}}",
+      "addToPlan": "Do planu",
+      "time": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "ratingLabel": "Ocena {{rating}} na 5",
+      "notRated": "Bez oceny",
+      "lastEaten": "Ostatnio: {{date}}",
+      "neverEaten": "Jeszcze nie jedliście",
+      "source": "Źródło",
+      "favourite": "ulubione",
+      "avoidBadge": "unikamy: {{names}}",
+      "tooSoon": "za wcześnie, najlepiej od {{date}}",
+      "archived": {
+        "title": "Przepis w archiwum",
+        "text": "Nie ma go w bibliotece, w szufladzie dań ani w propozycjach agenta. Historia i plan nadal go pokazują."
+      },
+      "restore": "Przywróć",
+      "archive": "Przenieś do archiwum",
+      "never": {
+        "text": "Zawiera: {{names}}. U Was na liście „nigdy”. Agent nie zaproponuje tego przepisu, a do planu dodasz go tylko świadomie.",
+        "textWithReason": "Zawiera: {{names}}. U Was na liście „nigdy” ({{reason}}). Agent nie zaproponuje tego przepisu, a do planu dodasz go tylko świadomie."
+      },
+      "actionFailed": "Nie udało się zapisać zmiany. Spróbuj jeszcze raz.",
+      "ingredients": "Składniki",
+      "servingsLabel": "Liczba porcji",
+      "fewerServings": "Mniej porcji",
+      "moreServings": "Więcej porcji",
+      "scaledFor": "{count, plural, one {Przeliczone na {servings} porcję.} few {Przeliczone na {servings} porcje.} many {Przeliczone na {servings} porcji.} other {Przeliczone na {servings} porcji.}}",
+      "backToHousehold": "Wróć do porcji domowych",
+      "forHousehold": "Na porcje domowe ({{servings}}).",
+      "toTaste": "do smaku",
+      "unknownIngredient": "składnik usunięty z katalogu",
+      "dislike": {
+        "never": "nigdy",
+        "avoid": "unikamy"
+      },
+      "noIngredients": "Ten przepis nie ma jeszcze składników.",
+      "steps": "Przygotowanie",
+      "noSteps": "Ten przepis nie ma jeszcze kroków.",
+      "nutrition": "Wartości odżywcze",
+      "nutrient": {
+        "kcal": "kcal",
+        "protein": "białko",
+        "fat": "tłuszcz",
+        "carbs": "węglowodany"
+      },
+      "perServing": "Na 1 porcję.",
+      "noNutrition": "Ten przepis nie ma danych o wartościach odżywczych. Dni z nim w planie są oznaczone jako niepełne.",
+      "history": "Historia i ocena",
+      "ratingCount": "{count, plural, one {# ocena} few {# oceny} many {# ocen} other {# oceny}}",
+      "entryNotRated": "bez oceny",
+      "rate": "Oceń",
+      "rateLabel": "Oceń danie z {{date}}",
+      "changeRatingLabel": "Zmień albo usuń ocenę z {{date}}",
+      "noHistory": "Jeszcze nie jedliście tego dania.",
+      "makeAgain": "Ugotować znowu",
+      "makeAgainYes": "Agent może proponować to danie.",
+      "makeAgainNo": "Nie gotujemy znowu, agent je pomija.",
+      "toast": {
+        "archived": "Przepis przeniesiony do archiwum",
+        "restored": "Przepis przywrócony"
+      },
+      "gone": "Nie ma takiego przepisu.",
+      "loadFailed": "Nie udało się wczytać przepisu.",
+      "retry": "Spróbuj ponownie",
+      "loading": "Wczytywanie…"
+    },
+    "editor": {
+      "back": "Przepisy",
+      "backToRecipe": "Wróć do przepisu",
+      "newTitle": "Nowy przepis",
+      "editTitle": "Edycja przepisu",
+      "name": "Nazwa",
+      "namePlaceholder": "np. Zupa krem z dyni",
+      "ingredients": "Składniki",
+      "servings": "Liczba porcji, na którą są ilości",
+      "servingsBefore": "Ilości na",
+      "servingsAfter": "{count, plural, one {porcję} few {porcje} many {porcji} other {porcji}}",
+      "servingsNote": "Wpisz ilości tak, jak podaje źródło; przepis zapisze się na 1 porcję.",
+      "quantity": "Ilość",
+      "toTaste": "do smaku",
+      "unit": "Jednostka",
+      "ingredient": "Składnik",
+      "ingredientPlaceholder": "np. cebula",
+      "unknownIngredient": "Składnika nie ma już w katalogu",
+      "changeIngredient": "Wybierz inny składnik zamiast {{name}}",
+      "newIngredient": "nowy",
+      "note": "Uwaga",
+      "notePlaceholder": "Uwaga, np. drobno posiekana",
+      "lineUp": "Przesuń składnik wyżej",
+      "lineDown": "Przesuń składnik niżej",
+      "lineRemove": "Usuń składnik",
+      "moveToSection": "Sekcja składnika",
+      "noSection": "Bez sekcji",
+      "addLine": "Dodaj składnik",
+      "addSectionLine": "Dodaj składnik do sekcji {{name}}",
+      "addSection": "Dodaj sekcję",
+      "sectionName": "Nazwa sekcji",
+      "sectionPlaceholder": "Sekcja, np. Sos",
+      "sectionUnnamed": "sekcja bez nazwy",
+      "sectionUp": "Przesuń sekcję {{name}} wyżej",
+      "sectionDown": "Przesuń sekcję {{name}} niżej",
+      "sectionRemove": "Usuń sekcję {{name}}; jej składniki zostaną",
+      "hint": {
+        "never": "Na liście „nigdy”",
+        "neverWithReason": "Na liście „nigdy” ({{reason}})",
+        "avoid": "Na liście „unikamy”",
+        "new": "Nowy składnik, trafi do katalogu po zapisie"
+      },
+      "details": "Szczegóły",
+      "prepTime": "Czas przygotowania",
+      "minutes": "minut",
+      "tags": "Tagi",
+      "tagPlaceholder": "Dodaj tag i naciśnij Enter",
+      "tagRemove": "Usuń tag {{tag}}",
+      "tagAdd": "Dodaj tag {{tag}}",
+      "tagSuggestions": "Podpowiedzi tagów",
+      "tagProblem": {
+        "tooLong": "Tag może mieć najwyżej 40 znaków.",
+        "tooMany": "Przepis może mieć najwyżej {{max}} tagów."
+      },
+      "source": "Źródło",
+      "photo": {
+        "label": "Zdjęcie",
+        "drop": "Upuść zdjęcie albo stuknij, żeby wybrać",
+        "optional": "Opcjonalne. JPEG, PNG lub WebP, do 10 MB.",
+        "dropping": "Upuść zdjęcie tutaj",
+        "replace": "Zmień",
+        "remove": "Usuń",
+        "alt": "Zdjęcie: {{name}}",
+        "newAlt": "Nowe zdjęcie",
+        "pending": "Zapisze się razem z przepisem.",
+        "removed": "Zdjęcie zniknie po zapisaniu.",
+        "undo": "Zostaw zdjęcie",
+        "problem": {
+          "type": "Wybierz obraz JPEG, PNG lub WebP.",
+          "size": "Zdjęcie ma więcej niż 10 MB. Wybierz mniejsze."
+        }
+      },
+      "cooldown": "Przerwa przed kolejnym planowaniem",
+      "cooldownDefault": "domyślna",
+      "days": "dni",
+      "cooldownNote": "Zostaw puste, żeby użyć ustawienia domu.",
+      "makeAgain": "Ugotować znowu",
+      "makeAgainNote": "Agent proponuje tylko dania, które chcecie ugotować znowu.",
+      "nutrition": "Wartości odżywcze",
+      "nutritionNote": "Na 1 porcję, opcjonalne. Wpisz to, co podaje źródło.",
+      "nutrient": {
+        "kcal": "Energia (kcal)",
+        "protein": "Białko (g)",
+        "fat": "Tłuszcz (g)",
+        "carbs": "Węglowodany (g)"
+      },
+      "steps": "Przygotowanie",
+      "step": "Krok {{number}}",
+      "stepPlaceholder": "Co zrobić",
+      "stepUp": "Przesuń krok {{number}} wyżej",
+      "stepDown": "Przesuń krok {{number}} niżej",
+      "stepRemove": "Usuń krok {{number}}",
+      "addStep": "Dodaj krok",
+      "unsaved": "Niezapisane zmiany",
+      "cancel": "Anuluj",
+      "add": "Dodaj przepis",
+      "save": "Zapisz",
+      "problems": "Popraw zaznaczone pola, zanim zapiszesz przepis.",
+      "problem": {
+        "nameRequired": "Nadaj przepisowi nazwę.",
+        "servings": "Wpisz liczbę porcji od 1 do {{max}}.",
+        "prepTime": "Wpisz pełne minuty albo zostaw puste.",
+        "sourceUrl": "Wpisz adres strony zaczynający się od http:// lub https://.",
+        "cooldown": "Wpisz pełne dni od 0 do {{max}} albo zostaw puste.",
+        "nutrition": "Wpisz liczbę albo zostaw puste.",
+        "quantity": "Wpisz ilość większą od 0, najwyżej 3 miejsca po przecinku, albo zostaw puste („do smaku”).",
+        "ingredientRequired": "Wybierz składnik albo usuń wiersz.",
+        "sectionName": "Nadaj sekcji nazwę.",
+        "sectionNameTaken": "Inna sekcja ma już taką nazwę.",
+        "sectionEmpty": "Dodaj składnik do sekcji albo ją usuń.",
+        "tooManyLines": "Przepis może mieć najwyżej {{max}} składników.",
+        "tooManySteps": "Przepis może mieć najwyżej {{max}} kroków."
+      },
+      "invalid": "Przepis nie został zapisany: coś w nim jest niepoprawne. Sprawdź pola i spróbuj jeszcze raz.",
+      "saveFailed": "Przepis nie został zapisany. Sprawdź połączenie i spróbuj jeszcze raz.",
+      "gone": "Tego przepisu już nie ma.",
+      "loadFailed": "Nie udało się wczytać przepisu. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "toast": {
+        "added": "Dodano przepis",
+        "saved": "Zapisano przepis",
+        "photoFailed": "Przepis zapisany, ale zdjęcie nie. Spróbuj z innym obrazem."
+      },
+      "discard": {
+        "title": "Odrzucić zmiany?",
+        "text": "Zmiany w przepisie {{name}} nie zostały zapisane.",
+        "textNew": "Nowy przepis nie został zapisany.",
+        "keep": "Wróć do edycji",
+        "discard": "Odrzuć"
+      }
     }
   }
 }

@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslocoTesting } from '../../testing/transloco-testing';
-import { PLANNING_RULES_URL, PlanningRule } from '../household-api';
+import { COOLDOWN_URL, PLANNING_RULES_URL, PlanningRule } from '../household-api';
 import { PlanningRulesSection } from './planning-rules-section';
 
 const quick: PlanningRule = { id: 'q', text: 'Weekday dinners under 30 minutes', position: 0, isEnabled: true };
@@ -26,6 +26,7 @@ describe('PlanningRulesSection', () => {
     const fixture = TestBed.createComponent(PlanningRulesSection);
     fixture.detectChanges();
     http.expectOne(PLANNING_RULES_URL).flush(rules);
+    http.expectOne(COOLDOWN_URL).flush({ cooldownDays: 21 });
     await fixture.whenStable();
     const page = fixture.nativeElement as HTMLElement;
     const settle = async () => {

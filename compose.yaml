@@ -25,6 +25,9 @@ services:
       Identity__Passkeys__RelyingPartyId: ${PASSKEY_RP_ID:-localhost}
       Identity__Passkeys__Origins__0: ${PASSKEY_ORIGIN:-http://localhost:8080}
       Identity__Session__Lifetime: ${SESSION_LIFETIME:-30.00:00:00}
+      Recipes__Photos__Path: /data/recipe-photos
+    volumes:
+      - ${RECIPE_PHOTOS_VOLUME:-recipe-photos}:/data/recipe-photos
     ports:
       - "${APP_PORT:-8080}:8080"
     depends_on:
@@ -33,3 +36,4 @@ services:
 
 volumes:
   db-data:
+  recipe-photos:

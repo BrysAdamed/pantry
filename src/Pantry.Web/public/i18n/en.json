@@ -254,6 +254,36 @@
       "retry": "Try again",
       "saveFailed": "The change was not saved. Check the connection and try again."
     },
+    "dislikes": {
+      "intro": "For the whole household. The agent does not suggest dishes with ingredients from \"never\", and picks those from \"avoid\" rarely and marks them.",
+      "never": {
+        "title": "Never",
+        "description": "Allergies and a hard no. Recipes with these ingredients get a red warning.",
+        "empty": "Nothing here yet.",
+        "add": "Add to \"never\"",
+        "placeholder": "Ingredient, e.g. peanuts",
+        "moveTo": "Move {{name}} to \"never\""
+      },
+      "avoid": {
+        "title": "Avoid",
+        "description": "Better not, but edible if need be.",
+        "empty": "Nothing here yet.",
+        "add": "Add to \"avoid\"",
+        "placeholder": "Ingredient, e.g. Brussels sprouts",
+        "moveTo": "Move {{name}} to \"avoid\""
+      },
+      "reason": "Reason",
+      "reasonPlaceholder": "Reason, e.g. allergy",
+      "add": "Add",
+      "remove": "Remove {{name}}",
+      "changeIngredient": "Choose another ingredient",
+      "newIngredient": "new",
+      "newIngredientHint": "New ingredient, joins the catalog as \"needs review\"",
+      "alreadyListed": "This ingredient is already on the list. The list is up to date again.",
+      "loadFailed": "Dislikes could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    },
     "account": {
       "intro": "These settings apply only to you, on every device you sign in on.",
       "language": "Interface language",
@@ -353,6 +383,17 @@
         "uk": { "name": "Українська", "description": "Recipes and lists in Ukrainian" }
       },
       "loadFailed": "The content language could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "cooldown": {
+      "title": "Break before a repeat",
+      "intro": "How many days after a meal a recipe is marked too soon. The agent sees it too, but nothing is blocked.",
+      "label": "Break",
+      "days": "days",
+      "note": "A recipe can have its own break. 0 turns the break off.",
+      "invalid": "Enter a whole number of days from {{min}} to {{max}}.",
+      "loadFailed": "The break could not be loaded. Check the connection.",
       "retry": "Try again",
       "saveFailed": "The change was not saved. Check the connection and try again."
     }
@@ -758,6 +799,293 @@
       "bunch": "{count, plural, one {bunch} other {bunches}}",
       "handful": "{count, plural, one {handful} other {handfuls}}",
       "glass": "{count, plural, one {glass} other {glasses}}"
+    }
+  },
+  "recipes": {
+    "library": {
+      "title": "Recipes",
+      "new": "New recipe",
+      "search": "Search recipes",
+      "searchPlaceholder": "Search names, tags, ingredients",
+      "filters": "Filters",
+      "filter": {
+        "withoutNever": "Without \"never\"",
+        "archived": "Archive"
+      },
+      "count": "{count, plural, one {# recipe} other {# recipes}}",
+      "archivedCount": "{count, plural, one {# archived recipe} other {# archived recipes}}",
+      "sortBy": "Sort:",
+      "sort": {
+        "rating": "Rating",
+        "recentlyEaten": "Recently eaten",
+        "notEatenLately": "Not eaten lately",
+        "prepTime": "Prep time",
+        "name": "Name"
+      },
+      "rating": "Rated {{rating}} out of 5",
+      "notRated": "not rated",
+      "neverEaten": "not eaten yet",
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "kcal": "{{kcal}} kcal",
+      "badge": {
+        "never": "never",
+        "avoid": "avoid",
+        "notAgain": "not cooking again",
+        "tooSoon": "too soon"
+      },
+      "noResults": {
+        "title": "Nothing matches",
+        "description": "Try a shorter word or turn off filters. We search names, tags and ingredients.",
+        "archive": "The archive is empty. An archived recipe leaves the library but stays in the history."
+      },
+      "clearFilters": "Clear filters",
+      "showMore": "Show more",
+      "loadFailed": "Could not load the recipes. Check the connection.",
+      "retry": "Try again",
+      "nothingSelected": "Pick a recipe from the list to see it here."
+    },
+    "rating": {
+      "label": "How was it?",
+      "dialogLabel": "Rating: {{name}}",
+      "household": "rated by the whole household",
+      "day": {
+        "today": "Today",
+        "yesterday": "Yesterday"
+      },
+      "stars": "Rating",
+      "starLabel": "{{stars}} out of 5, {{word}}",
+      "word": {
+        "1": "Didn't like it",
+        "2": "So-so",
+        "3": "Good",
+        "4": "Very good",
+        "5": "Superb"
+      },
+      "makeAgain": "Make it again?",
+      "yes": "Yes",
+      "no": "Rather not",
+      "noHint": "The agent will stop suggesting this dish. You can change that on the recipe.",
+      "later": "Later",
+      "cancel": "Cancel",
+      "remove": "Remove rating",
+      "save": "Save rating",
+      "error": {
+        "gone": "This meal is no longer in the history.",
+        "failed": "The rating could not be saved. Try again."
+      },
+      "toast": {
+        "rated": "Thanks! Rating saved",
+        "removed": "Rating removed"
+      },
+      "toRate": "To rate",
+      "toRateLabel": "To rate: {{name}}",
+      "rate": "Rate"
+    },
+    "detail": {
+      "back": "Recipes",
+      "edit": "Edit",
+      "photoAlt": "Photo of {{name}}",
+      "addToPlan": "Add to plan",
+      "time": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "ratingLabel": "Rated {{rating}} out of 5",
+      "notRated": "Not rated yet",
+      "lastEaten": "Last eaten {{date}}",
+      "neverEaten": "Not eaten yet",
+      "source": "Source",
+      "favourite": "favourite",
+      "avoidBadge": "avoid: {{names}}",
+      "tooSoon": "too soon, best from {{date}}",
+      "archived": {
+        "title": "This recipe is archived",
+        "text": "It is hidden from the library, the tray and the agent's suggestions. History and the plan still show it."
+      },
+      "restore": "Restore",
+      "archive": "Archive",
+      "never": {
+        "text": "Contains {{names}}, which is on your \"never\" list. The agent will not suggest this recipe; you can only add it to the plan on purpose.",
+        "textWithReason": "Contains {{names}}, which is on your \"never\" list ({{reason}}). The agent will not suggest this recipe; you can only add it to the plan on purpose."
+      },
+      "actionFailed": "The change could not be saved. Try again.",
+      "ingredients": "Ingredients",
+      "servingsLabel": "Servings",
+      "fewerServings": "Fewer servings",
+      "moreServings": "More servings",
+      "scaledFor": "{count, plural, one {Scaled to {servings} serving.} other {Scaled to {servings} servings.}}",
+      "backToHousehold": "Back to household servings",
+      "forHousehold": "For the household ({{servings}} servings).",
+      "toTaste": "to taste",
+      "unknownIngredient": "ingredient no longer in the catalog",
+      "dislike": {
+        "never": "never",
+        "avoid": "avoid"
+      },
+      "noIngredients": "This recipe has no ingredients yet.",
+      "steps": "Method",
+      "noSteps": "This recipe has no steps yet.",
+      "nutrition": "Nutrition",
+      "nutrient": {
+        "kcal": "kcal",
+        "protein": "protein",
+        "fat": "fat",
+        "carbs": "carbs"
+      },
+      "perServing": "Per serving.",
+      "noNutrition": "This recipe has no nutrition data. Days with it in the plan are marked incomplete.",
+      "history": "History and rating",
+      "ratingCount": "{count, plural, one {# rating} other {# ratings}}",
+      "entryNotRated": "not rated",
+      "rate": "Rate",
+      "rateLabel": "Rate the meal of {{date}}",
+      "changeRatingLabel": "Change or remove the rating of {{date}}",
+      "noHistory": "You have not eaten this dish yet.",
+      "makeAgain": "Make again",
+      "makeAgainYes": "The agent may suggest this dish.",
+      "makeAgainNo": "Not again; the agent skips it.",
+      "toast": {
+        "archived": "Recipe archived",
+        "restored": "Recipe restored"
+      },
+      "gone": "This recipe does not exist.",
+      "loadFailed": "The recipe could not be loaded.",
+      "retry": "Try again",
+      "loading": "Loading…"
+    },
+    "editor": {
+      "back": "Recipes",
+      "backToRecipe": "Back to the recipe",
+      "newTitle": "New recipe",
+      "editTitle": "Edit recipe",
+      "name": "Name",
+      "namePlaceholder": "e.g. Pumpkin soup",
+      "ingredients": "Ingredients",
+      "servings": "Servings the quantities are for",
+      "servingsBefore": "Quantities for",
+      "servingsAfter": "{count, plural, one {serving} other {servings}}",
+      "servingsNote": "Type the quantities as the source gives them; the recipe is saved per serving.",
+      "quantity": "Quantity",
+      "toTaste": "to taste",
+      "unit": "Unit",
+      "ingredient": "Ingredient",
+      "ingredientPlaceholder": "e.g. onion",
+      "unknownIngredient": "Ingredient no longer in the catalog",
+      "changeIngredient": "Choose another ingredient instead of {{name}}",
+      "newIngredient": "new",
+      "note": "Note",
+      "notePlaceholder": "Note, e.g. finely chopped",
+      "lineUp": "Move ingredient up",
+      "lineDown": "Move ingredient down",
+      "lineRemove": "Remove ingredient",
+      "moveToSection": "Section of the ingredient",
+      "noSection": "No section",
+      "addLine": "Add ingredient",
+      "addSectionLine": "Add ingredient to {{name}}",
+      "addSection": "Add section",
+      "sectionName": "Section name",
+      "sectionPlaceholder": "Section, e.g. Sauce",
+      "sectionUnnamed": "unnamed section",
+      "sectionUp": "Move section {{name}} up",
+      "sectionDown": "Move section {{name}} down",
+      "sectionRemove": "Remove section {{name}}; its ingredients stay",
+      "hint": {
+        "never": "On the \"never\" list",
+        "neverWithReason": "On the \"never\" list ({{reason}})",
+        "avoid": "On the \"avoid\" list",
+        "new": "New ingredient, added to the catalog when you save"
+      },
+      "details": "Details",
+      "prepTime": "Prep time",
+      "minutes": "minutes",
+      "tags": "Tags",
+      "tagPlaceholder": "Add a tag and press Enter",
+      "tagRemove": "Remove tag {{tag}}",
+      "tagAdd": "Add tag {{tag}}",
+      "tagSuggestions": "Suggested tags",
+      "tagProblem": {
+        "tooLong": "A tag can have at most 40 characters.",
+        "tooMany": "A recipe can have at most {{max}} tags."
+      },
+      "source": "Source",
+      "photo": {
+        "label": "Photo",
+        "drop": "Drop a photo or tap to choose",
+        "optional": "Optional. JPEG, PNG or WebP, up to 10 MB.",
+        "dropping": "Drop the photo here",
+        "replace": "Replace",
+        "remove": "Remove",
+        "alt": "Photo of {{name}}",
+        "newAlt": "New photo",
+        "pending": "Saved with the recipe.",
+        "removed": "The photo is removed when you save.",
+        "undo": "Keep the photo",
+        "problem": {
+          "type": "Choose a JPEG, PNG or WebP picture.",
+          "size": "The photo is larger than 10 MB. Choose a smaller one."
+        }
+      },
+      "cooldown": "Break before planning it again",
+      "cooldownDefault": "default",
+      "days": "days",
+      "cooldownNote": "Leave empty to use the household default.",
+      "makeAgain": "Make again",
+      "makeAgainNote": "Agents only propose recipes you want to make again.",
+      "nutrition": "Nutrition",
+      "nutritionNote": "Per serving, optional. Fill in what the source gives.",
+      "nutrient": {
+        "kcal": "Energy (kcal)",
+        "protein": "Protein (g)",
+        "fat": "Fat (g)",
+        "carbs": "Carbohydrates (g)"
+      },
+      "steps": "Steps",
+      "step": "Step {{number}}",
+      "stepPlaceholder": "What to do",
+      "stepUp": "Move step {{number}} up",
+      "stepDown": "Move step {{number}} down",
+      "stepRemove": "Remove step {{number}}",
+      "addStep": "Add step",
+      "unsaved": "Unsaved changes",
+      "cancel": "Cancel",
+      "add": "Add recipe",
+      "save": "Save",
+      "problems": "Some fields need a look before the recipe can be saved.",
+      "problem": {
+        "nameRequired": "Give the recipe a name.",
+        "servings": "Type a whole number of servings from 1 to {{max}}.",
+        "prepTime": "Type whole minutes, or leave it empty.",
+        "sourceUrl": "Type a web address starting with http:// or https://.",
+        "cooldown": "Type whole days from 0 to {{max}}, or leave it empty.",
+        "nutrition": "Type a number, or leave it empty.",
+        "quantity": "Type a quantity greater than 0 with at most 3 decimal places, or leave it empty for \"to taste\".",
+        "ingredientRequired": "Choose an ingredient, or remove the line.",
+        "sectionName": "Give the section a name.",
+        "sectionNameTaken": "Another section already has this name.",
+        "sectionEmpty": "Add an ingredient to the section, or remove it.",
+        "tooManyLines": "A recipe can have at most {{max}} ingredients.",
+        "tooManySteps": "A recipe can have at most {{max}} steps."
+      },
+      "invalid": "The recipe was not saved: something in it is not valid. Check the fields and try again.",
+      "saveFailed": "The recipe was not saved. Check the connection and try again.",
+      "gone": "This recipe no longer exists.",
+      "loadFailed": "The recipe could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "toast": {
+        "added": "Recipe added",
+        "saved": "Recipe saved",
+        "photoFailed": "The recipe was saved, but its photo was not. Try another picture."
+      },
+      "discard": {
+        "title": "Discard changes?",
+        "text": "Changes to {{name}} have not been saved.",
+        "textNew": "The new recipe has not been saved.",
+        "keep": "Keep editing",
+        "discard": "Discard"
+      }
     }
   }
 }

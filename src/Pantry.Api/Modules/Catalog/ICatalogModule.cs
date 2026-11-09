@@ -19,6 +19,12 @@ public interface ICatalogModule
     Task<CatalogIngredient?> FindIngredientAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// The ids of the ingredients with a name or an alias that contains <paramref name="search"/>, ignoring letter case,
+    /// diacritics and extra whitespace; empty for a blank search.
+    /// </summary>
+    Task<IReadOnlyList<Guid>> SearchIngredientIdsAsync(string search, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// The ingredient that has <paramref name="name"/> as its name or an alias (as <see cref="FindIngredientAsync"/>), or
     /// a new one created and committed right away: base unit guessed from <paramref name="unitUsed"/>, category
     /// <c>other</c>, needs review. Parallel calls with the same new name create one ingredient. Throws
@@ -77,6 +83,9 @@ public sealed record CatalogIngredient(
     bool NeedsReview,
     IReadOnlyDictionary<Unit, decimal> Conversions)
 {
+    /// <summary>The longest name or alias an ingredient can have, also the limit for a name passed to resolve.</summary>
+    public const int NameMaxLength = Domain.Ingredient.NameMaxLength;
+
     /// <summary>The quantity in the base unit; false when <paramref name="unit"/> has no ingredient or generic conversion into it.</summary>
     public bool TryConvertToBaseUnit(decimal quantity, Unit unit, out decimal converted) =>
         Units.TryConvert(quantity, unit, BaseUnit, Conversions, out converted);

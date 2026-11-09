@@ -1,0 +1,142 @@
+<ng-container *transloco="let t">
+  <div class="md:grid md:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] md:items-start md:gap-7">
+    <section
+      class="content-start gap-3 md:sticky md:top-6 md:grid md:max-h-[calc(100dvh-4rem)] md:overflow-y-auto md:pr-1"
+      [class.grid]="!open()"
+      [class.hidden]="open()"
+      aria-labelledby="recipes-title"
+      data-testid="recipe-library"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <h2 id="recipes-title" class="sr-only text-[28px] md:not-sr-only">{{ t('recipes.library.title') }}</h2>
+        <a hlmBtn size="sm" class="ml-auto" data-testid="new-recipe" [routerLink]="newPath">
+          <app-icon name="plus" class="size-4" />
+          {{ t('recipes.library.new') }}
+        </a>
+      </div>
+
+      <app-to-rate-cards (rated)="screen.changed()" />
+
+      @if (screen.libraryEmpty() && !screen.archived()) {
+        <app-empty-state
+          class="md:hidden"
+          illustration="recipes"
+          data-testid="library-empty"
+          [heading]="t('emptyState.recipes.title')"
+          [description]="t('emptyState.recipes.description')"
+          [agentHint]="t('emptyState.recipes.agentHint')"
+        >
+          <a hlmBtn [routerLink]="newPath">
+            <app-icon name="plus" class="size-4" />
+            {{ t('recipes.library.new') }}
+          </a>
+        </app-empty-state>
+      } @else {
+        <label class="flex h-tap items-center gap-2 rounded-control border-2 border-outline bg-card px-3.5 text-muted-foreground focus-within:ring-3 focus-within:ring-ring/50">
+          <app-icon name="search" class="size-5" />
+          <input
+            type="search"
+            class="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+            autocomplete="off"
+            data-testid="recipe-search"
+            [attr.aria-label]="t('recipes.library.search')"
+            [placeholder]="t('recipes.library.searchPlaceholder')"
+            [value]="screen.searchText()"
+            (input)="screen.searchText.set($any($event.target).value)"
+          />
+        </label>
+
+        <div class="flex flex-wrap items-center gap-1.5" role="group" [attr.aria-label]="t('recipes.library.filters')">
+          @for (tag of screen.tagChips(); track tag) {
+            <button
+              type="button"
+              class="inline-flex min-h-9 items-center gap-1.5 rounded-full border-2 border-border bg-card px-3 text-[13px] font-bold text-muted-foreground aria-pressed:border-outline aria-pressed:bg-accent aria-pressed:text-accent-foreground pointer-coarse:min-h-tap"
+              data-testid="filter-tag"
+              [attr.aria-pressed]="screen.tags().includes(tag)"
+              (click)="screen.toggleTag(tag)"
+            >
+              {{ tag }}
+            </button>
+          }
+          <button
+            type="button"
+            class="inline-flex min-h-9 items-center gap-1.5 rounded-full border-2 border-border bg-card px-3 text-[13px] font-bold text-muted-foreground aria-pressed:border-outline aria-pressed:bg-accent aria-pressed:text-accent-foreground pointer-coarse:min-h-tap"
+            data-testid="filter-without-never"
+            [attr.aria-pressed]="screen.withoutNever()"
+            (click)="screen.withoutNever.set(!screen.withoutNever())"
+          >
+            <app-icon name="ban" class="size-3.5" />
+            {{ t('recipes.library.filter.withoutNever') }}
+          </button>
+          <button
+            type="button"
+            class="inline-flex min-h-9 items-center gap-1.5 rounded-full border-2 border-border bg-card px-3 text-[13px] font-bold text-muted-foreground aria-pressed:border-outline aria-pressed:bg-accent aria-pressed:text-accent-foreground pointer-coarse:min-h-tap"
+            data-testid="filter-archived"
+            [attr.aria-pressed]="screen.archived()"
+            (click)="screen.archived.set(!screen.archived())"
+          >
+            {{ t('recipes.library.filter.archived') }}
+          </button>
+        </div>
+
+        <div class="flex min-h-9 flex-wrap items-center justify-between gap-2 text-[13px] text-muted-foreground">
+          <span data-testid="recipe-count" aria-live="polite">
+            @if (screen.matching() !== null) {
+              {{ t(screen.archived() ? 'recipes.library.archivedCount' : 'recipes.library.count', { count: screen.matching() }) }}
+            }
+          </span>
+          <label class="inline-flex items-center gap-1.5">
+            {{ t('recipes.library.sortBy') }}
+            <select
+              class="min-h-9 rounded-chip border-2 border-border bg-card px-2 font-bold text-foreground pointer-coarse:min-h-tap"
+              data-testid="recipe-sort"
+              (change)="setSort($any($event.target).value)"
+            >
+              @for (sort of sorts; track sort) {
+                <option [value]="sort" [selected]="screen.sort() === sort">{{ t('recipes.library.sort.' + sort) }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        @if (screen.loadFailed()) {
+          <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+            <span class="flex-1">{{ t('recipes.library.loadFailed') }}</span>
+            <button hlmBtn variant="outline" size="sm" type="button" (click)="screen.retry()">{{ t('recipes.library.retry') }}</button>
+          </div>
+        } @else if (screen.items(); as items) {
+          <ul class="grid gap-2.5" data-testid="recipe-list">
+            @for (recipe of items; track recipe.id) {
+              <li><app-recipe-card [recipe]="recipe" [today]="screen.today" [current]="open() === recipe.id" /></li>
+            } @empty {
+              <li>
+                <app-empty-state
+                  illustration="search"
+                  data-testid="no-results"
+                  [heading]="t('recipes.library.noResults.title')"
+                  [description]="t(screen.archived() && !screen.search() && !screen.tags().length && !screen.withoutNever() ? 'recipes.library.noResults.archive' : 'recipes.library.noResults.description')"
+                >
+                  <button hlmBtn variant="outline" type="button" (click)="screen.clearFilters()">{{ t('recipes.library.clearFilters') }}</button>
+                </app-empty-state>
+              </li>
+            }
+          </ul>
+          @if (screen.moreFailed()) {
+            <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+              <span class="flex-1">{{ t('recipes.library.loadFailed') }}</span>
+              <button hlmBtn variant="outline" size="sm" type="button" (click)="screen.retry()">{{ t('recipes.library.retry') }}</button>
+            </div>
+          } @else if (screen.hasMore()) {
+            <button hlmBtn variant="outline" type="button" data-testid="show-more" [disabled]="screen.loadingMore()" (click)="screen.showMore()">
+              {{ t('recipes.library.showMore') }}
+            </button>
+          }
+        }
+      }
+    </section>
+
+    <div class="min-w-0 md:block" [class.hidden]="!open()">
+      <router-outlet />
+    </div>
+  </div>
+</ng-container>
