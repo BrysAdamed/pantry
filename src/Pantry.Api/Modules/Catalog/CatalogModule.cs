@@ -25,6 +25,8 @@ public static class CatalogModule
         ingredients.MapGetIngredient();
         ingredients.MapCreateIngredient();
         ingredients.MapUpdateIngredient();
+        ingredients.MapResolveIngredient();
+        ingredients.MapConfirmIngredient();
         ingredients.MapMergeIngredients();
         return api;
     }

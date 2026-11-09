@@ -60,6 +60,16 @@ public sealed class Ingredient
         return ingredient;
     }
 
+    /// <summary>
+    /// An ingredient for a name nobody has used before (from the recipe editor or an agent): base unit guessed from the
+    /// unit it was used with, category <c>other</c>, needs review.
+    /// </summary>
+    public static Ingredient CreateFromUnknownName(string name, Unit? unitUsed) =>
+        Create(name, [], Units.GuessBaseUnit(unitUsed), needsReview: true);
+
+    /// <summary>A person or an agent checked the ingredient; it no longer needs review.</summary>
+    public void Confirm() => NeedsReview = false;
+
     public static bool IsValidName(string name) =>
         name.Length is > 0 and <= NameMaxLength && IngredientName.KeyOf(name).Length > 0;
 
@@ -123,6 +133,6 @@ public sealed class Ingredient
         }
 
         SetNames(Name, [.. Aliases, .. merge.AliasesToAdd]);
-        NeedsReview = false;
+        Confirm();
     }
 }

@@ -47,6 +47,13 @@ public static class Units
 
     public static bool IsBaseUnit(Unit unit) => BaseUnits.Contains(unit);
 
+    /// <summary>
+    /// The base unit of an ingredient first seen with <paramref name="unitUsed"/>: <c>g</c> for weights, <c>ml</c> for
+    /// volumes, <c>piece</c> for everything else (a clove, a can, no unit at all).
+    /// </summary>
+    public static Unit GuessBaseUnit(Unit? unitUsed) =>
+        unitUsed is { } unit && GenericConversionOf(unit) is { } conversion ? conversion.BaseUnit : Unit.Piece;
+
     /// <summary>The built-in conversion of <paramref name="unit"/>, or null when it depends on the ingredient (a clove, a can).</summary>
     public static GenericConversion? GenericConversionOf(Unit unit) => GenericConversions.GetValueOrDefault(unit);
 
