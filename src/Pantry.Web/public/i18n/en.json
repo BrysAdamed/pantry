@@ -254,6 +254,36 @@
       "retry": "Try again",
       "saveFailed": "The change was not saved. Check the connection and try again."
     },
+    "dislikes": {
+      "intro": "For the whole household. The agent does not suggest dishes with ingredients from \"never\", and picks those from \"avoid\" rarely and marks them.",
+      "never": {
+        "title": "Never",
+        "description": "Allergies and a hard no. Recipes with these ingredients get a red warning.",
+        "empty": "Nothing here yet.",
+        "add": "Add to \"never\"",
+        "placeholder": "Ingredient, e.g. peanuts",
+        "moveTo": "Move {{name}} to \"never\""
+      },
+      "avoid": {
+        "title": "Avoid",
+        "description": "Better not, but edible if need be.",
+        "empty": "Nothing here yet.",
+        "add": "Add to \"avoid\"",
+        "placeholder": "Ingredient, e.g. Brussels sprouts",
+        "moveTo": "Move {{name}} to \"avoid\""
+      },
+      "reason": "Reason",
+      "reasonPlaceholder": "Reason, e.g. allergy",
+      "add": "Add",
+      "remove": "Remove {{name}}",
+      "changeIngredient": "Choose another ingredient",
+      "newIngredient": "new",
+      "newIngredientHint": "New ingredient, joins the catalog as \"needs review\"",
+      "alreadyListed": "This ingredient is already on the list. The list is up to date again.",
+      "loadFailed": "Dislikes could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    },
     "account": {
       "intro": "These settings apply only to you, on every device you sign in on.",
       "language": "Interface language",

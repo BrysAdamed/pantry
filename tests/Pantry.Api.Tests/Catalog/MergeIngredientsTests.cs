@@ -80,8 +80,9 @@ public sealed class MergeIngredientsTests(PantryApiFactory factory) : IAsyncLife
         Assert.Equal(2, preview.GetProperty("aliasCountAfter").GetInt32());
         Assert.False(preview.GetProperty("exceedsAliasLimit").GetBoolean());
         Assert.False(preview.GetProperty("sameBaseUnit").GetBoolean());
-        var references = Assert.Single(preview.GetProperty("references").EnumerateArray());
-        Assert.Equal(TestIngredientReferenceHandler.ModuleName, references.GetProperty("module").GetString());
+        var references = Assert.Single(
+            preview.GetProperty("references").EnumerateArray(),
+            r => r.GetProperty("module").GetString() == TestIngredientReferenceHandler.ModuleName);
         Assert.Equal(2, references.GetProperty("source").GetInt32());
         Assert.Equal(0, references.GetProperty("target").GetInt32());
         Assert.Equal(HttpStatusCode.OK, (await _client.GetAsync($"{IngredientsUrl}/{source}")).StatusCode);

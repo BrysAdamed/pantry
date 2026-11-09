@@ -1,0 +1,143 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.dislikes.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('dislikes.intro') }}</p>
+  </div>
+
+  @if (resource.error() && !resource.hasValue()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('dislikes.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="resource.reload()">{{ t('dislikes.retry') }}</button>
+    </div>
+  } @else if (resource.hasValue()) {
+    <div class="grid items-start gap-4 lg:grid-cols-2">
+      @for (column of columns; track column.kind) {
+        <section
+          class="grid min-w-0 gap-3 rounded-card border-2 bg-card px-4.5 py-4"
+          [class]="column.card"
+          [attr.aria-labelledby]="'dislikes-' + column.kind"
+          [attr.data-testid]="'dislikes-' + column.kind"
+        >
+          <div class="grid gap-1">
+            <h3 class="flex items-center gap-2 text-lg font-extrabold" [class]="column.title" [id]="'dislikes-' + column.kind">
+              <app-icon [name]="column.icon" class="size-5" />
+              {{ t('dislikes.' + column.kind + '.title') }}
+            </h3>
+            <p class="text-sm text-muted-foreground">{{ t('dislikes.' + column.kind + '.description') }}</p>
+          </div>
+
+          @if (byKind()[column.kind].length === 0) {
+            <p class="text-sm text-muted-foreground" data-testid="dislikes-empty">{{ t('dislikes.' + column.kind + '.empty') }}</p>
+          } @else {
+            <ul class="flex flex-wrap gap-1.5" [attr.aria-label]="t('dislikes.' + column.kind + '.title')">
+              @for (dislike of byKind()[column.kind]; track dislike.id) {
+                <li
+                  class="inline-flex min-h-9 max-w-full items-center gap-1 rounded-full border-2 border-outline bg-secondary py-0.5 pr-1 pl-3 text-sm font-bold"
+                  data-testid="dislike"
+                >
+                  <span class="min-w-0 truncate">
+                    {{ dislike.ingredientName }}
+                    @if (dislike.reason) {
+                      <span class="text-xs font-medium text-muted-foreground">· {{ dislike.reason }}</span>
+                    }
+                  </span>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    class="size-7 rounded-full"
+                    [attr.aria-label]="t('dislikes.' + column.other + '.moveTo', { name: dislike.ingredientName })"
+                    [title]="t('dislikes.' + column.other + '.moveTo', { name: dislike.ingredientName })"
+                    (click)="move(dislike, column.other)"
+                  >
+                    <app-icon [name]="column.kind === 'never' ? 'chevronRight' : 'chevronLeft'" class="size-4" />
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    class="size-7 rounded-full"
+                    [attr.aria-label]="t('dislikes.remove', { name: dislike.ingredientName })"
+                    (click)="remove(dislike)"
+                  >
+                    <app-icon name="close" class="size-4" />
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          <form class="grid gap-2" (submit)="add($event, column.kind)">
+            @if (chosen()[column.kind]; as choice) {
+              <div
+                class="flex min-h-tap items-center gap-2 rounded-control border-2 border-outline bg-secondary py-1 pr-1 pl-3 font-bold"
+                data-testid="dislike-chosen"
+              >
+                <span class="min-w-0 flex-1 truncate">{{ choiceName(choice) }}</span>
+                @if (choice.kind === 'new') {
+                  <span class="rounded-full border-[1.5px] border-current bg-info-surface px-1.5 py-px text-[11px] font-extrabold text-info">
+                    {{ t('dislikes.newIngredient') }}
+                  </span>
+                }
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  [attr.aria-label]="t('dislikes.changeIngredient')"
+                  (click)="choose(column.kind, null)"
+                >
+                  <app-icon name="close" class="size-4" />
+                </button>
+              </div>
+              @if (choice.kind === 'new') {
+                <p class="flex items-center gap-1.5 text-xs text-info">
+                  <app-icon name="sparkle" class="size-4" />
+                  {{ t('dislikes.newIngredientHint') }}
+                </p>
+              }
+            } @else {
+              <app-ingredient-picker
+                [label]="t('dislikes.' + column.kind + '.add')"
+                [placeholder]="t('dislikes.' + column.kind + '.placeholder')"
+                [taken]="taken()"
+                (picked)="choose(column.kind, $event)"
+              />
+            }
+            <div class="flex gap-2">
+              @if (column.kind === 'never') {
+                <input
+                  class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3"
+                  [value]="reason()"
+                  [maxLength]="reasonMaxLength"
+                  [placeholder]="t('dislikes.reasonPlaceholder')"
+                  [attr.aria-label]="t('dislikes.reason')"
+                  (input)="reason.set($any($event.target).value)"
+                />
+              }
+              <button
+                hlmBtn
+                variant="outline"
+                type="submit"
+                [class.ml-auto]="column.kind !== 'never'"
+                [disabled]="!chosen()[column.kind] || adding() !== null"
+              >
+                <app-icon name="plus" class="size-4" />
+                {{ t('dislikes.add') }}
+              </button>
+            </div>
+          </form>
+        </section>
+      }
+    </div>
+
+    @if (alreadyListed()) {
+      <p class="rounded-control border-2 border-warning bg-warning-surface px-3.5 py-3 text-sm" role="status">{{ t('dislikes.alreadyListed') }}</p>
+    }
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('dislikes.saveFailed') }}</p>
+    }
+  }
+</ng-container>
