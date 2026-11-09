@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Pantry.Api.Modules.Catalog;
+using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Persistence;
 
 namespace Pantry.Api.Modules.Recipes.Features.Recipes;
@@ -11,7 +12,7 @@ public static class UpdateRecipe
     public static RouteHandlerBuilder MapUpdateRecipe(this IEndpointRouteBuilder recipes) => recipes.MapPut("/{id:guid}", HandleAsync);
 
     private static async Task<Results<Ok<RecipeResponse>, NotFound, ValidationProblem>> HandleAsync(
-        Guid id, RecipeRequest request, RecipesDbContext db, ICatalogModule catalog, TimeProvider time, CancellationToken cancellationToken)
+        Guid id, RecipeRequest request, RecipesDbContext db, ICatalogModule catalog, IHouseholdModule household, TimeProvider time, CancellationToken cancellationToken)
     {
         var recipe = await db.Recipes.AsSplitQuery().SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
         if (recipe is null)
@@ -27,6 +28,6 @@ public static class UpdateRecipe
 
         recipe.Update(content, time.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
-        return TypedResults.Ok(await RecipeResponse.FromAsync(recipe, catalog, cancellationToken));
+        return TypedResults.Ok(await RecipeResponse.FromAsync(recipe, catalog, household, cancellationToken));
     }
 }

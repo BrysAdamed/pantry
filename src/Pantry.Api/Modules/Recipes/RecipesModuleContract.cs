@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
 using Pantry.Api.Modules.Recipes.Persistence;
 
 namespace Pantry.Api.Modules.Recipes;
 
-internal sealed class RecipesModuleContract(RecipesDbContext db) : IRecipesModule
+internal sealed class RecipesModuleContract(RecipesDbContext db, IHouseholdModule household) : IRecipesModule
 {
     public async Task<RecipeSummary?> GetRecipeAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -31,6 +32,19 @@ internal sealed class RecipesModuleContract(RecipesDbContext db) : IRecipesModul
         return recipes
             .SelectMany(recipe => recipe.OrderedLines().Select(line => new RecipeIngredientPerServing(
                 recipe.Id, line.IngredientId, line.QuantityPerServing, line.Unit, line.Note, line.Section)))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<RecipeDislikeWarning>> GetDislikeWarningsAsync(
+        IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default)
+    {
+        var recipes = await db.Recipes.AsNoTracking().AsSplitQuery()
+            .Where(r => recipeIds.Contains(r.Id))
+            .OrderBy(r => r.Id)
+            .ToListAsync(cancellationToken);
+        var warnings = await DislikeWarnings.LoadAsync(household, cancellationToken);
+        return recipes
+            .SelectMany(recipe => warnings.Of(recipe).Select(d => new RecipeDislikeWarning(recipe.Id, d.IngredientId, d.Kind, d.Reason)))
             .ToList();
     }
 
