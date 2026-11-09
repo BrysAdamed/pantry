@@ -1,0 +1,622 @@
+<title>Kierunki wizualne Spiżarni</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Nunito:wght@400;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..700&family=Lexend:wght@300..600&display=swap">
+<style>
+/* Layout: page header with direction + theme switch, then the direction brief, desktop planner frame, phone shopping frame and a state legend. */
+:root { --page-bg: #f4f1ea; }
+
+.app[data-dir="a"] {
+  --bg:#F2ECE2; --surface:#FBF8F3; --surface-2:#EAE1D3; --ink:#2B241F; --muted:#6B5F55; --line:#DCD0BF; --line-strong:#BFAF99;
+  --primary:#B4432E; --primary-ink:#FFF7F0; --accent:#2F5C45; --accent-ink:#F3F8F4;
+  --proposed:#94600E; --proposed-bg:#FBF0D9; --eaten:#5E7350; --leftover-bg:#E6EDE4;
+  --ok:#2F7A4B; --warn:#94600E; --missing:#B4432E; --info:#36608F; --shadow-c:60 40 20;
+  --font-display:'Fraunces', Georgia, 'Times New Roman', serif; --font-body:'Nunito', system-ui, sans-serif;
+  --display-weight:600; --display-style:normal; --radius:14px; --radius-sm:9px; --bw:1px;
+  --card-shadow:0 1px 2px rgb(var(--shadow-c) / .07), 0 6px 16px rgb(var(--shadow-c) / .07);
+}
+.app[data-dir="b"] {
+  --bg:#FFF4E6; --surface:#FFFFFF; --surface-2:#FDE6CC; --ink:#2A1B2D; --muted:#6E5B70; --line:#F0D9BF; --line-strong:#2A1B2D;
+  --primary:#6E2A5E; --primary-ink:#FFF4E6; --accent:#F4A259; --accent-ink:#2A1B2D;
+  --proposed:#1C6964; --proposed-bg:#DDF1EE; --eaten:#66774A; --leftover-bg:#F3E9F5;
+  --ok:#2E7D4F; --warn:#A8520F; --missing:#B8342A; --info:#1C6964; --shadow-c:42 27 45;
+  --font-display:'Bricolage Grotesque', 'Arial Rounded MT Bold', system-ui, sans-serif; --font-body:'Figtree', system-ui, sans-serif;
+  --display-weight:800; --display-style:normal; --radius:20px; --radius-sm:12px; --bw:2px;
+  --card-shadow:3px 3px 0 var(--line-strong);
+}
+.app[data-dir="c"] {
+  --bg:#F2F0E6; --surface:#FCFBF5; --surface-2:#E5EBDA; --ink:#1E2822; --muted:#56645B; --line:#D2D8C6; --line-strong:#A9B39C;
+  --primary:#3B6A4D; --primary-ink:#F6F9F1; --accent:#2F4B7C; --accent-ink:#F2F5FB;
+  --proposed:#2F4B7C; --proposed-bg:#E3EAF6; --eaten:#66745C; --leftover-bg:#EEF0E2;
+  --ok:#3B6A4D; --warn:#8C600F; --missing:#9C3B52; --info:#2F4B7C; --shadow-c:30 40 34;
+  --font-display:'Literata', Georgia, serif; --font-body:'Lexend', system-ui, sans-serif;
+  --display-weight:500; --display-style:italic; --radius:6px; --radius-sm:4px; --bw:1px;
+  --card-shadow:none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page-bg:#171512; color-scheme: dark; }
+  :root:not([data-theme="light"]) .app[data-dir="a"] {
+    --bg:#1C1916; --surface:#27221E; --surface-2:#322B26; --ink:#F2EADF; --muted:#B5A899; --line:#3D352F; --line-strong:#5A4E44;
+    --primary:#E7795F; --primary-ink:#1C1916; --accent:#86BC9C; --accent-ink:#13201A;
+    --proposed:#E5B14F; --proposed-bg:#3A2F1A; --eaten:#9FB38C; --leftover-bg:#24302A;
+    --ok:#7FC79A; --warn:#E5B14F; --missing:#EF8A73; --info:#8EB3E0; --shadow-c:0 0 0;
+  }
+  :root:not([data-theme="light"]) .app[data-dir="b"] {
+    --bg:#1B141E; --surface:#251C29; --surface-2:#322536; --ink:#FBEFE3; --muted:#C2AEC3; --line:#3D2E42; --line-strong:#6B5470;
+    --primary:#E59CD0; --primary-ink:#1B141E; --accent:#F4A259; --accent-ink:#1B141E;
+    --proposed:#6FD0C6; --proposed-bg:#173A37; --eaten:#B2C28E; --leftover-bg:#2E2333;
+    --ok:#7DD3A0; --warn:#F4A259; --missing:#FF8A7A; --info:#6FD0C6; --shadow-c:0 0 0;
+  }
+  :root:not([data-theme="light"]) .app[data-dir="c"] {
+    --bg:#151A17; --surface:#1D2420; --surface-2:#26302A; --ink:#E6ECE3; --muted:#A0AEA4; --line:#313C35; --line-strong:#4A574E;
+    --primary:#8FC5A2; --primary-ink:#122017; --accent:#9CB6E8; --accent-ink:#121A2A;
+    --proposed:#9CB6E8; --proposed-bg:#1E2A40; --eaten:#A4B39A; --leftover-bg:#222B25;
+    --ok:#8FC5A2; --warn:#E3B45C; --missing:#E58A9E; --info:#9CB6E8; --shadow-c:0 0 0;
+  }
+}
+:root[data-theme="dark"] { --page-bg:#171512; color-scheme: dark; }
+:root[data-theme="dark"] .app[data-dir="a"] {
+  --bg:#1C1916; --surface:#27221E; --surface-2:#322B26; --ink:#F2EADF; --muted:#B5A899; --line:#3D352F; --line-strong:#5A4E44;
+  --primary:#E7795F; --primary-ink:#1C1916; --accent:#86BC9C; --accent-ink:#13201A;
+  --proposed:#E5B14F; --proposed-bg:#3A2F1A; --eaten:#9FB38C; --leftover-bg:#24302A;
+  --ok:#7FC79A; --warn:#E5B14F; --missing:#EF8A73; --info:#8EB3E0; --shadow-c:0 0 0;
+}
+:root[data-theme="dark"] .app[data-dir="b"] {
+  --bg:#1B141E; --surface:#251C29; --surface-2:#322536; --ink:#FBEFE3; --muted:#C2AEC3; --line:#3D2E42; --line-strong:#6B5470;
+  --primary:#E59CD0; --primary-ink:#1B141E; --accent:#F4A259; --accent-ink:#1B141E;
+  --proposed:#6FD0C6; --proposed-bg:#173A37; --eaten:#B2C28E; --leftover-bg:#2E2333;
+  --ok:#7DD3A0; --warn:#F4A259; --missing:#FF8A7A; --info:#6FD0C6; --shadow-c:0 0 0;
+}
+:root[data-theme="dark"] .app[data-dir="c"] {
+  --bg:#151A17; --surface:#1D2420; --surface-2:#26302A; --ink:#E6ECE3; --muted:#A0AEA4; --line:#313C35; --line-strong:#4A574E;
+  --primary:#8FC5A2; --primary-ink:#122017; --accent:#9CB6E8; --accent-ink:#121A2A;
+  --proposed:#9CB6E8; --proposed-bg:#1E2A40; --eaten:#A4B39A; --leftover-bg:#222B25;
+  --ok:#8FC5A2; --warn:#E3B45C; --missing:#E58A9E; --info:#9CB6E8; --shadow-c:0 0 0;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page-bg); }
+.app {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  min-height: 100vh; transition: background .25s;
+}
+.wrap {
+  max-width: 1320px; margin: 0 auto; display: grid; gap: 28px;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--display-weight); font-style: var(--display-style); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.i.sm { width: 14px; height: 14px; }
+
+/* Page chrome */
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; }
+.pagebar .title { display: grid; gap: 2px; }
+.pagebar .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.pagebar h1 { font-size: clamp(22px, 3vw, 30px); }
+.seg { display: inline-flex; padding: 4px; gap: 4px; background: var(--surface-2); border-radius: 999px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 14px; min-height: 40px; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 3px rgb(var(--shadow-c) / .15); color: var(--ink); }
+.switches { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.brief {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px;
+  background: var(--surface); border: var(--bw) solid var(--line); border-radius: var(--radius); padding: 24px;
+  box-shadow: var(--card-shadow);
+}
+.app[data-dir="b"] .brief { border-color: var(--line-strong); }
+.brief h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.05; }
+.brief .tagline { color: var(--muted); max-width: 60ch; margin: 10px 0 0; }
+.brief ul { margin: 14px 0 0; padding-left: 18px; display: grid; gap: 6px; max-width: 62ch; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; align-content: start; }
+.sw { border-radius: var(--radius-sm); border: var(--bw) solid var(--line); overflow: hidden; background: var(--surface); }
+.sw i { display: block; height: 40px; }
+.sw span { display: block; font-size: 11px; padding: 5px 7px; color: var(--muted); font-weight: 600; }
+.typesample { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline; border-top: 1px dashed var(--line); padding-top: 14px; }
+.typesample .d { font-family: var(--font-display); font-weight: var(--display-weight); font-style: var(--display-style); font-size: 26px; }
+.typesample .b { color: var(--muted); font-size: 14px; }
+
+.frame-label { display: flex; gap: 8px; align-items: center; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 10px; }
+.scroller { overflow-x: auto; border-radius: calc(var(--radius) + 4px); border: var(--bw) solid var(--line-strong); box-shadow: 0 20px 50px -20px rgb(var(--shadow-c) / .35); }
+
+/* Desktop planner */
+.desk { min-width: 1180px; display: grid; grid-template-columns: 196px minmax(0, 1fr) 272px; background: var(--bg); min-height: 720px; }
+.side { background: var(--surface); border-right: var(--bw) solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 22px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: var(--display-weight); font-style: var(--display-style); font-size: 21px; }
+.brand .mark { width: 34px; height: 34px; border-radius: var(--radius-sm); background: var(--primary); color: var(--primary-ink); display: grid; place-items: center; }
+.app[data-dir="a"] .brand .mark { background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / .16) 0 4px, transparent 4px 8px), repeating-linear-gradient(90deg, rgb(255 255 255 / .16) 0 4px, transparent 4px 8px); }
+.app[data-dir="b"] .brand .mark { border: 2px solid var(--line-strong); box-shadow: 2px 2px 0 var(--line-strong); background: var(--accent); color: var(--accent-ink); border-radius: 10px 10px 14px 14px; }
+.nav { display: grid; gap: 4px; }
+.nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--muted); text-decoration: none; font-weight: 600; min-height: 44px; }
+.nav a.on { background: var(--surface-2); color: var(--ink); }
+.app[data-dir="b"] .nav a.on { background: var(--accent); color: var(--accent-ink); }
+.app[data-dir="c"] .nav a.on { background: transparent; color: var(--primary); box-shadow: inset 3px 0 0 var(--primary); border-radius: 0; }
+.sync { margin-top: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); flex: none; }
+
+.main { padding: 22px 22px 26px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.mainhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.mainhead h2 { font-size: 30px; }
+.mainhead .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.weeknav { display: flex; gap: 6px; align-items: center; }
+.iconbtn { width: 40px; height: 40px; border-radius: var(--radius-sm); border: var(--bw) solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: var(--radius-sm); border: var(--bw) solid var(--line); background: var(--surface); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.btn.primary { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+.app[data-dir="b"] .btn, .app[data-dir="b"] .iconbtn { border-color: var(--line-strong); box-shadow: 2px 2px 0 var(--line-strong); border-radius: 999px; }
+.app[data-dir="b"] .iconbtn { border-radius: 50%; }
+
+.agentbar { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 14px; border-radius: var(--radius-sm); background: var(--proposed-bg); color: var(--ink); border: var(--bw) dashed var(--proposed); }
+.agentbar .sp { color: var(--proposed); }
+.agentbar .txt { flex: 1; font-size: 14px; }
+.agentbar .txt b { color: var(--proposed); }
+.agentbar[hidden] { display: none; }
+
+.grid { display: grid; grid-template-columns: 92px repeat(7, minmax(0, 1fr)); gap: 8px; }
+.app[data-dir="c"] .grid { gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--surface); }
+.app[data-dir="c"] .grid > * { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.dayhead { padding: 6px 8px 8px; display: grid; gap: 0; }
+.dayhead .dn { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.dayhead .dd { font-family: var(--font-display); font-weight: var(--display-weight); font-style: var(--display-style); font-size: 24px; line-height: 1.1; }
+.dayhead.today .dd { color: var(--primary); }
+.dayhead.today .dn::after { content: " · dziś"; color: var(--primary); }
+.app[data-dir="b"] .dayhead.today { background: var(--accent); color: var(--accent-ink); border-radius: var(--radius-sm); }
+.app[data-dir="b"] .dayhead.today .dd, .app[data-dir="b"] .dayhead.today .dn, .app[data-dir="b"] .dayhead.today .dn::after { color: var(--accent-ink); }
+.slotlabel { font-size: 13px; font-weight: 700; color: var(--muted); padding: 10px 6px 0 2px; }
+.app[data-dir="c"] .slotlabel { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 15px; color: var(--ink); padding: 10px 10px 0; }
+.cell { min-height: 112px; display: grid; }
+.app[data-dir="c"] .cell { padding: 6px; background-image: repeating-linear-gradient(180deg, transparent 0 23px, rgb(var(--shadow-c) / .07) 23px 24px); }
+
+.entry { border-radius: var(--radius-sm); padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: var(--bw) solid var(--line); box-shadow: var(--card-shadow); min-width: 0; position: relative; }
+.app[data-dir="b"] .entry { border-color: var(--line-strong); }
+.app[data-dir="c"] .entry { box-shadow: none; }
+.entry .nm { font-weight: 700; font-size: 14px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.entry .meta { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: var(--muted); align-items: center; margin-top: auto; }
+.entry .meta span { display: inline-flex; align-items: center; gap: 3px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--surface-2); color: var(--ink); width: fit-content; }
+.entry.proposed { background: var(--proposed-bg); border: 1.5px dashed var(--proposed); box-shadow: none; }
+.entry.proposed .tag { background: transparent; color: var(--proposed); padding: 0; }
+.entry .acts { display: flex; gap: 4px; }
+.entry .acts button { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--proposed); background: var(--surface); display: grid; place-items: center; color: var(--proposed); }
+.entry .acts button.yes { background: var(--proposed); color: var(--surface); }
+.entry.eaten { background: transparent; box-shadow: none; border-style: solid; }
+.entry.eaten .nm { color: var(--muted); }
+.entry.eaten .tag { background: transparent; color: var(--eaten); padding: 0; }
+.entry.leftover { background: var(--leftover-bg); box-shadow: none; }
+.entry.agent { background: transparent; border: 1.5px dotted var(--proposed); box-shadow: none; color: var(--proposed); align-items: center; justify-content: center; text-align: center; font-size: 13px; font-weight: 600; }
+.entry.empty { background: transparent; border: 1.5px dashed var(--line); box-shadow: none; color: var(--muted); align-items: center; justify-content: center; font-size: 13px; opacity: .8; }
+.entry.empty:hover { border-color: var(--primary); color: var(--primary); opacity: 1; }
+.kcal { font-size: 12px; color: var(--muted); padding: 6px 8px; font-variant-numeric: tabular-nums; }
+
+.tray { background: var(--surface); border-left: var(--bw) solid var(--line); padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+.tray h3 { font-size: 20px; }
+.search { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 12px; border-radius: var(--radius-sm); border: var(--bw) solid var(--line); background: var(--bg); color: var(--muted); font-size: 14px; }
+.app[data-dir="b"] .search { border-color: var(--line-strong); border-radius: 999px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: none; padding: 8px 8px 10px; font-size: 13px; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button.on { color: var(--ink); border-color: var(--primary); }
+.dish { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; padding: 10px; border-radius: var(--radius-sm); border: var(--bw) solid var(--line); background: var(--surface); cursor: grab; }
+.app[data-dir="b"] .dish { border-color: var(--line-strong); box-shadow: 2px 2px 0 var(--line-strong); }
+.dish .grip { color: var(--line-strong); padding-top: 2px; }
+.dish .nm { font-weight: 700; font-size: 14px; }
+.dish .meta { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; }
+.dish .warn { color: var(--warn); font-weight: 700; }
+.dish .never { color: var(--missing); font-weight: 700; }
+.dish.cool { opacity: .7; }
+.trayhint { margin-top: auto; font-size: 12px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 12px; }
+.stars { color: var(--warn); letter-spacing: 1px; }
+
+/* Phone */
+.duo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; }
+.phonewrap { display: grid; justify-items: start; }
+.phone { width: 390px; max-width: 100%; height: 820px; border-radius: 44px; border: 10px solid #1b1714; background: var(--bg); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 30px 60px -25px rgb(var(--shadow-c) / .45); position: relative; }
+.statusbar { height: 40px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-size: 13px; font-weight: 700; }
+.phead { padding: 6px 18px 14px; display: grid; gap: 10px; flex: none; }
+.phead .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.phead h2 { font-size: 28px; }
+.phead .lists { font-size: 13px; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: var(--proposed-bg); color: var(--warn); border: 1px solid currentColor; }
+.prog { display: grid; gap: 6px; }
+.prog .bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.prog .bar i { display: block; height: 100%; background: var(--primary); border-radius: inherit; transition: width .3s; }
+.app[data-dir="b"] .prog .bar { border: 2px solid var(--line-strong); height: 14px; }
+.prog .lbl { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.plist { flex: 1; overflow-y: auto; padding: 0 12px 100px; display: grid; gap: 16px; align-content: start; }
+.group h4 { margin: 0 0 6px 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.app[data-dir="c"] .group h4 { font-family: var(--font-display); font-style: italic; text-transform: none; letter-spacing: 0; font-size: 16px; color: var(--ink); font-weight: 500; }
+.items { background: var(--surface); border-radius: var(--radius); border: var(--bw) solid var(--line); overflow: hidden; }
+.app[data-dir="b"] .items { border-color: var(--line-strong); box-shadow: 3px 3px 0 var(--line-strong); }
+.item { width: 100%; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; min-height: 60px; border: 0; background: transparent; text-align: left; border-top: 1px solid var(--line); }
+.item:first-child { border-top: 0; }
+.box { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; color: transparent; transition: background .15s; }
+.app[data-dir="b"] .box { border-radius: 10px; }
+.app[data-dir="c"] .box { border-radius: 4px; }
+.item .nm { font-weight: 700; font-size: 16px; }
+.item .src { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.item .qty { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px; }
+.item.done .box { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.item.done .nm { text-decoration: line-through; color: var(--muted); font-weight: 600; }
+.item.done .qty { color: var(--muted); }
+.miss { color: var(--missing); font-weight: 700; }
+.fab { position: absolute; right: 18px; bottom: 92px; height: 56px; padding: 0 20px; border-radius: 999px; border: 0; background: var(--primary); color: var(--primary-ink); font-weight: 800; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 24px -8px rgb(var(--shadow-c) / .5); }
+.app[data-dir="b"] .fab { border: 2px solid var(--line-strong); box-shadow: 3px 3px 0 var(--line-strong); }
+.app[data-dir="c"] .fab { border-radius: var(--radius); }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 76px; padding-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: var(--bw) solid var(--line); }
+.app[data-dir="b"] .tabbar { border-top-color: var(--line-strong); }
+.tabbar a { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted); text-decoration: none; }
+.tabbar a.on { color: var(--primary); }
+.tabbar a.on svg { stroke-width: 2.5; }
+
+/* Legend */
+.legend { display: grid; gap: 18px; background: var(--surface); border: var(--bw) solid var(--line); border-radius: var(--radius); padding: 20px; min-width: 0; }
+.app[data-dir="b"] .legend { border-color: var(--line-strong); box-shadow: var(--card-shadow); }
+.legend h3 { font-size: 22px; }
+.legend p { margin: 0; color: var(--muted); font-size: 14px; max-width: 60ch; }
+.lg { display: grid; gap: 8px; }
+.lg h4 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; padding: 6px 11px; border-radius: 999px; border: 1.5px solid currentColor; background: var(--surface); }
+.chip.fill { border-style: solid; }
+.c-ok { color: var(--ok); } .c-warn { color: var(--warn); } .c-miss { color: var(--missing); } .c-info { color: var(--info); } .c-prop { color: var(--proposed); border-style: dashed; background: var(--proposed-bg); } .c-eaten { color: var(--eaten); } .c-muted { color: var(--muted); }
+.legend .samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.legend .samples .entry { min-height: 84px; }
+
+@media (max-width: 900px) {
+  .brief { grid-template-columns: minmax(0, 1fr); }
+  .duo { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 440px) {
+  .phone { border-width: 6px; border-radius: 32px; height: 760px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app" id="app" data-dir="a">
+  <div class="wrap">
+    <header class="pagebar">
+      <div class="title">
+        <span class="eyebrow">PAN-11 · Spiżarnia</span>
+        <h1>Kierunki wizualne</h1>
+      </div>
+      <div class="switches">
+        <div class="seg" role="group" aria-label="Kierunek">
+          <button id="dir-a" data-dir="a" aria-pressed="true">A · Lniany obrus</button>
+          <button id="dir-b" data-dir="b" aria-pressed="false">B · Słoik konfitury</button>
+          <button id="dir-c" data-dir="c" aria-pressed="false">C · Zielnik</button>
+        </div>
+        <div class="seg" role="group" aria-label="Motyw">
+          <button id="th-light" data-th="light" aria-pressed="false">Jasny</button>
+          <button id="th-dark" data-th="dark" aria-pressed="false">Ciemny</button>
+          <button id="th-system" data-th="system" aria-pressed="true">System</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="brief" id="brief"></section>
+
+    <section>
+      <div class="frame-label">Planer tygodnia · desktop</div>
+      <div class="scroller">
+        <div class="desk">
+          <aside class="side">
+            <div class="brand"><span class="mark" data-icon="jar"></span>Spiżarnia</div>
+            <nav class="nav">
+              <a href="#" class="on"><span data-icon="cal"></span>Plan</a>
+              <a href="#"><span data-icon="book"></span>Przepisy</a>
+              <a href="#"><span data-icon="cart"></span>Zakupy</a>
+              <a href="#"><span data-icon="home"></span>Dom</a>
+            </nav>
+            <div class="sync"><span class="dot"></span>Online · wszystko zapisane</div>
+          </aside>
+          <div class="main">
+            <div class="mainhead">
+              <div>
+                <h2>9–15 listopada</h2>
+                <div class="sub">2,3 porcji domowych · 3 posiłki dziennie</div>
+              </div>
+              <div class="weeknav">
+                <button class="iconbtn" aria-label="Poprzedni tydzień"><span data-icon="left"></span></button>
+                <button class="btn">Dziś</button>
+                <button class="iconbtn" aria-label="Następny tydzień"><span data-icon="right"></span></button>
+                <button class="btn primary"><span data-icon="cart"></span>Lista zakupów</button>
+              </div>
+            </div>
+            <div class="agentbar" id="agentbar">
+              <span class="sp" data-icon="spark"></span>
+              <div class="txt"><b id="propcount">4 propozycje</b> od agenta czekają na Twoją decyzję. Puste pola oznaczone kropkami agent uzupełni przy następnym planowaniu.</div>
+              <button class="btn" id="rejectall">Odrzuć wszystkie</button>
+              <button class="btn primary" id="acceptall"><span data-icon="check"></span>Akceptuj wszystkie</button>
+            </div>
+            <div class="grid" id="grid"></div>
+          </div>
+          <aside class="tray">
+            <h3>Szuflada dań</h3>
+            <div class="search"><span data-icon="search"></span>Szukaj przepisu…</div>
+            <div class="tabs"><button class="on">Ulubione</button><button>Ostatnio</button><button>Wszystkie</button></div>
+            <div style="display:grid;gap:8px" id="tray"></div>
+            <div class="trayhint">Przeciągnij danie na pole w kalendarzu. Upuść danie z kalendarza tutaj, żeby je usunąć.</div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="duo">
+      <div class="phonewrap">
+        <div class="frame-label">Tryb zakupów · telefon</div>
+        <div class="phone">
+          <div class="statusbar"><span>17:42</span><span style="display:flex;gap:6px;align-items:center"><span data-icon="wifioff" class="sm"></span>62%</span></div>
+          <div class="phead">
+            <div class="row">
+              <h2>W sklepie</h2>
+              <span class="pill"><span data-icon="wifioff" class="sm"></span>Offline · 2 zmiany</span>
+            </div>
+            <div class="lists">Tydzień 9–15 lis · Drogeria · Pies</div>
+            <div class="prog"><div class="bar"><i id="progbar"></i></div><div class="lbl"><span id="proglbl"></span><span>Brakowało online: 1</span></div></div>
+          </div>
+          <div class="plist" id="plist"></div>
+          <button class="fab"><span data-icon="plus"></span>Dodaj</button>
+          <nav class="tabbar">
+            <a href="#"><span data-icon="cal"></span>Plan</a>
+            <a href="#"><span data-icon="book"></span>Przepisy</a>
+            <a href="#" class="on"><span data-icon="cart"></span>Zakupy</a>
+            <a href="#"><span data-icon="home"></span>Dom</a>
+          </nav>
+        </div>
+      </div>
+      <div class="legend">
+        <div>
+          <h3>Stany w tym kierunku</h3>
+          <p>Wszystko, czego dotyka agent, ma jeden kolor: propozycje i pola czekające na agenta. Stany listy i raportu z koszyka używają kolorów semantycznych, niezależnych od akcentu.</p>
+        </div>
+        <div class="lg">
+          <h4>Pozycja w planie</h4>
+          <div class="samples" id="samples"></div>
+        </div>
+        <div class="lg">
+          <h4>Pozycja na liście</h4>
+          <div class="chips">
+            <span class="chip c-muted"><span data-icon="circle" class="sm"></span>Do kupienia</span>
+            <span class="chip c-info"><span data-icon="home" class="sm"></span>Mamy w domu</span>
+            <span class="chip c-ok"><span data-icon="check" class="sm"></span>Kupione</span>
+          </div>
+        </div>
+        <div class="lg">
+          <h4>Raport z koszyka</h4>
+          <div class="chips">
+            <span class="chip c-ok"><span data-icon="check" class="sm"></span>Dodano</span>
+            <span class="chip c-info"><span data-icon="scale" class="sm"></span>Zmieniona ilość</span>
+            <span class="chip c-warn"><span data-icon="swap" class="sm"></span>Zamiennik</span>
+            <span class="chip c-miss"><span data-icon="x" class="sm"></span>Brak</span>
+          </div>
+        </div>
+        <div class="lg">
+          <h4>Nie jemy · synchronizacja</h4>
+          <div class="chips">
+            <span class="chip c-miss"><span data-icon="ban" class="sm"></span>Nigdy</span>
+            <span class="chip c-warn"><span data-icon="alert" class="sm"></span>Unikamy</span>
+            <span class="chip c-ok"><span class="dot"></span>Online</span>
+            <span class="chip c-warn"><span data-icon="wifioff" class="sm"></span>Offline</span>
+            <span class="chip c-info"><span data-icon="sync" class="sm"></span>Czeka na wysłanie</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const ICONS = {
+  jar: '<path d="M7 3h10M8 3v3l-2 3v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M6 12h12"/>',
+  cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  left: '<path d="M15 18l-6-6 6-6"/>', right: '<path d="M9 18l6-6-6-6"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  grip: '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+  repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', wifioff: '<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.7M19 13a10 10 0 0 0-2.3-1.6M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 10.7 5"/><circle cx="12" cy="20" r=".8"/>',
+  circle: '<circle cx="12" cy="12" r="8"/>', scale: '<path d="M12 3v18M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>',
+  swap: '<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>', ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/>', sync: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+  flame: '<path d="M12 22a7 7 0 0 0 7-7c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-3 3-5 5-5 8a7 7 0 0 0 7 7z"/>'
+};
+const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const hydrateIcons = root => root.querySelectorAll('[data-icon]').forEach(el => {
+  const cls = el.classList.contains('sm') ? 'sm' : '';
+  el.outerHTML = icon(el.dataset.icon, cls);
+});
+
+const DIRECTIONS = {
+  a: {
+    name: 'Lniany obrus',
+    tagline: 'Niedzielny obiad u babci, tylko w nowym wydaniu. Lniane tło, pomidorowa czerwień i butelkowa zieleń. Szeryfowe nagłówki z miękkimi zakończeniami, okrągły i przyjazny tekst.',
+    points: ['Miękkie cienie i zaokrąglenia: karty wyglądają jak talerze na obrusie.', 'Kratka z obrusa tylko w znaku aplikacji, nigdzie więcej.', 'Najbardziej klasyczny i najspokojniejszy z trzech; dobrze się starzeje.'],
+    fonts: ['Fraunces', 'Nunito'],
+    swatches: [['--bg', 'Len'], ['--surface', 'Płótno'], ['--primary', 'Pomidor'], ['--accent', 'Butelka'], ['--proposed', 'Agent'], ['--ink', 'Atrament']]
+  },
+  b: {
+    name: 'Słoik konfitury',
+    tagline: 'Półka w spiżarni pełna etykiet. Morelowe ciepło, śliwkowy akcent i wyraźne, grube kontury jak na naklejkach na słoikach. Najbardziej zabawny i energiczny.',
+    points: ['Grube obramowania i przesunięte cienie: wszystko wygląda na „klikalne”.', 'Agent ma osobny, chłodny kolor (morska zieleń), żeby propozycje od razu odstawały.', 'Duże promienie i pigułki; świetnie na telefonie, na desktopie bardziej krzykliwy.'],
+    fonts: ['Bricolage Grotesque', 'Figtree'],
+    swatches: [['--bg', 'Krem'], ['--surface-2', 'Morela jasna'], ['--accent', 'Morela'], ['--primary', 'Śliwka'], ['--proposed', 'Agent'], ['--ink', 'Powidła']]
+  },
+  c: {
+    name: 'Zielnik',
+    tagline: 'Kuchenny zeszyt z przepisami i suszone zioła. Papierowe tło, rozmaryn i atramentowy granat. Kursywa w nagłówkach jak odręczne notatki, bardzo czytelny tekst.',
+    points: ['Kalendarz rysowany liniami jak w zeszycie, bez pływających kart.', 'Najmniej dekoracji, najwięcej treści na ekranie; najlepszy przy gęstym tygodniu.', 'Lexend w treści poprawia czytelność, także przy małych rozmiarach w sklepie.'],
+    fonts: ['Literata', 'Lexend'],
+    swatches: [['--bg', 'Papier'], ['--surface-2', 'Szałwia'], ['--primary', 'Rozmaryn'], ['--accent', 'Atrament'], ['--missing', 'Burak'], ['--ink', 'Grafit']]
+  }
+};
+
+const DAYS = [['Pn', 9], ['Wt', 10], ['Śr', 11], ['Cz', 12], ['Pt', 13], ['So', 14], ['Nd', 15]];
+const SLOTS = ['Śniadanie', 'Obiad', 'Kolacja'];
+const KCAL = ['1 840 kcal', '2 010 kcal', '1 930 kcal', '—', '2 120 kcal', '—', '—'];
+let plan = [
+  [{ s: 'eaten', n: 'Owsianka z jabłkiem i cynamonem', t: '10 min' }, { s: 'accepted', n: 'Pomidorowa z ryżem', t: '35 min' }, { s: 'accepted', n: 'Kanapki z pastą z ciecierzycy', t: '10 min' }],
+  [{ s: 'accepted', n: 'Jajecznica ze szczypiorkiem', t: '10 min' }, { s: 'accepted', n: 'Kurczak curry z ryżem', t: '40 min', srv: 'Na 2 dni' }, { s: 'accepted', n: 'Twarożek z rzodkiewką', t: '10 min' }],
+  [{ s: 'accepted', n: 'Owsianka z jabłkiem i cynamonem', t: '10 min' }, { s: 'leftover', n: 'Kurczak curry z ryżem', from: 'z wtorku' }, { s: 'proposed', n: 'Leczo z cukinią', t: '30 min' }],
+  [{ s: 'proposed', n: 'Naleśniki z twarogiem', t: '25 min' }, { s: 'proposed', n: 'Zupa krem z dyni', t: '45 min' }, { s: 'agent' }],
+  [{ s: 'accepted', n: 'Jajecznica ze szczypiorkiem', t: '10 min' }, { s: 'accepted', n: 'Łosoś z pieczonymi ziemniakami', t: '45 min', srv: '4,3 porcji' }, { s: 'empty' }],
+  [{ s: 'proposed', n: 'Placki ziemniaczane', t: '40 min' }, { s: 'accepted', n: 'Gulasz wołowy', t: '2 h' }, { s: 'agent' }],
+  [{ s: 'empty' }, { s: 'accepted', n: 'Pierogi ruskie', t: '1 h 30' }, { s: 'agent' }]
+];
+
+function entryHtml(e, d, s) {
+  if (e.s === 'agent') return `<div class="entry agent">${icon('spark')}<span>Czeka na agenta</span></div>`;
+  if (e.s === 'empty') return `<div class="entry empty">${icon('plus', 'sm')}<span>Upuść danie</span></div>`;
+  const time = e.t ? `<span>${icon('clock', 'sm')}${e.t}</span>` : '';
+  const srv = e.srv ? `<span>${icon('users', 'sm')}${e.srv}</span>` : '';
+  if (e.s === 'proposed') {
+    return `<div class="entry proposed"><span class="tag">${icon('spark', 'sm')}Propozycja</span><div class="nm">${e.n}</div>
+      <div class="meta">${time}<span class="acts" style="margin-left:auto"><button aria-label="Odrzuć" data-act="no" data-d="${d}" data-s="${s}">${icon('x', 'sm')}</button><button class="yes" aria-label="Akceptuj" data-act="yes" data-d="${d}" data-s="${s}">${icon('check', 'sm')}</button></span></div></div>`;
+  }
+  if (e.s === 'eaten') return `<div class="entry eaten"><span class="tag">${icon('check', 'sm')}Zjedzone</span><div class="nm">${e.n}</div><div class="meta">${time}</div></div>`;
+  if (e.s === 'leftover') return `<div class="entry leftover"><span class="tag">${icon('repeat', 'sm')}Resztki ${e.from}</span><div class="nm">${e.n}</div><div class="meta"><span>Nie trafia na listę zakupów</span></div></div>`;
+  return `<div class="entry"><div class="nm">${e.n}</div><div class="meta">${time}${srv}</div></div>`;
+}
+
+function renderGrid() {
+  const g = document.getElementById('grid');
+  let html = '<div></div>' + DAYS.map(([dn, dd], i) => `<div class="dayhead${i === 0 ? ' today' : ''}"><span class="dn">${dn}</span><span class="dd">${dd}</span></div>`).join('');
+  SLOTS.forEach((slot, s) => {
+    html += `<div class="slotlabel">${slot}</div>`;
+    DAYS.forEach((_, d) => { html += `<div class="cell">${entryHtml(plan[d][s], d, s)}</div>`; });
+  });
+  html += '<div class="kcal">Dzień</div>' + KCAL.map(k => `<div class="kcal">${k === '—' ? 'Brak danych' : icon('flame', 'sm') + ' ' + k}</div>`).join('');
+  g.innerHTML = html;
+  const count = plan.flat().filter(e => e.s === 'proposed').length;
+  const bar = document.getElementById('agentbar');
+  bar.hidden = count === 0;
+  document.getElementById('propcount').textContent = count === 1 ? '1 propozycja' : (count < 5 ? `${count} propozycje` : `${count} propozycji`);
+}
+
+document.getElementById('grid').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-act]');
+  if (!b) return;
+  const e = plan[b.dataset.d][b.dataset.s];
+  plan[b.dataset.d][b.dataset.s] = b.dataset.act === 'yes' ? { ...e, s: 'accepted' } : { s: 'agent' };
+  renderGrid();
+});
+document.getElementById('acceptall').addEventListener('click', () => { plan = plan.map(d => d.map(e => e.s === 'proposed' ? { ...e, s: 'accepted' } : e)); renderGrid(); });
+document.getElementById('rejectall').addEventListener('click', () => { plan = plan.map(d => d.map(e => e.s === 'proposed' ? { s: 'agent' } : e)); renderGrid(); });
+
+const TRAY = [
+  { n: 'Pierogi ruskie', r: 5, last: '3 tyg. temu', t: '1 h 30' },
+  { n: 'Spaghetti bolognese', r: 5, last: '9 dni temu', t: '40 min', cool: 'Przerwa jeszcze 5 dni' },
+  { n: 'Risotto z pieczarkami', r: 4, last: 'miesiąc temu', t: '35 min' },
+  { n: 'Tortilla z fasolą i kukurydzą', r: 4, last: '2 tyg. temu', t: '20 min', avoid: 'Kolendra · unikamy' },
+  { n: 'Zupa krem z dyni', r: 4, last: '5 tyg. temu', t: '45 min' },
+  { n: 'Placki z cukinii', r: 3, last: '2 mies. temu', t: '30 min' }
+];
+document.getElementById('tray').innerHTML = TRAY.map(x => `
+  <div class="dish${x.cool ? ' cool' : ''}"><span class="grip">${icon('grip', 'sm')}</span><div>
+    <div class="nm">${x.n}</div>
+    <div class="meta"><span class="stars" aria-label="Ocena ${x.r} na 5">${'★'.repeat(x.r)}${'☆'.repeat(5 - x.r)}</span><span>${x.t}</span><span>${x.last}</span></div>
+    ${x.cool ? `<div class="meta"><span class="warn">${x.cool}</span></div>` : ''}
+    ${x.avoid ? `<div class="meta"><span class="warn">${x.avoid}</span></div>` : ''}
+  </div></div>`).join('');
+
+const SHOP = [
+  { g: 'Warzywa i owoce', items: [
+    { n: 'Cebula', q: '6 szt.', src: 'Z planu', done: true },
+    { n: 'Cukinia', q: '2 szt.', src: 'Z planu' },
+    { n: 'Pomidory', q: '1,2 kg', src: 'Z planu' },
+    { n: 'Dynia piżmowa', q: '1 szt.', src: 'Z planu', miss: true },
+    { n: 'Szczypiorek', q: '1 pęczek', src: 'Z planu', done: true },
+    { n: 'Jabłka', q: '1 kg', src: 'Z planu' }
+  ]},
+  { g: 'Nabiał i jajka', items: [
+    { n: 'Twaróg półtłusty', q: '500 g', src: 'Z planu', done: true },
+    { n: 'Śmietana 18%', q: '200 ml', src: 'Z planu' },
+    { n: 'Jajka', q: '10 szt.', src: 'Z planu' }
+  ]},
+  { g: 'Ryby', items: [ { n: 'Filet z łososia', q: '650 g', src: 'Z planu' } ]},
+  { g: 'Drogeria', items: [
+    { n: 'Szampon dla dzieci', q: '1 szt.', src: 'Drogeria' },
+    { n: 'Pasta do zębów', q: '2 szt.', src: 'Drogeria', done: true }
+  ]},
+  { g: 'Pies', items: [ { n: 'Karma sucha', q: '3 kg', src: 'Pies' } ]}
+];
+function renderShop() {
+  const total = SHOP.reduce((a, g) => a + g.items.length, 0);
+  const done = SHOP.reduce((a, g) => a + g.items.filter(i => i.done).length, 0);
+  document.getElementById('progbar').style.width = `${Math.round(done / total * 100)}%`;
+  document.getElementById('proglbl').textContent = `${done} z ${total} w koszyku`;
+  document.getElementById('plist').innerHTML = SHOP.map((g, gi) => `
+    <div class="group"><h4>${g.g}</h4><div class="items">
+      ${[...g.items.map((it, ii) => ({ it, ii }))].sort((a, b) => a.it.done - b.it.done).map(({ it, ii }) => `
+        <button class="item${it.done ? ' done' : ''}" data-g="${gi}" data-i="${ii}" aria-pressed="${!!it.done}">
+          <span class="box">${icon('check', 'sm')}</span>
+          <span><span class="nm">${it.n}</span><span class="src">${it.src}${it.miss ? ' · <span class="miss">Brakowało w sklepie online</span>' : ''}</span></span>
+          <span class="qty">${it.q}</span>
+        </button>`).join('')}
+    </div></div>`).join('');
+}
+document.getElementById('plist').addEventListener('click', ev => {
+  const b = ev.target.closest('.item');
+  if (!b) return;
+  const it = SHOP[b.dataset.g].items[b.dataset.i];
+  it.done = !it.done;
+  renderShop();
+});
+
+function renderSamples() {
+  const s = [
+    { s: 'accepted', n: 'Gulasz wołowy', t: '2 h' },
+    { s: 'proposed', n: 'Leczo z cukinią', t: '30 min' },
+    { s: 'eaten', n: 'Owsianka', t: '10 min' },
+    { s: 'leftover', n: 'Kurczak curry', from: 'z wtorku' },
+    { s: 'agent' },
+    { s: 'empty' }
+  ];
+  document.getElementById('samples').innerHTML = s.map(e => entryHtml(e, 0, 0).replace(/data-act="[a-z]+"/g, 'disabled')).join('');
+}
+
+function renderBrief(dir) {
+  const d = DIRECTIONS[dir];
+  document.getElementById('brief').innerHTML = `
+    <div>
+      <h2>${dir.toUpperCase()} · ${d.name}</h2>
+      <p class="tagline">${d.tagline}</p>
+      <ul>${d.points.map(p => `<li>${p}</li>`).join('')}</ul>
+    </div>
+    <div class="swatches">${d.swatches.map(([v, l]) => `<div class="sw"><i style="background:var(${v})"></i><span>${l}</span></div>`).join('')}</div>
+    <div class="typesample"><span class="d">Zażółć gęślą jaźń</span><span class="b">${d.fonts[0]} w nagłówkach · ${d.fonts[1]} w treści · obie z polskimi znakami, do hostowania lokalnie (OFL)</span></div>`;
+}
+
+function setDir(dir) {
+  if (!DIRECTIONS[dir]) dir = 'a';
+  document.getElementById('app').dataset.dir = dir;
+  document.querySelectorAll('[data-dir]').forEach(b => { if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', String(b.dataset.dir === dir)); });
+  renderBrief(dir);
+}
+document.querySelectorAll('button[data-dir]').forEach(b => b.addEventListener('click', () => { location.hash = 'kierunek-' + b.dataset.dir; }));
+const fromHash = () => setDir((location.hash.match(/^#kierunek-([abc])$/) || [])[1] || 'a');
+window.addEventListener('hashchange', fromHash);
+
+function setTheme(th) {
+  const root = document.documentElement;
+  if (th === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', th);
+  document.querySelectorAll('button[data-th]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.th === th)));
+}
+document.querySelectorAll('button[data-th]').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.th)));
+const initialTheme = document.documentElement.getAttribute('data-theme');
+if (initialTheme === 'light' || initialTheme === 'dark') setTheme(initialTheme);
+
+hydrateIcons(document);
+renderGrid();
+renderShop();
+renderSamples();
+fromHash();
+</script>
