@@ -30,7 +30,7 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema(Schema);
-        builder.HasPostgresExtension("public", "pg_trgm");
+        builder.HasPostgresExtension("pg_trgm");
 
         builder.Entity<Ingredient>(ingredient =>
         {
@@ -53,7 +53,7 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
                 name.Property(n => n.Value).HasMaxLength(Ingredient.NameMaxLength);
                 name.Property(n => n.Key).HasMaxLength(Ingredient.NameMaxLength * 2);
                 name.HasIndex(n => n.Key).IsUnique().HasDatabaseName(NameKeyIndex);
-                name.HasIndex(n => n.Key, NameKeyTrigramIndex).HasMethod("gin").HasOperators("gin_trgm_ops");
+                name.HasIndex(n => n.Key, NameKeyTrigramIndex).HasDatabaseName(NameKeyTrigramIndex).HasMethod("gin").HasOperators("gin_trgm_ops");
             });
             ingredient.Navigation(i => i.Names).UsePropertyAccessMode(PropertyAccessMode.Field);
         });
