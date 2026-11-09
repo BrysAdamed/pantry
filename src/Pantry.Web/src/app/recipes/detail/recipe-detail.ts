@@ -15,6 +15,7 @@ import {
   HistoryEntry,
   Nutrition,
   Recipe,
+  RatingSummary,
   RecipeDislike,
   RecipeLine,
   recipeHistoryUrl,
@@ -22,11 +23,12 @@ import {
   RecipesApi,
 } from '../recipes-api';
 import { editRecipePath, RECIPES_PATH } from '../recipes-paths';
+import { localDateIso, RECIPE_DATE_FORMAT } from '../local-date';
+import { RatingPrompt } from '../rating/rating-prompt';
 import { Stars } from '../stars';
 import { scaledAmount, startingServings, stepServings } from './recipe-servings';
 
 export const PLANNER_PATH = '/planner';
-export const RECIPE_DATE_FORMAT = 'd MMM y';
 
 const MINUTES_PER_HOUR = 60;
 const NUTRIENTS =['kcal', 'protein', 'fat', 'carbs'] as const satisfies readonly (keyof Nutrition)[];
@@ -63,6 +65,7 @@ export class RecipeDetail {
 
   private readonly api = inject(RecipesApi);
   private readonly toasts = inject(Toasts);
+  private readonly prompt = inject(RatingPrompt);
   private readonly transloco = inject(TranslocoService);
   protected readonly language = inject(UiLanguageService).current;
 
@@ -118,7 +121,7 @@ export class RecipeDetail {
   protected readonly neverReason = computed(() => this.never().find((d) => d.reason)?.reason ?? null);
   protected readonly tooSoon = computed(() => {
     const from = this.current()?.cooldown.availableFrom;
-    return from && from > todayIso() ? from : null;
+    return from && from > localDateIso() ? from : null;
   });
   protected readonly hasNutrition = computed(() => {
     const nutrition = this.current()?.nutrition;
@@ -155,8 +158,32 @@ export class RecipeDetail {
     if (!recipe) {
       return;
     }
-    await this.run('makeAgain', async () => {
-      const summary = await this.api.setMakeAgain(recipe.id, makeAgain);
+    await this.run('makeAgain', async () => this.applySummary(await this.api.setMakeAgain(recipe.id, makeAgain)));
+  }
+
+  /** Rates a history entry, or changes or removes its rating, in the rating sheet. */
+  protected async rateEntry(entry: HistoryEntry): Promise<void> {
+    const recipe = this.current();
+    if (!recipe) {
+      return;
+    }
+    const outcome = await this.prompt.open({
+      entryId: entry.id,
+      recipeName: recipe.name,
+      date: entry.date,
+      mealSlotName: this.slotName(entry),
+      rating: entry.rating,
+      makeAgain: recipe.makeAgain,
+    });
+    if (outcome) {
+      this.applySummary(outcome.result.recipe);
+      this.history.reload();
+    }
+  }
+
+  private applySummary(summary: RatingSummary): void {
+    const recipe = this.current();
+    if (recipe?.id === summary.recipeId) {
       this.recipe.set({
         ...recipe,
         makeAgain: summary.makeAgain,
@@ -164,7 +191,7 @@ export class RecipeDetail {
         ratingCount: summary.ratingCount,
         isFavourite: summary.isFavourite,
       });
-    });
+    }
   }
 
   protected async archive(): Promise<void> {
@@ -214,10 +241,4 @@ export function prepTimeOf(
   const rest = minutes % MINUTES_PER_HOUR;
   const key = !hours ? 'minutes' : rest ? 'hoursMinutes' : 'hours';
   return { key, hours, minutes: hours ? rest : minutes };
-}
-
-function todayIso(): string {
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }

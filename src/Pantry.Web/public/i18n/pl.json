@@ -802,6 +802,43 @@
     }
   },
   "recipes": {
+    "rating": {
+      "label": "Jak smakowało?",
+      "dialogLabel": "Ocena: {{name}}",
+      "household": "ocena całego domu",
+      "day": {
+        "today": "Dziś",
+        "yesterday": "Wczoraj"
+      },
+      "stars": "Ocena",
+      "starLabel": "{{stars}} na 5, {{word}}",
+      "word": {
+        "1": "Nie smakowało",
+        "2": "Takie sobie",
+        "3": "Dobre",
+        "4": "Bardzo dobre",
+        "5": "Rewelacja"
+      },
+      "makeAgain": "Ugotować znowu?",
+      "yes": "Tak",
+      "no": "Raczej nie",
+      "noHint": "Agent przestanie proponować to danie. Możesz to zmienić w przepisie.",
+      "later": "Później",
+      "cancel": "Anuluj",
+      "remove": "Usuń ocenę",
+      "save": "Zapisz ocenę",
+      "error": {
+        "gone": "Tego posiłku nie ma już w historii.",
+        "failed": "Nie udało się zapisać oceny. Spróbuj jeszcze raz."
+      },
+      "toast": {
+        "rated": "Dzięki! Ocena zapisana",
+        "removed": "Ocena usunięta"
+      },
+      "toRate": "Do oceny",
+      "toRateLabel": "Do oceny: {{name}}",
+      "rate": "Oceń"
+    },
     "detail": {
       "back": "Przepisy",
       "edit": "Edytuj",
@@ -858,6 +895,9 @@
       "history": "Historia i ocena",
       "ratingCount": "{count, plural, one {# ocena} few {# oceny} many {# ocen} other {# oceny}}",
       "entryNotRated": "bez oceny",
+      "rate": "Oceń",
+      "rateLabel": "Oceń danie z {{date}}",
+      "changeRatingLabel": "Zmień albo usuń ocenę z {{date}}",
       "noHistory": "Jeszcze nie jedliście tego dania.",
       "makeAgain": "Ugotować znowu",
       "makeAgainYes": "Agent może proponować to danie.",

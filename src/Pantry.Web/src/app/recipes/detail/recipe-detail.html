@@ -348,11 +348,32 @@
                       · {{ slot }}
                     }
                   </span>
-                  @if (entry.rating !== null) {
-                    <app-stars [value]="entry.rating" [label]="t('ratingLabel', { rating: entry.rating })" />
-                  } @else {
-                    <span class="text-xs text-muted-foreground">{{ t('entryNotRated') }}</span>
-                  }
+                  <span class="flex items-center gap-1.5">
+                    @if (entry.rating !== null) {
+                      <app-stars [value]="entry.rating" [label]="t('ratingLabel', { rating: entry.rating })" />
+                    } @else {
+                      <span class="text-xs text-muted-foreground">{{ t('entryNotRated') }}</span>
+                    }
+                    <button
+                      hlmBtn
+                      variant="ghost"
+                      size="xs"
+                      type="button"
+                      data-testid="history-rate"
+                      [attr.aria-label]="
+                        entry.rating !== null
+                          ? t('changeRatingLabel', { date: (entry.date | date: dateFormat : undefined : language()) })
+                          : t('rateLabel', { date: (entry.date | date: dateFormat : undefined : language()) })
+                      "
+                      (click)="rateEntry(entry)"
+                    >
+                      @if (entry.rating !== null) {
+                        <app-icon name="edit" class="size-3.5" />
+                      } @else {
+                        {{ t('rate') }}
+                      }
+                    </button>
+                  </span>
                 </li>
               }
             </ul>

@@ -99,6 +99,23 @@ export interface RatingResult {
   recipe: RatingSummary;
 }
 
+export const TO_RATE_URL = `${RECIPES_URL}/history/to-rate`;
+
+/** A history entry of the last days still waiting for a rating, newest first. */
+export interface ToRateItem {
+  id: string;
+  recipeId: string;
+  recipeName: string;
+  recipeIsArchived: boolean;
+  date: string;
+  mealSlotId: string;
+  planEntryId: string;
+}
+
+export function historyRatingUrl(entryId: string): string {
+  return `${RECIPES_URL}/history/${entryId}/rating`;
+}
+
 export function recipeHistoryUrl(id: string): string {
   return `${recipeUrl(id)}/history`;
 }
@@ -185,6 +202,16 @@ export class RecipesApi {
 
   restoreRecipe(id: string): Promise<Recipe> {
     return firstValueFrom(this.http.post<Recipe>(`${recipeUrl(id)}/restore`, null));
+  }
+
+  /** Adds or changes the stars of a history entry; a `makeAgain` answer also sets the recipe's flag. */
+  rate(entryId: string, stars: number, makeAgain: boolean | null): Promise<RatingResult> {
+    const body = makeAgain === null ? { stars } : { stars, makeAgain };
+    return firstValueFrom(this.http.put<RatingResult>(historyRatingUrl(entryId), body));
+  }
+
+  removeRating(entryId: string): Promise<RatingResult> {
+    return firstValueFrom(this.http.delete<RatingResult>(historyRatingUrl(entryId)));
   }
 
   setMakeAgain(id: string, makeAgain: boolean): Promise<RatingSummary> {
