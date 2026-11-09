@@ -20,7 +20,9 @@ One container serves the API, the MCP endpoint and the built Angular app. Postgr
 src/Pantry.Api/          .NET host: endpoints, modules, MCP, static SPA in wwwroot/
 src/Pantry.Api/Modules/  one folder per module (see below)
 src/Pantry.Web/          Angular 21 app
-tests/Pantry.Api.Tests/  xUnit integration tests (WebApplicationFactory, later Testcontainers)
+src/Pantry.Api/Infrastructure/  cross-cutting host code (database, health)
+src/Pantry.Web/e2e/      Playwright end-to-end tests
+tests/Pantry.Api.Tests/  xUnit integration tests (WebApplicationFactory + Testcontainers Postgres)
 docs/                    vision, architecture, glossary, ADRs
 ```
 
@@ -44,13 +46,23 @@ Rules:
 - Endpoints are organised as vertical slices: request, handler, response in one file per use case. No mediator library.
 - If a module grows too large, it can move to its own project without changing its contract.
 
+## Persistence
+
+See [ADR 0012](adr/0012-module-persistence.md). A module registers its context with `services.AddModuleDbContext<CatalogDbContext>("catalog")` and sets `HasDefaultSchema("catalog")` in `OnModelCreating`. Pending migrations of all registered modules run on startup.
+
+Add a migration (the `dotnet-ef` tool is pinned in `dotnet-tools.json`, run `dotnet tool restore` once):
+
+```bash
+dotnet ef migrations add <Name> --project src/Pantry.Api --context CatalogDbContext --output-dir Modules/Catalog/Persistence/Migrations
+```
+
 ## Frontend
 
 - Angular 21, zoneless, signals, standalone components, `httpResource` for reads.
-- Tailwind CSS v4 and Spartan UI (copy-in components). Design tokens come from E2.
+- Tailwind CSS v4 and Spartan UI. Spartan's styled (helm) components are copied into `src/app/shared/ui/` and imported as `@spartan-ng/helm/<name>`. Add one with `npx ng g @spartan-ng/cli:ui <name>`. Design tokens come from E2.
 - Angular CDK for drag and drop in the planner.
-- Feature folders mirror backend modules: `src/app/<feature>/`.
-- i18n: PL and EN.
+- Feature folders mirror backend modules: `src/app/<feature>/`. App-wide services live in `src/app/core/`.
+- i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it).
 - PWA: `@angular/service-worker`. Offline writes (shopping lists only) queue in IndexedDB.
 
 ## Development
@@ -60,6 +72,18 @@ docker compose up -d                      # Postgres only
 dotnet run --project src/Pantry.Api       # API on http://localhost:5080
 cd src/Pantry.Web && npm start            # SPA on http://localhost:4200, proxies /api and /mcp
 ```
+
+The development connection string in `appsettings.Development.json` matches `.env.example`. If you change the password in `.env`, override it with `dotnet user-secrets set ConnectionStrings:Pantry "<connection string>" --project src/Pantry.Api`.
+
+Tests:
+
+```bash
+dotnet test                                        # needs Docker (Testcontainers starts Postgres)
+cd src/Pantry.Web && npx ng test --watch=false     # Vitest unit tests
+cd src/Pantry.Web && npm run e2e                   # Playwright, starts ng serve, API is mocked
+```
+
+Run `npx playwright install chromium` once before the first e2e run.
 
 Full stack in Docker:
 

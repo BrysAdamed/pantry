@@ -30,4 +30,5 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Cart run report** | Per-item result of a cart run: *added*, *quantity changed*, *substituted*, *missing*. |
 | **Product memory** | Which shop product was used for an ingredient last time. Shop-agnostic text and URL. |
 | **Content language** | Household setting telling agents which language to write recipes and items in. |
+| **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
 | **Access token** | Personal token an MCP client uses to call the app. Revocable. |

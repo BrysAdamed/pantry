@@ -14,3 +14,5 @@ Short records of decisions that shape the project. Format: context, decision, co
 | [0008](0008-deterministic-shopping-list.md) | Shopping list computed in code with base units | Accepted |
 | [0009](0009-ui-library.md) | Tailwind + Spartan UI instead of PrimeNG | Accepted |
 | [0010](0010-languages.md) | English code and docs, PL/EN UI, household content language | Accepted |
+| [0011](0011-runtime-i18n.md) | Runtime UI translations with Transloco | Accepted |
+| [0012](0012-module-persistence.md) | Schema per module, migrations on startup | Accepted |

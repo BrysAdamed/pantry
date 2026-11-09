@@ -8,7 +8,8 @@ Self-hosted household meal planner and shopping list with an MCP server. Read `d
 - Use glossary terms in code, API and UI. Add a term to `docs/glossary.md` when you introduce one.
 - A structural decision gets a new ADR in `docs/adr/` (next number) and a row in `docs/adr/README.md`.
 - No LLM calls inside the app. Agent features go through the MCP server.
-- No hardcoded UI strings; every label in PL and EN.
+- No hardcoded UI strings; every label in PL and EN (`public/i18n/*.json`, see ADR 0011).
+- A module's data lives in its own schema via `AddModuleDbContext` (ADR 0012).
 
 ## Work tracking
 
@@ -24,6 +25,7 @@ Tickets live in the ticketing app (MCP server `ticketing`), project key `PAN`. E
 docker compose up -d                       # Postgres
 dotnet run --project src/Pantry.Api        # http://localhost:5080
 cd src/Pantry.Web && npm start             # http://localhost:4200 (proxies /api, /mcp)
-dotnet test
+dotnet test                                # needs Docker (Testcontainers)
 cd src/Pantry.Web && npx ng test --watch=false
+cd src/Pantry.Web && npm run e2e           # Playwright
 ```

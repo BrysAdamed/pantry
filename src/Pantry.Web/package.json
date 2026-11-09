@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "e2e": "playwright test"
   },
   "prettier": {
     "printWidth": 100,
@@ -47,6 +48,7 @@
     "@playwright/test": "^1.65.0",
     "@spartan-ng/cli": "^1.9.0",
     "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^24.19.2",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.32",
     "tailwindcss": "^4.3.5",

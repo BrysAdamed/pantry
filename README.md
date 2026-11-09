@@ -34,8 +34,9 @@ Full stack in Docker: `docker compose --profile app up -d --build`, then open ht
 Tests:
 
 ```bash
-dotnet test
-cd src/Pantry.Web && npx ng test --watch=false
+dotnet test                                     # needs Docker (Testcontainers)
+cd src/Pantry.Web && npx ng test --watch=false  # unit tests
+cd src/Pantry.Web && npm run e2e                # Playwright end-to-end
 ```
 
 ## Docs
