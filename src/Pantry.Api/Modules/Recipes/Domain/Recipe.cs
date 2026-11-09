@@ -102,6 +102,18 @@ public sealed class Recipe
         UpdatedAt = now;
     }
 
+    /// <summary>
+    /// Points the lines of <paramref name="sourceId"/> at <paramref name="targetId"/> after an ingredient merge. Quantities,
+    /// units, notes and positions stay, so a recipe that had lines for both keeps two lines.
+    /// </summary>
+    public void ReplaceIngredient(Guid sourceId, Guid targetId)
+    {
+        foreach (var line in _lines.Where(l => l.IngredientId == sourceId))
+        {
+            line.ReplaceIngredient(targetId);
+        }
+    }
+
     private void SetTags(IReadOnlyList<string> tags)
     {
         _tags.RemoveAll(existing => !tags.Contains(existing.Value));

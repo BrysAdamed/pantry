@@ -44,6 +44,11 @@ public sealed class RecipeIngredientLine
         Unit = line.Unit;
         Note = line.Note;
     }
+
+    internal void ReplaceIngredient(Guid ingredientId)
+    {
+        IngredientId = ingredientId;
+    }
 }
 
 /// <summary>

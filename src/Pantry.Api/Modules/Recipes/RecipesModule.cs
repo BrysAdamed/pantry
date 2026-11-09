@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pantry.Api.Infrastructure.Database;
+using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Recipes.Features.History;
 using Pantry.Api.Modules.Recipes.Features.Recipes;
 using Pantry.Api.Modules.Recipes.Features.Tags;
@@ -13,6 +14,7 @@ public static class RecipesModule
     {
         services.AddModuleDbContext<RecipesDbContext>(RecipesDbContext.Schema);
         services.AddScoped<IRecipesModule, RecipesModuleContract>();
+        services.AddScoped<IIngredientReferenceHandler, RecipeIngredientReferences>();
         services.TryAddSingleton(TimeProvider.System);
         return services;
     }
