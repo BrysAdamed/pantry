@@ -10,10 +10,10 @@ const creationOptions = {
   attestation: 'none',
 };
 
-const user = { id: '2', displayName: 'Sam', role: 'user', uiLanguage: null, theme: 'system' };
+const user = { id: '2', displayName: 'Sam', role: 'user', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
 const expiresAt = '2026-11-11T10:00:00Z';
 
-type LinkAnswer = { status: 200; kind: 'invite' | 'recovery' } | { status: 410; state: 'expired' | 'used' | 'revoked' } | { status: 404 };
+type LinkAnswer = { status: 200; kind: 'invite' | 'recovery'; userName?: string } | { status: 410; state: 'expired' | 'used' | 'revoked' } | { status: 404 };
 
 /** The redeem API for the token `tok`; the session starts signed out and the completed link signs the user in. */
 async function mockLink(page: Page, answer: LinkAnswer, language: 'en' | 'pl' = 'en') {
@@ -23,11 +23,15 @@ async function mockLink(page: Page, answer: LinkAnswer, language: 'en' | 'pl' = 
   await page.route('/api/antiforgery', (route) => route.fulfill({ status: 204 }));
   await page.route('/api/passkey-links/redeem/tok', (route) => {
     if (answer.status === 200) {
-      return route.fulfill({ json: { kind: answer.kind, name: 'Sam', invitedBy: 'Alex', expiresAt } });
+      return route.fulfill({ json: { kind: answer.kind, name: 'Sam', userName: answer.userName ?? null, invitedBy: 'Alex', expiresAt } });
     }
     return route.fulfill({ status: answer.status, json: answer.status === 410 ? { state: answer.state } : {} });
   });
   await page.route('/api/passkey-links/redeem/tok/passkey-options', (route) => route.fulfill({ json: creationOptions }));
+  await page.route('/api/passkey-links/redeem/tok/complete-with-password', (route) => {
+    signedIn = true;
+    return route.fulfill({ json: { ...user, signInMethods: ['password'] } });
+  });
   await page.route('/api/passkey-links/redeem/tok/complete', (route) => {
     signedIn = true;
     return route.fulfill({ json: user });
@@ -126,4 +130,36 @@ test('shows the invite in Polish', async ({ page }) => {
 
   await expect(page.getByTestId('redeem-title')).toHaveText('Alex zaprasza Cię do Spiżarni');
   await expect(page.getByTestId('redeem-create')).toHaveText('Dołącz i utwórz klucz');
+});
+
+test('accepts an invite with a username and password, without a passkey', async ({ page }) => {
+  await mockLink(page, { status: 200, kind: 'invite' });
+  const completed = page.waitForRequest('/api/passkey-links/redeem/tok/complete-with-password');
+  await page.goto('/link/tok');
+
+  await page.getByTestId('method-password').click();
+  await page.getByLabel('Username').fill('sam');
+  await page.getByLabel('Password', { exact: true }).fill('pantry shelf 2026');
+  await page.getByLabel('Repeat the password').fill('pantry shelf 2026');
+  await page.getByTestId('redeem-create').click();
+
+  expect((await completed).postDataJSON()).toEqual({ displayName: 'Sam', userName: 'sam', password: 'pantry shelf 2026', uiLanguage: 'en' });
+  await expect(page.getByTestId('redeem-done')).toHaveText('Welcome home!');
+  await page.getByTestId('redeem-open-app').click();
+  await expect(page).toHaveURL('/planner');
+});
+
+test('sets a new password from a recovery link', async ({ page }) => {
+  await mockLink(page, { status: 200, kind: 'recovery', userName: 'sam' });
+  const completed = page.waitForRequest('/api/passkey-links/redeem/tok/complete-with-password');
+  await page.goto('/link/tok');
+
+  await page.getByTestId('method-password').click();
+  await expect(page.getByLabel('Username')).toHaveValue('sam');
+  await page.getByLabel('Password', { exact: true }).fill('a brand new password');
+  await page.getByLabel('Repeat the password').fill('a brand new password');
+  await page.getByTestId('redeem-create').click();
+
+  expect((await completed).postDataJSON()).toMatchObject({ userName: null, password: 'a brand new password' });
+  await expect(page.getByTestId('redeem-done')).toBeVisible();
 });

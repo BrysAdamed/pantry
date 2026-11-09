@@ -1,7 +1,7 @@
 import { generateKeyPairSync } from 'node:crypto';
 import { expect, Page, test } from '@playwright/test';
 
-const user = { id: '1', displayName: 'Alex', role: 'user', uiLanguage: null, theme: 'system' };
+const user = { id: '1', displayName: 'Alex', role: 'user', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
 
 const requestOptions = {
   challenge: 'Y2hhbGxlbmdlLWNoYWxsZW5nZS1jaGFsbGVuZ2U',
@@ -13,11 +13,12 @@ const requestOptions = {
 interface MockApi {
   signedIn: boolean;
   signInStatus: number;
+  passwords: Record<string, string>;
 }
 
 /** A household with a session that starts signed out; sign-in and sign-out flip it like the real API. */
 async function mockApi(page: Page, overrides: Partial<MockApi> = {}): Promise<MockApi> {
-  const api: MockApi = { signedIn: false, signInStatus: 200, ...overrides };
+  const api: MockApi = { signedIn: false, signInStatus: 200, passwords: { alex: 'pantry shelf 2026' }, ...overrides };
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
   await page.route('/api/me', (route) =>
     api.signedIn ? route.fulfill({ json: user }) : route.fulfill({ status: 401 }),
@@ -30,6 +31,14 @@ async function mockApi(page: Page, overrides: Partial<MockApi> = {}): Promise<Mo
     }
     api.signedIn = true;
     return route.fulfill({ json: user });
+  });
+  await page.route('/api/auth/sign-in/password', (route) => {
+    const { userName, password } = route.request().postDataJSON();
+    if (api.passwords[userName.toLowerCase()] !== password) {
+      return route.fulfill({ status: 401, json: { title: 'Password sign-in failed.' } });
+    }
+    api.signedIn = true;
+    return route.fulfill({ json: { ...user, userName, signInMethods: ['password'] } });
   });
   await page.route('/api/auth/sign-out', (route) => {
     api.signedIn = false;
@@ -158,9 +167,16 @@ test('signs in with a passkey picked from the autofill where the browser support
     PublicKeyCredential.isConditionalMediationAvailable = () => Promise.resolve(true);
   });
   await addPasskey(page);
+  let answerSignIn!: () => void;
+  const signInHeld = new Promise<void>((resolve) => (answerSignIn = resolve));
+  await page.route('/api/auth/sign-in', async (route) => {
+    await signInHeld;
+    await route.fallback();
+  });
   await page.goto('/sign-in');
 
-  await expect(page.getByTestId('sign-in-autofill')).toHaveAttribute('autocomplete', 'username webauthn');
+  await expect(page.getByTestId('sign-in-user-name')).toHaveAttribute('autocomplete', 'username webauthn');
+  answerSignIn();
 
   await expect(page).toHaveURL('/planner');
 });
@@ -210,4 +226,54 @@ test('signs out and the back button does not show the app again', async ({ page 
   await expect(page).toHaveURL(/\/sign-in\?returnUrl=/);
   await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveCount(0);
   await expect(page.getByRole('navigation')).toHaveCount(0);
+});
+
+test('signs in with a username and password and goes back to the requested page', async ({ page }) => {
+  await mockApi(page);
+  await withoutPasskeyAutofill(page);
+  const signedIn = page.waitForRequest('/api/auth/sign-in/password');
+
+  await page.goto('/recipes');
+  await expect(page).toHaveURL('/sign-in?returnUrl=%2Frecipes');
+  await page.getByLabel('Username').fill('alex');
+  await page.getByLabel('Password').fill('pantry shelf 2026');
+  await page.getByLabel('Password').press('Enter');
+
+  expect((await signedIn).postDataJSON()).toEqual({ userName: 'alex', password: 'pantry shelf 2026' });
+  await expect(page).toHaveURL('/recipes');
+  await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText('Add your first recipe');
+});
+
+test('gives the same message for a wrong password and an unknown username', async ({ page }) => {
+  await mockApi(page);
+  await withoutPasskeyAutofill(page);
+  await page.goto('/sign-in');
+
+  await page.getByLabel('Username').fill('alex');
+  await page.getByLabel('Password').fill('not the password');
+  await page.getByTestId('sign-in-with-password').click();
+  await expect(page.getByRole('alert')).toContainText('Wrong username or password.');
+  const wrongPassword = await page.getByRole('alert').textContent();
+
+  await page.getByLabel('Username').fill('nobody');
+  const unknownUser = page.waitForResponse('/api/auth/sign-in/password');
+  await page.getByTestId('sign-in-with-password').click();
+
+  expect((await unknownUser).status()).toBe(401);
+  await expect(page.getByRole('alert')).toHaveText(wrongPassword!);
+  await expect(page).toHaveURL('/sign-in');
+});
+
+test('signs in with a password where the browser has no passkeys', async ({ page }) => {
+  await mockApi(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'PublicKeyCredential', { value: undefined, configurable: true });
+  });
+  await page.goto('/sign-in');
+
+  await page.getByLabel('Username').fill('alex');
+  await page.getByLabel('Password').fill('pantry shelf 2026');
+  await page.getByTestId('sign-in-with-password').click();
+
+  await expect(page).toHaveURL('/planner');
 });

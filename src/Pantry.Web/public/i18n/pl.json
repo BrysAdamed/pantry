@@ -104,10 +104,19 @@
     "intro": "To konto będzie kontem administratora. Potem zaprosisz resztę domowników.",
     "nameLabel": "Jak masz na imię?",
     "namePlaceholder": "np. Ania",
-    "create": "Utwórz klucz dostępu",
-    "creating": "Czekam na klucz dostępu…",
+    "create": {
+      "passkey": "Utwórz klucz dostępu",
+      "password": "Utwórz konto"
+    },
+    "creating": {
+      "passkey": "Czekam na klucz dostępu…",
+      "password": "Tworzę konto…"
+    },
     "retry": "Spróbuj ponownie",
-    "hint": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+    "hint": {
+      "passkey": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+      "password": "Niech menedżer haseł zapamięta nazwę użytkownika i hasło."
+    },
     "cancelled": {
       "title": "Tworzenie klucza przerwane.",
       "body": "Okno klucza zostało zamknięte. Spróbuj jeszcze raz."
@@ -116,9 +125,13 @@
       "title": "Nie udało się zapisać klucza.",
       "body": "Sprawdź połączenie i spróbuj jeszcze raz."
     },
+    "passwordFailed": {
+      "title": "Nie udało się utworzyć konta.",
+      "body": "Sprawdź połączenie i spróbuj jeszcze raz."
+    },
     "unsupported": {
       "title": "Klucze dostępu tu nie działają.",
-      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce albo użyj hasła."
     },
     "alreadyDone": {
       "title": "Spiżarnia jest już założona",
@@ -127,7 +140,8 @@
     },
     "done": {
       "title": "Witaj w domu!",
-      "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "passkey": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "password": "Następnym razem zaloguj się nazwą użytkownika i hasłem.",
       "action": "Przejdź do planu"
     }
   },
@@ -163,7 +177,7 @@
       },
       "account": {
         "title": "Moje konto",
-        "description": "Język, motyw, klucze dostępu"
+        "description": "Język, motyw, logowanie"
       }
     },
     "members": {
@@ -179,6 +193,11 @@
         "none": "bez konta",
         "invited": "zaproszenie wysłane",
         "recoveryLinkSent": "link odzyskania wysłany"
+      },
+      "signInMethods": {
+        "label": "Loguje się przez",
+        "passkey": "klucz dostępu",
+        "password": "hasło"
       },
       "nameLabel": "Imię",
       "rename": "Zmień imię: {{name}}",
@@ -205,11 +224,11 @@
       "issued": {
         "invite": {
           "title": "Zaproszenie dla: {{name}}",
-          "body": "Wyślij ten link tylko tej osobie. Otworzy go na swoim telefonie i utworzy klucz dostępu."
+          "body": "Wyślij ten link tylko tej osobie. Otworzy go na swoim telefonie i utworzy klucz dostępu albo hasło."
         },
         "recovery": {
           "title": "Link odzyskania dla: {{name}}",
-          "body": "Wyślij ten link tylko tej osobie. Otworzy go na nowym telefonie i doda klucz dostępu."
+          "body": "Wyślij ten link tylko tej osobie. Otworzy go na nowym telefonie i doda klucz dostępu albo ustawi nowe hasło."
         },
         "address": "Adres linku",
         "copy": "Kopiuj",
@@ -253,8 +272,9 @@
         "confirmRemove": "Usunąć: {{name}}? Inne urządzenia trzeba będzie zalogować ponownie.",
         "cancel": "Anuluj",
         "confirm": "Usuń",
-        "onlyOne": "To Twój jedyny klucz. Zanim go usuniesz, dodaj drugi.",
-        "lastPasskey": "Ostatni klucz musi zostać. Najpierw dodaj drugi.",
+        "onlyOne": "To Twój jedyny sposób logowania. Zanim go usuniesz, dodaj drugi klucz albo ustaw hasło.",
+        "lastPasskey": "Ostatni sposób logowania musi zostać. Najpierw dodaj drugi klucz albo ustaw hasło.",
+        "none": "Brak kluczy dostępu. Dodaj klucz, żeby logować się bez hasła.",
         "note": "Klucze synchronizują się przez menedżer haseł telefonu. Dodaj drugi, jeśli używasz kilku urządzeń bez wspólnego konta.",
         "loadFailed": "Nie udało się wczytać kluczy. Sprawdź połączenie.",
         "retry": "Spróbuj ponownie",
@@ -262,6 +282,33 @@
         "cancelled": "Dodawanie klucza przerwane. Spróbuj jeszcze raz.",
         "unsupported": "Klucze dostępu tu nie działają. Otwórz aplikację przez HTTPS w aktualnej przeglądarce.",
         "addFailed": "Nie udało się zapisać klucza. Sprawdź połączenie i spróbuj jeszcze raz."
+      },
+      "password": {
+        "title": "Nazwa użytkownika i hasło",
+        "userName": "Nazwa użytkownika",
+        "noUserName": "jeszcze brak",
+        "password": "Hasło",
+        "isSet": "ustawione",
+        "notSet": "nieustawione",
+        "set": "Ustaw hasło",
+        "change": "Zmień hasło",
+        "remove": "Usuń hasło",
+        "confirmRemove": "Usunąć hasło? Inne urządzenia trzeba będzie zalogować ponownie.",
+        "currentPassword": "Obecne hasło",
+        "save": "Zapisz",
+        "saving": "Zapisuję…",
+        "cancel": "Anuluj",
+        "onlyMethod": "Hasło to Twój jedyny sposób logowania. Zanim je usuniesz, dodaj klucz dostępu.",
+        "saved": "Hasło zapisane. Inne urządzenia są wylogowane.",
+        "removed": "Hasło usunięte. Inne urządzenia są wylogowane.",
+        "note": "Nazwę użytkownika wybierasz raz, razem z pierwszym hasłem. Każda zmiana wylogowuje Twoje inne urządzenia.",
+        "problem": {
+          "userNameTaken": "Ta nazwa użytkownika jest zajęta. Wybierz inną.",
+          "wrongCurrent": "Obecne hasło jest nieprawidłowe.",
+          "lastMethod": "Ostatni sposób logowania musi zostać. Najpierw dodaj klucz dostępu.",
+          "outdated": "Twoje konto zmieniło się na innym urządzeniu. Dane są znowu aktualne.",
+          "failed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+        }
       },
       "sessions": {
         "title": "Inne urządzenia",
@@ -311,13 +358,27 @@
   "signIn": {
     "title": "Spiżarnia",
     "intro": "Plan posiłków i zakupy dla całego domu.",
-    "accountLabel": "Konto",
-    "accountPlaceholder": "Wybierz klucz dostępu",
     "signIn": "Zaloguj się kluczem dostępu",
     "signingIn": "Czekam na klucz dostępu…",
     "retry": "Spróbuj ponownie",
+    "or": "albo",
+    "userNameLabel": "Nazwa użytkownika",
+    "userNamePlaceholder": "Wpisz ją albo wybierz klucz",
+    "passwordLabel": "Hasło",
     "hint": "Nie masz konta? Poproś administratora o zaproszenie.",
     "expired": "Sesja wygasła. Zaloguj się ponownie.",
+    "password": {
+      "signIn": "Zaloguj się hasłem",
+      "signingIn": "Loguję…",
+      "rejected": {
+        "title": "Nieprawidłowa nazwa użytkownika lub hasło.",
+        "body": "Sprawdź oba pola i spróbuj ponownie. Po kilku nieudanych próbach logowanie jest blokowane na 15 minut."
+      },
+      "failed": {
+        "title": "Nie udało się zalogować.",
+        "body": "Sprawdź połączenie i spróbuj ponownie."
+      }
+    },
     "cancelled": {
       "title": "Logowanie przerwane.",
       "body": "Okno klucza zostało zamknięte albo klucz nie pasuje do tego adresu. Spróbuj jeszcze raz albo poproś administratora o nowy link."
@@ -332,8 +393,21 @@
     },
     "unsupported": {
       "title": "Klucze dostępu tu nie działają.",
-      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce albo zaloguj się hasłem."
     }
+  },
+  "password": {
+    "method": {
+      "label": "Jak chcesz się logować?",
+      "passkey": "Klucz dostępu",
+      "password": "Hasło"
+    },
+    "userNameLabel": "Nazwa użytkownika",
+    "userNameRule": "Od 3 do 32 liter, cyfr, kropek, myślników lub podkreśleń. Nią się logujesz.",
+    "passwordLabel": "Hasło",
+    "passwordRule": "Co najmniej 12 znaków. Dobrze sprawdza się kilka losowych słów.",
+    "confirmationLabel": "Powtórz hasło",
+    "mismatch": "Hasła się różnią."
   },
   "redeemLink": {
     "loading": "Otwieranie linku…",
@@ -345,19 +419,34 @@
       "label": "Zaproszenie",
       "title": "{{name}} zaprasza Cię do Spiżarni",
       "titleAnonymous": "Zaproszenie do Spiżarni",
-      "create": "Dołącz i utwórz klucz"
+      "create": {
+        "passkey": "Dołącz i utwórz klucz",
+        "password": "Dołącz"
+      }
     },
     "recovery": {
       "label": "Link odzyskania",
       "title": "Wróć do Spiżarni, {{name}}",
-      "body": "Utwórz klucz dostępu na tym urządzeniu. Klucze na innych urządzeniach działają dalej.",
-      "create": "Utwórz klucz dostępu"
+      "body": {
+        "passkey": "Utwórz klucz dostępu na tym urządzeniu. Inne urządzenia zostaną wylogowane; ich klucze działają dalej.",
+        "password": "Ustaw nowe hasło. Inne urządzenia zostaną wylogowane."
+      },
+      "create": {
+        "passkey": "Utwórz klucz dostępu",
+        "password": "Ustaw hasło"
+      }
     },
     "validUntil": "Ważny do {{date}}",
     "nameLabel": "Jak masz na imię?",
-    "creating": "Czekam na klucz dostępu…",
+    "creating": {
+      "passkey": "Czekam na klucz dostępu…",
+      "password": "Zapisuję…"
+    },
     "retry": "Spróbuj ponownie",
-    "hint": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+    "hint": {
+      "passkey": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+      "password": "Niech menedżer haseł zapamięta nazwę użytkownika i hasło."
+    },
     "cancelled": {
       "title": "Tworzenie klucza przerwane.",
       "body": "Okno klucza zostało zamknięte. Spróbuj jeszcze raz."
@@ -366,9 +455,17 @@
       "title": "Nie udało się zapisać klucza.",
       "body": "Sprawdź połączenie i spróbuj jeszcze raz."
     },
+    "passwordFailed": {
+      "title": "Nie udało się zapisać hasła.",
+      "body": "Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "userNameTaken": {
+      "title": "Ta nazwa użytkownika jest zajęta.",
+      "body": "Wybierz inną."
+    },
     "unsupported": {
       "title": "Klucze dostępu tu nie działają.",
-      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce albo użyj hasła."
     },
     "expired": {
       "title": "Link wygasł",
@@ -388,7 +485,8 @@
     },
     "done": {
       "title": "Witaj w domu!",
-      "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "passkey": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "password": "Następnym razem zaloguj się nazwą użytkownika i hasłem.",
       "action": "Przejdź do planu"
     },
     "signIn": "Przejdź do logowania"

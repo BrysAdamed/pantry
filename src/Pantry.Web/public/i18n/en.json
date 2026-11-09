@@ -104,10 +104,19 @@
     "intro": "This account will be the admin. Then you can invite the rest of the household.",
     "nameLabel": "What is your name?",
     "namePlaceholder": "e.g. Alex",
-    "create": "Create a passkey",
-    "creating": "Waiting for the passkey…",
+    "create": {
+      "passkey": "Create a passkey",
+      "password": "Create the account"
+    },
+    "creating": {
+      "passkey": "Waiting for the passkey…",
+      "password": "Creating the account…"
+    },
     "retry": "Try again",
-    "hint": "No password. The passkey stays in your phone's password manager.",
+    "hint": {
+      "passkey": "No password. The passkey stays in your phone's password manager.",
+      "password": "Let your password manager save the username and password."
+    },
     "cancelled": {
       "title": "Passkey creation cancelled.",
       "body": "The passkey window was closed. Try again."
@@ -116,9 +125,13 @@
       "title": "The passkey could not be saved.",
       "body": "Check the connection and try again."
     },
+    "passwordFailed": {
+      "title": "The account could not be created.",
+      "body": "Check the connection and try again."
+    },
     "unsupported": {
       "title": "Passkeys do not work here.",
-      "body": "Open the app over HTTPS in an up-to-date browser."
+      "body": "Open the app over HTTPS in an up-to-date browser, or use a password."
     },
     "alreadyDone": {
       "title": "Pantry is already set up",
@@ -127,7 +140,8 @@
     },
     "done": {
       "title": "Welcome home!",
-      "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "passkey": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "password": "Next time sign in with your username and password.",
       "action": "Go to the plan"
     }
   },
@@ -163,7 +177,7 @@
       },
       "account": {
         "title": "My account",
-        "description": "Language, theme, passkeys"
+        "description": "Language, theme, sign-in"
       }
     },
     "members": {
@@ -179,6 +193,11 @@
         "none": "no account",
         "invited": "invite sent",
         "recoveryLinkSent": "recovery link sent"
+      },
+      "signInMethods": {
+        "label": "Signs in with",
+        "passkey": "passkey",
+        "password": "password"
       },
       "nameLabel": "Name",
       "rename": "Rename {{name}}",
@@ -205,11 +224,11 @@
       "issued": {
         "invite": {
           "title": "Invite for {{name}}",
-          "body": "Send this link only to this person. They open it on their phone and create a passkey."
+          "body": "Send this link only to this person. They open it on their phone and create a passkey or a password."
         },
         "recovery": {
           "title": "Recovery link for {{name}}",
-          "body": "Send this link only to this person. They open it on the new phone and add a passkey."
+          "body": "Send this link only to this person. They open it on the new phone and add a passkey or set a new password."
         },
         "address": "Link address",
         "copy": "Copy",
@@ -253,8 +272,9 @@
         "confirmRemove": "Remove {{name}}? Other devices will have to sign in again.",
         "cancel": "Cancel",
         "confirm": "Remove",
-        "onlyOne": "This is your only passkey. Add another one before removing it.",
-        "lastPasskey": "The last passkey has to stay. Add another one first.",
+        "onlyOne": "This is your only way to sign in. Add another passkey or set a password before removing it.",
+        "lastPasskey": "The last way to sign in has to stay. Add another passkey or set a password first.",
+        "none": "No passkeys. Add one to sign in without a password.",
         "note": "Passkeys sync through your phone's password manager. Add a second one if you use devices without a shared account.",
         "loadFailed": "Passkeys could not be loaded. Check the connection.",
         "retry": "Try again",
@@ -262,6 +282,33 @@
         "cancelled": "Adding the passkey was cancelled. Try again.",
         "unsupported": "Passkeys do not work here. Open the app over HTTPS in an up-to-date browser.",
         "addFailed": "The passkey could not be saved. Check the connection and try again."
+      },
+      "password": {
+        "title": "Username and password",
+        "userName": "Username",
+        "noUserName": "none yet",
+        "password": "Password",
+        "isSet": "set",
+        "notSet": "not set",
+        "set": "Set a password",
+        "change": "Change the password",
+        "remove": "Remove the password",
+        "confirmRemove": "Remove the password? Other devices will have to sign in again.",
+        "currentPassword": "Current password",
+        "save": "Save",
+        "saving": "Saving…",
+        "cancel": "Cancel",
+        "onlyMethod": "The password is your only way to sign in. Add a passkey before removing it.",
+        "saved": "Password saved. Other devices are signed out.",
+        "removed": "Password removed. Other devices are signed out.",
+        "note": "A username is chosen once, together with the first password. Every change signs out your other devices.",
+        "problem": {
+          "userNameTaken": "This username is taken. Pick another one.",
+          "wrongCurrent": "The current password is wrong.",
+          "lastMethod": "The last way to sign in has to stay. Add a passkey first.",
+          "outdated": "Your account changed on another device. It is up to date again.",
+          "failed": "The change was not saved. Check the connection and try again."
+        }
       },
       "sessions": {
         "title": "Other devices",
@@ -311,13 +358,27 @@
   "signIn": {
     "title": "Pantry",
     "intro": "Meal plan and shopping for the whole household.",
-    "accountLabel": "Account",
-    "accountPlaceholder": "Pick your passkey",
     "signIn": "Sign in with a passkey",
     "signingIn": "Waiting for the passkey…",
     "retry": "Try again",
+    "or": "or",
+    "userNameLabel": "Username",
+    "userNamePlaceholder": "Type it or pick a passkey",
+    "passwordLabel": "Password",
     "hint": "No account? Ask the admin for an invite.",
     "expired": "Your session has expired. Sign in again.",
+    "password": {
+      "signIn": "Sign in with a password",
+      "signingIn": "Signing in…",
+      "rejected": {
+        "title": "Wrong username or password.",
+        "body": "Check both and try again. After several failed attempts, signing in is blocked for 15 minutes."
+      },
+      "failed": {
+        "title": "Could not sign in.",
+        "body": "Check the connection and try again."
+      }
+    },
     "cancelled": {
       "title": "Sign-in interrupted.",
       "body": "The passkey window was closed or the passkey does not match this address. Try again or ask the admin for a new link."
@@ -332,8 +393,21 @@
     },
     "unsupported": {
       "title": "Passkeys do not work here.",
-      "body": "Open the app over HTTPS in an up-to-date browser."
+      "body": "Open the app over HTTPS in an up-to-date browser, or sign in with a password."
     }
+  },
+  "password": {
+    "method": {
+      "label": "How do you want to sign in?",
+      "passkey": "Passkey",
+      "password": "Password"
+    },
+    "userNameLabel": "Username",
+    "userNameRule": "3 to 32 letters, digits, dots, dashes or underscores. You sign in with it.",
+    "passwordLabel": "Password",
+    "passwordRule": "At least 12 characters. A few random words work well.",
+    "confirmationLabel": "Repeat the password",
+    "mismatch": "The passwords do not match."
   },
   "redeemLink": {
     "loading": "Opening the link…",
@@ -345,19 +419,34 @@
       "label": "Invite",
       "title": "{{name}} invites you to Pantry",
       "titleAnonymous": "You are invited to Pantry",
-      "create": "Join and create a passkey"
+      "create": {
+        "passkey": "Join and create a passkey",
+        "password": "Join"
+      }
     },
     "recovery": {
       "label": "Recovery link",
       "title": "Get back into Pantry, {{name}}",
-      "body": "Create a passkey on this device. Passkeys on your other devices keep working.",
-      "create": "Create a passkey"
+      "body": {
+        "passkey": "Create a passkey on this device. Your other devices will be signed out; their passkeys keep working.",
+        "password": "Set a new password. Your other devices will be signed out."
+      },
+      "create": {
+        "passkey": "Create a passkey",
+        "password": "Set the password"
+      }
     },
     "validUntil": "Valid until {{date}}",
     "nameLabel": "What is your name?",
-    "creating": "Waiting for the passkey…",
+    "creating": {
+      "passkey": "Waiting for the passkey…",
+      "password": "Saving…"
+    },
     "retry": "Try again",
-    "hint": "No password. The passkey stays in your phone's password manager.",
+    "hint": {
+      "passkey": "No password. The passkey stays in your phone's password manager.",
+      "password": "Let your password manager save the username and password."
+    },
     "cancelled": {
       "title": "Passkey creation cancelled.",
       "body": "The passkey window was closed. Try again."
@@ -366,9 +455,17 @@
       "title": "The passkey could not be saved.",
       "body": "Check the connection and try again."
     },
+    "passwordFailed": {
+      "title": "The password could not be saved.",
+      "body": "Check the connection and try again."
+    },
+    "userNameTaken": {
+      "title": "This username is taken.",
+      "body": "Pick another one."
+    },
     "unsupported": {
       "title": "Passkeys do not work here.",
-      "body": "Open the app over HTTPS in an up-to-date browser."
+      "body": "Open the app over HTTPS in an up-to-date browser, or use a password."
     },
     "expired": {
       "title": "This link has expired",
@@ -388,7 +485,8 @@
     },
     "done": {
       "title": "Welcome home!",
-      "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "passkey": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "password": "Next time sign in with your username and password.",
       "action": "Go to the plan"
     },
     "signIn": "Go to sign-in"

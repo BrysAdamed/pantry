@@ -8,12 +8,24 @@ export interface SetupStatus {
   firstRunNeeded: boolean;
 }
 
+/** A way a user signs in. A user has at least one. */
+export type SignInMethod = 'passkey' | 'password';
+
 export interface CurrentUser {
   id: string;
   displayName: string;
+  /** Null until the user chooses a username together with a password. */
+  userName: string | null;
   role: 'admin' | 'user';
   uiLanguage: UiLanguage | null;
   theme: ThemePreference;
+  signInMethods: SignInMethod[];
+}
+
+/** A new password, with the username when one is being chosen (`null` when the user already has one). */
+export interface NewCredentials {
+  userName: string | null;
+  password: string;
 }
 
 export type PasskeyLinkKind = 'invite' | 'recovery';
@@ -23,6 +35,8 @@ export interface RedeemableLink {
   kind: PasskeyLinkKind;
   /** The member's name (invite) or the user's display name (recovery). */
   name: string;
+  /** The recovering user's username; null for an invite or a user without one. */
+  userName: string | null;
   invitedBy: string | null;
   expiresAt: string;
 }
@@ -52,6 +66,13 @@ export class IdentityApi {
     return firstValueFrom(this.http.post<CurrentUser>('/api/setup/complete', { credential, uiLanguage }));
   }
 
+  /** Creates the admin with a username and password instead of a passkey. */
+  completeFirstRunWithPassword(displayName: string, credentials: NewCredentials, uiLanguage: UiLanguage): Promise<CurrentUser> {
+    return firstValueFrom(
+      this.http.post<CurrentUser>('/api/setup/complete-with-password', { displayName, ...credentials, uiLanguage }),
+    );
+  }
+
   /**
    * The signed-in user. Fails with 401 when there is no session, which the caller handles; with
    * `{ handlesUnauthorized: false }` the auth interceptor sends the user to sign-in instead.
@@ -75,6 +96,13 @@ export class IdentityApi {
     return firstValueFrom(this.http.post<CurrentUser>('/api/auth/sign-in', { credential }, handlesUnauthorized()));
   }
 
+  /** Fails with 401 for a wrong username or password and for a locked-out account alike. */
+  signInWithPassword(userName: string, password: string): Promise<CurrentUser> {
+    return firstValueFrom(
+      this.http.post<CurrentUser>('/api/auth/sign-in/password', { userName, password }, handlesUnauthorized()),
+    );
+  }
+
   redeemableLink(token: string): Promise<RedeemableLink> {
     return firstValueFrom(this.http.get<RedeemableLink>(redeemUrl(token), handlesUnauthorized()));
   }
@@ -89,6 +117,20 @@ export class IdentityApi {
   completeRedeem(token: string, credential: PublicKeyCredentialJSON, uiLanguage: UiLanguage): Promise<CurrentUser> {
     return firstValueFrom(
       this.http.post<CurrentUser>(`${redeemUrl(token)}/complete`, { credential, uiLanguage }, handlesUnauthorized()),
+    );
+  }
+
+  /**
+   * Redeems the link with a password: an invite creates the user (`displayName` is used only here), a recovery link sets
+   * a new password.
+   */
+  completeRedeemWithPassword(token: string, displayName: string, credentials: NewCredentials, uiLanguage: UiLanguage): Promise<CurrentUser> {
+    return firstValueFrom(
+      this.http.post<CurrentUser>(
+        `${redeemUrl(token)}/complete-with-password`,
+        { displayName, ...credentials, uiLanguage },
+        handlesUnauthorized(),
+      ),
     );
   }
 

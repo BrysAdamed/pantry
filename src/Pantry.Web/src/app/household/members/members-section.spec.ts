@@ -7,8 +7,8 @@ import { provideTranslocoTesting } from '../../testing/transloco-testing';
 import { Member, MEMBERS_URL, MembersResponse, stepPortionFactor } from '../household-api';
 import { MembersSection } from './members-section';
 
-const admin: Member = { id: 'a', name: 'Alex', portionFactor: 1, position: 0, account: 'admin', userId: 'u-a' };
-const toddler: Member = { id: 't', name: 'Toddler', portionFactor: 0.3, position: 1, account: null, userId: null };
+const admin: Member = { id: 'a', name: 'Alex', portionFactor: 1, position: 0, account: 'admin', userId: 'u-a', signInMethods: ['passkey'] };
+const toddler: Member = { id: 't', name: 'Toddler', portionFactor: 0.3, position: 1, account: null, userId: null, signInMethods: null };
 
 describe('MembersSection', () => {
   let http: HttpTestingController;
@@ -108,7 +108,7 @@ describe('MembersSection', () => {
 
     const add = http.expectOne({ method: 'POST', url: MEMBERS_URL });
     expect(add.request.body).toEqual({ name: 'Guest', portionFactor: 1 });
-    add.flush({ id: 'g', name: 'Guest', portionFactor: 1, position: 2, account: null, userId: null });
+    add.flush({ id: 'g', name: 'Guest', portionFactor: 1, position: 2, account: null, userId: null, signInMethods: null });
     await settle();
     expect(text('household-serving')).toEqual(['2.3']);
     expect(input.value).toBe('');

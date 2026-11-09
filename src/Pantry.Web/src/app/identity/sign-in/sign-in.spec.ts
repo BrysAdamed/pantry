@@ -7,10 +7,10 @@ import { PasskeyCancelledError, Passkeys } from '../passkeys';
 import { Session } from '../session';
 import { provideTranslocoTesting } from '../../testing/transloco-testing';
 
-const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'user', uiLanguage: null, theme: 'system' };
+const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'user', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
 
 describe('SignIn', () => {
-  let api: Record<'refreshAntiforgeryToken' | 'signInPasskeyOptions' | 'signIn', ReturnType<typeof vi.fn>>;
+  let api: Record<'refreshAntiforgeryToken' | 'signInPasskeyOptions' | 'signIn' | 'signInWithPassword', ReturnType<typeof vi.fn>>;
   let passkeys: Record<'isSupported' | 'isAutofillSupported' | 'get', ReturnType<typeof vi.fn>>;
 
   beforeEach(async () => {
@@ -18,6 +18,7 @@ describe('SignIn', () => {
       refreshAntiforgeryToken: vi.fn().mockResolvedValue(undefined),
       signInPasskeyOptions: vi.fn().mockResolvedValue({ challenge: 'abc' }),
       signIn: vi.fn().mockResolvedValue(user),
+      signInWithPassword: vi.fn().mockResolvedValue(user),
     };
     passkeys = {
       isSupported: vi.fn().mockReturnValue(true),
@@ -52,7 +53,18 @@ describe('SignIn', () => {
       await settle();
       await fixture.whenStable();
     };
-    return { fixture, page, button, signIn };
+    const type = async (id: string, value: string) => {
+      const input = page.querySelector<HTMLInputElement>(`[data-testid="${id}"]`)!;
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
+    const submitPassword = async () => {
+      page.querySelector<HTMLButtonElement>('[data-testid="sign-in-with-password"]')!.click();
+      await settle();
+      await fixture.whenStable();
+    };
+    return { fixture, page, button, signIn, type, submitPassword };
   }
 
   it('signs in with a fresh token and returns to the requested page', async () => {
@@ -139,5 +151,71 @@ describe('SignIn', () => {
 
     expect(signal?.aborted).toBe(true);
     expect(api.signIn).toHaveBeenCalledWith({ id: 'cred' });
+  });
+
+  it('signs in with a username and password and returns to the requested page', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const { type, submitPassword } = await render({ returnUrl: '/shopping' });
+
+    await type('sign-in-user-name', ' alex ');
+    await type('sign-in-password', 'pantry shelf 2026');
+    await submitPassword();
+
+    expect(api.refreshAntiforgeryToken).toHaveBeenCalledBefore(api.signInWithPassword);
+    expect(api.signInWithPassword).toHaveBeenCalledWith('alex', 'pantry shelf 2026');
+    expect(TestBed.inject(Session).user()).toEqual(user);
+    expect(navigate).toHaveBeenCalledWith('/shopping', { replaceUrl: true });
+  });
+
+  it('offers the password form only when both fields are filled', async () => {
+    const { page, type } = await render();
+    const submit = () => page.querySelector<HTMLButtonElement>('[data-testid="sign-in-with-password"]')!;
+
+    expect(submit().disabled).toBe(true);
+    await type('sign-in-user-name', 'alex');
+    expect(submit().disabled).toBe(true);
+    await type('sign-in-password', 'x');
+
+    expect(submit().disabled).toBe(false);
+    expect(page.querySelector('[data-testid="sign-in-password"]')?.getAttribute('autocomplete')).toBe('current-password');
+  });
+
+  it('gives one message for a wrong username, a wrong password and a locked account', async () => {
+    api.signInWithPassword.mockRejectedValueOnce(new HttpErrorResponse({ status: 401 }));
+    const { page, type, submitPassword } = await render();
+
+    await type('sign-in-user-name', 'alex');
+    await type('sign-in-password', 'wrong password');
+    await submitPassword();
+
+    expect(page.querySelectorAll('[role="alert"]')).toHaveLength(1);
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain('Wrong username or password.');
+  });
+
+  it('replaces a passkey message with the password one, never both', async () => {
+    passkeys.get.mockRejectedValueOnce(new PasskeyCancelledError());
+    api.signInWithPassword.mockRejectedValueOnce(new HttpErrorResponse({ status: 500 }));
+    const { page, button, signIn, type, submitPassword } = await render();
+    await signIn();
+
+    await type('sign-in-user-name', 'alex');
+    await type('sign-in-password', 'pantry shelf 2026');
+    await submitPassword();
+
+    expect(page.querySelectorAll('[role="alert"]')).toHaveLength(1);
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain('Could not sign in.');
+    expect(button().textContent).toContain('Sign in with a passkey');
+  });
+
+  it('still signs in with a password where passkeys do not work', async () => {
+    passkeys.isSupported.mockReturnValue(false);
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const { type, submitPassword } = await render();
+
+    await type('sign-in-user-name', 'alex');
+    await type('sign-in-password', 'pantry shelf 2026');
+    await submitPassword();
+
+    expect(api.signInWithPassword).toHaveBeenCalledWith('alex', 'pantry shelf 2026');
   });
 });

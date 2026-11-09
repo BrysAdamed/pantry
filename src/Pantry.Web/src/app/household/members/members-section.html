@@ -60,6 +60,13 @@
                   }
                 }
               }
+              @if (isAdmin() && member.signInMethods) {
+                <span class="flex flex-wrap gap-1" role="group" data-testid="member-sign-in-methods" [attr.aria-label]="t('members.signInMethods.label')">
+                  @for (method of member.signInMethods; track method) {
+                    <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-border text-muted-foreground">{{ t('members.signInMethods.' + method) }}</span>
+                  }
+                </span>
+              }
               @if (member.account && openLinkByMember().has(member.id)) {
                 <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-info bg-info-surface text-info">{{ t('members.account.recoveryLinkSent') }}</span>
               }

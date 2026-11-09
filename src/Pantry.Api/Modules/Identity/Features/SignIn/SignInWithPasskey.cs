@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Pantry.Api.Infrastructure.Antiforgery;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
 using Pantry.Api.Modules.Identity.Persistence;
@@ -27,7 +26,8 @@ public static class SignInWithPasskey
         SignInManager<User> signInManager,
         IdentityModuleDbContext db,
         TimeProvider time,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        CancellationToken cancellationToken)
     {
         if (request.Credential.ValueKind != JsonValueKind.Object)
         {
@@ -63,12 +63,8 @@ public static class SignInWithPasskey
             return SignInFailed();
         }
 
-        await db.RecordPasskeyUseAsync(assertion.Passkey.CredentialId, time.GetUtcNow());
-        await signInManager.SignInAsync(user, isPersistent: true, AuthenticationMethod);
-        httpContext.User = await signInManager.CreateUserPrincipalAsync(user);
-        ApiAntiforgery.IssueRequestToken(httpContext);
-
-        return TypedResults.Ok(CurrentUserResponse.From(user));
+        await db.RecordPasskeyUseAsync(assertion.Passkey.CredentialId, time.GetUtcNow(), cancellationToken);
+        return await NewSession.StartAsync(user, httpContext, signInManager, db, cancellationToken, AuthenticationMethod);
     }
 
     private static ProblemHttpResult SignInFailed() =>

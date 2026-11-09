@@ -8,9 +8,9 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Member** | A person in the household. Has a portion factor. May or may not have a user account (a toddler is a member, not a user). |
 | **User** | Someone who can sign in. Belongs to the household. |
 | **Admin** | A user who can also manage users: invite, issue recovery links, remove users, promote another admin. The first user is the admin; the last admin cannot be removed or demoted. |
-| **Invite** | A link an admin issues for a member without a user (*Zaproszenie*). Valid 48 hours, single use. Opening it creates the user, links it to the member and registers a passkey. |
-| **Recovery link** | A link an admin issues for an existing user who lost their device (*Link odzyskania*). Same rules as an invite; opening it adds a passkey to that user. Invites and recovery links are both *passkey links* in code; a new one revokes the previous open one for the same member or user. |
-| **First run** | The setup on a fresh deployment (*Pierwsze uruchomienie*): while no user exists, the app asks for a name and creates the admin with a passkey. |
+| **Invite** | A link an admin issues for a member without a user (*Zaproszenie*). Valid 48 hours, single use. Opening it creates the user, links it to the member and gives them a passkey or a username and password. |
+| **Recovery link** | A link an admin issues for an existing user who lost their device (*Link odzyskania*). Same rules as an invite; opening it adds a passkey or sets a new password, and signs the user out on their other devices. Invites and recovery links are both *passkey links* in code; a new one revokes the previous open one for the same member or user. |
+| **First run** | The setup on a fresh deployment (*Pierwsze uruchomienie*): while no user exists, the app asks for a name and creates the admin with a passkey or a username and password. |
 | **Portion factor** | How much of a standard serving a member eats (e.g. adult 1.0, toddler 0.3). Configurable. |
 | **Household serving** | Sum of portion factors of members eating a meal. Drives shopping quantities. |
 | **Meal slot** | A configured meal of the day (e.g. breakfast, second breakfast, lunch, snack, dinner), with an order. A row of the planner. Never deleted: a disabled slot leaves the planner but keeps its plan history; at least one stays enabled. |
@@ -37,7 +37,10 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Content language** | Household setting telling agents which language to write recipes and items in (*Język treści*). A BCP 47 code from a short supported list (`pl`, `en`, `de`, ...); the first run sets it from the admin's UI language. Changing it translates nothing that exists. |
 | **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
 | **Theme** | Light or dark look of the app (*Motyw*). Follows the system unless the user picks one. |
-| **Passkey** | The sign-in credential (*Klucz dostępu*) stored by the phone or computer. No passwords (ADR 0004). A user can have several and manages them in *My account*; the last one cannot be removed. |
-| **My account** | The settings section (*Moje konto*) that applies only to the signed-in user: UI language, theme, passkeys and signing out other devices. |
-| **Session** | A signed-in browser (*Sesja*). Starts with a passkey sign-in, lasts while the device keeps using the app (30 days idle by default) and ends with sign-out. |
+| **Sign-in method** | A way a user signs in (*Sposób logowania*): *passkey* or *password*. A user has one or both (ADR 0018); the last one cannot be removed. |
+| **Passkey** | The main sign-in credential (*Klucz dostępu*) stored by the phone or computer (ADR 0004). A user can have several and manages them in *My account*. |
+| **Password** | The other sign-in method (*Hasło*): 12 to 128 characters, used with a *username*. Five wrong attempts lock the user out for 15 minutes. |
+| **Username** | The login for password sign-in (*Nazwa użytkownika*): unique regardless of letter case, 3 to 32 letters, digits, `.`, `_` or `-`. Chosen once, together with the first password; a user who never set a password has none. Not the display name. |
+| **My account** | The settings section (*Moje konto*) that applies only to the signed-in user: UI language, theme, passkeys, username and password, and signing out other devices. |
+| **Session** | A signed-in browser (*Sesja*). Starts with a sign-in (passkey or password), lasts while the device keeps using the app (30 days idle by default) and ends with sign-out. |
 | **Access token** | Personal token an MCP client uses to call the app. Revocable. |

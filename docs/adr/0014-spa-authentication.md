@@ -1,6 +1,6 @@
 # 0014 SPA authentication: Identity passkeys over JSON, cookie session, antiforgery header
 
-**Status:** Accepted, 2026-11-09
+**Status:** Accepted, 2026-11-09. Amended by [0018](0018-password-sign-in.md): passwords are allowed next to passkeys, with password sign-in under `auth/*`.
 
 ## Context
 ADR 0004 picks ASP.NET Core Identity with passkeys. The .NET 10 templates show passkeys in Blazor pages, but the app is an Angular SPA calling `/api`. We checked the .NET 10 API before building on it: `SignInManager.MakePasskeyCreationOptionsAsync`, `PerformPasskeyAttestationAsync`, `MakePasskeyRequestOptionsAsync` and `PasskeySignInAsync` take and return WebAuthn JSON and need no Razor or Blazor code, and users do not need a password. Between the options call and the attestation call, `SignInManager` keeps the ceremony state in the `Identity.TwoFactorUserId` cookie.

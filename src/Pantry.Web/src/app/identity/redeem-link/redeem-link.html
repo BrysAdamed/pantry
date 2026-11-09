@@ -13,7 +13,7 @@
       }
       @case ('done') {
         <h1 class="text-3xl" data-testid="redeem-done">{{ t('done.title') }}</h1>
-        <p class="text-sm text-muted-foreground">{{ t('done.body') }}</p>
+        <p class="text-sm text-muted-foreground">{{ t('done.' + method()) }}</p>
       }
       @default {
         @if (isDead()) {
@@ -41,24 +41,31 @@
                 class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 py-2 disabled:opacity-45"
                 name="displayName"
                 autocomplete="name"
+                data-testid="redeem-name"
                 [maxLength]="maxLength"
                 [value]="displayName()"
-                [disabled]="state() === 'creating' || state() === 'unsupported'"
+                [disabled]="state() === 'creating'"
                 (input)="displayName.set($any($event.target).value)"
-                (keydown.enter)="createPasskey()"
+                (keydown.enter)="create()"
               />
             </label>
           } @else {
-            <p class="text-sm text-muted-foreground">{{ t('recovery.body') }}</p>
+            <p class="text-sm text-muted-foreground">{{ t('recovery.body.' + method()) }}</p>
           }
 
-          @if (isRetryable() || state() === 'unsupported') {
+          <app-sign-in-method-choice [value]="method()" [disabled]="state() === 'creating'" (valueChange)="chooseMethod($event)" />
+
+          @if (method() === 'password') {
+            <app-new-password-fields [userName]="link.userName" [disabled]="state() === 'creating'" (credentials)="credentials.set($event)" />
+          }
+
+          @if (error(); as error) {
             <div
               role="alert"
               data-testid="redeem-error"
               class="flex w-full items-start gap-2 rounded-control border-2 border-danger bg-danger-surface px-3 py-2.5 text-left text-sm"
             >
-              <p><b>{{ t(state() + '.title') }}</b> {{ t(state() + '.body') }}</p>
+              <p><b>{{ t(error + '.title') }}</b> {{ t(error + '.body') }}</p>
             </div>
           }
         }
@@ -68,15 +75,16 @@
 
   <footer class="grid gap-2.5">
     @if (showsForm()) {
-      <button hlmBtn size="lg" class="w-full" data-testid="redeem-create" [disabled]="!canCreate()" (click)="createPasskey()">
+      <button hlmBtn size="lg" class="w-full" data-testid="redeem-create" [disabled]="!canCreate()" (click)="create()">
         @switch (state()) {
-          @case ('creating') { {{ t('creating') }} }
+          @case ('creating') { {{ t('creating.' + method()) }} }
           @case ('cancelled') { {{ t('retry') }} }
           @case ('failed') { {{ t('retry') }} }
-          @default { {{ t(link()!.kind + '.create') }} }
+          @case ('passwordFailed') { {{ t('retry') }} }
+          @default { {{ t(link()!.kind + '.create.' + method()) }} }
         }
       </button>
-      <p class="text-center text-xs text-muted-foreground">{{ t('hint') }}</p>
+      <p class="text-center text-xs text-muted-foreground">{{ t('hint.' + method()) }}</p>
     } @else if (state() === 'done') {
       <button hlmBtn size="lg" class="w-full" data-testid="redeem-open-app" (click)="openApp()">{{ t('done.action') }}</button>
     } @else if (state() === 'loadFailed') {

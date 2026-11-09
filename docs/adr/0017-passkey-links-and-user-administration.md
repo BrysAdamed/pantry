@@ -1,6 +1,6 @@
 # 0017 Invites, recovery links and user administration
 
-**Status:** Accepted, 2026-11-09. Builds on [0004](0004-passkeys.md) and [0014](0014-spa-authentication.md).
+**Status:** Accepted, 2026-11-09. Builds on [0004](0004-passkeys.md) and [0014](0014-spa-authentication.md). Amended by [0018](0018-password-sign-in.md): links can also be redeemed with a password, a recovery link ends the user's other sessions, and the last *sign-in method* (not the last passkey) stays.
 
 ## Context
 ADR 0004 says the admin brings people in with an invite link and needs a recovery path for a lost phone. Both are bearer links: whoever has the link gets an account or a passkey on an account. The admin also removes users and changes roles, and the last admin must stay. Sessions are cookies that the app only rechecks against the database from time to time (Identity's security stamp validation, default every 30 minutes).

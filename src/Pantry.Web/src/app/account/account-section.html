@@ -96,8 +96,8 @@
                   size="icon-sm"
                   type="button"
                   data-testid="passkey-remove"
-                  [disabled]="onlyOne()"
-                  [title]="onlyOne() ? t('account.passkeys.onlyOne') : ''"
+                  [disabled]="lastMethod()"
+                  [title]="lastMethod() ? t('account.passkeys.onlyOne') : ''"
                   [attr.aria-label]="t('account.passkeys.remove', { name })"
                   (click)="removingId.set(passkey.id)"
                 >
@@ -108,7 +108,10 @@
           </li>
         }
       </ul>
-      @if (onlyOne()) {
+      @if (passkeys().length === 0) {
+        <p class="text-sm text-muted-foreground" data-testid="passkeys-none">{{ t('account.passkeys.none') }}</p>
+      }
+      @if (lastMethod()) {
         <p class="text-xs text-muted-foreground" data-testid="passkey-only-one">{{ t('account.passkeys.onlyOne') }}</p>
       }
     }
@@ -133,6 +136,8 @@
       <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.passkeys.saveFailed') }}</p>
     }
   </section>
+
+  <app-password-section [hasPasskey]="passkeys().length > 0" />
 
   <section class="grid gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card" data-testid="account-sessions">
     <h3 class="text-lg font-extrabold">{{ t('account.sessions.title') }}</h3>

@@ -168,7 +168,7 @@ export class MembersSection {
     this.removingUserOf.set(null);
     await this.administer('lastAdmin', async () => {
       await this.userAdmin.removeUser(member.userId!);
-      this.members.update((members) => members.map((m) => (m.id === member.id ? { ...m, account: null, userId: null } : m)));
+      this.members.update((members) => members.map((m) => (m.id === member.id ? { ...m, account: null, userId: null, signInMethods: null } : m)));
     });
   }
 
