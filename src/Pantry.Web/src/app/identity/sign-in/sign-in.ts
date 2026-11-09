@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
@@ -12,6 +12,7 @@ export type SignInState = 'ready' | 'signingIn' | 'cancelled' | 'rejected' | 'fa
 @Component({
   selector: 'app-sign-in',
   imports: [TranslocoDirective, HlmButton],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sign-in.html',
 })
 export class SignIn implements OnInit {

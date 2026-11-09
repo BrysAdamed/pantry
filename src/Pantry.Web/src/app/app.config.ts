@@ -4,6 +4,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideSpartanHlm } from '@spartan-ng/helm/utils';
 
 import { routes } from './app.routes';
+import { provideUserPreferences } from './account/user-preferences';
 import { provideI18n } from './core/i18n/provide-i18n';
 import { provideTheme } from './core/theme/provide-theme';
 import { authInterceptor } from './identity/session';
@@ -20,5 +21,6 @@ export const appConfig: ApplicationConfig = {
     provideSpartanHlm(),
     provideI18n(),
     provideTheme(),
+    provideUserPreferences(),
   ],
 };

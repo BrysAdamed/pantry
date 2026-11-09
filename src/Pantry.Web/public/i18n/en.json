@@ -73,6 +73,7 @@
     "skipToContent": "Skip to content",
     "mainNavigation": "Main navigation",
     "account": "Account",
+    "myAccount": "My account",
     "signOut": "Sign out"
   },
   "nav": {
@@ -200,6 +201,7 @@
       "removeUser": "Remove account",
       "confirmRemoveUser": "Remove the account of {{name}}? The member stays.",
       "lastAdmin": "The last admin has to stay. Make someone else an admin first.",
+      "outdated": "Someone changed this in the meantime. The list is up to date again.",
       "issued": {
         "invite": {
           "title": "Invite for {{name}}",
@@ -230,6 +232,44 @@
       "loadFailed": "Meals could not be loaded. Check the connection.",
       "retry": "Try again",
       "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "account": {
+      "intro": "These settings apply only to you, on every device you sign in on.",
+      "language": "Interface language",
+      "theme": "Theme",
+      "themeNote": "System follows the setting of your phone or computer.",
+      "preferencesNotSaved": "The change works on this device but was not saved to your account. Check the connection.",
+      "passkeys": {
+        "title": "Passkeys",
+        "add": "Add",
+        "adding": "Waiting for the passkey…",
+        "unnamed": "Passkey",
+        "nameLabel": "Passkey name",
+        "rename": "Rename {{name}}",
+        "added": "Added {{date}}",
+        "lastUsed": "last used {{date}}",
+        "notUsedYet": "not used to sign in yet",
+        "remove": "Remove {{name}}",
+        "confirmRemove": "Remove {{name}}? Other devices will have to sign in again.",
+        "cancel": "Cancel",
+        "confirm": "Remove",
+        "onlyOne": "This is your only passkey. Add another one before removing it.",
+        "lastPasskey": "The last passkey has to stay. Add another one first.",
+        "note": "Passkeys sync through your phone's password manager. Add a second one if you use devices without a shared account.",
+        "loadFailed": "Passkeys could not be loaded. Check the connection.",
+        "retry": "Try again",
+        "saveFailed": "The change was not saved. Check the connection and try again.",
+        "cancelled": "Adding the passkey was cancelled. Try again.",
+        "unsupported": "Passkeys do not work here. Open the app over HTTPS in an up-to-date browser.",
+        "addFailed": "The passkey could not be saved. Check the connection and try again."
+      },
+      "sessions": {
+        "title": "Other devices",
+        "body": "Lost a phone or signed in on someone else's computer? Sign out everywhere except here.",
+        "signOutOthers": "Sign out other devices",
+        "done": "Other devices are signed out.",
+        "failed": "Other devices were not signed out. Check the connection and try again."
+      }
     }
   },
   "signIn": {

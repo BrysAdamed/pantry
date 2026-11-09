@@ -6,7 +6,7 @@ namespace Pantry.Api.Modules.Identity.Features.Me;
 
 public static class GetMe
 {
-    public static RouteHandlerBuilder MapGetMe(this IEndpointRouteBuilder api) => api.MapGet("/me", HandleAsync);
+    public static RouteHandlerBuilder MapGetMe(this IEndpointRouteBuilder me) => me.MapGet("", HandleAsync);
 
     private static async Task<Results<Ok<CurrentUserResponse>, UnauthorizedHttpResult>> HandleAsync(
         HttpContext httpContext, UserManager<User> userManager)

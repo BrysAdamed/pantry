@@ -150,6 +150,47 @@ describe('authInterceptor', () => {
     expect(TestBed.inject(Router).url).toBe('/sign-in?returnUrl=%2Frecipes&reason=expired');
   });
 
+  it('reads the user again after a 403, so a changed role shows without a reload', async () => {
+    const session = TestBed.inject(Session);
+    session.signedIn(user);
+    const request = firstValueFrom(http.get('/api/passkey-links'));
+
+    backend.expectOne('/api/passkey-links').flush(null, { status: 403, statusText: 'Forbidden' });
+    await expect(request).rejects.toBeInstanceOf(HttpErrorResponse);
+    backend.expectOne('/api/me').flush({ ...user, role: 'user' });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(session.user()?.role).toBe('user');
+    expect(TestBed.inject(Router).url).toBe('/recipes');
+  });
+
+  it('sends the user to sign-in when reading the user again finds the session gone', async () => {
+    const session = TestBed.inject(Session);
+    session.signedIn(user);
+
+    const refreshed = session.refresh();
+    backend.expectOne('/api/me').flush(null, { status: 401, statusText: 'Unauthorized' });
+    await refreshed;
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(session.user()).toBeNull();
+    expect(TestBed.inject(Router).url).toBe('/sign-in?returnUrl=%2Frecipes&reason=expired');
+  });
+
+  it('reads the user again only once at a time and not when signed out', async () => {
+    const session = TestBed.inject(Session);
+
+    await session.refresh();
+    backend.expectNone('/api/me');
+    session.signedIn(user);
+    const first = session.refresh();
+    const second = session.refresh();
+    backend.expectOne('/api/me').flush({ ...user, role: 'user' });
+    await Promise.all([first, second]);
+
+    expect(session.user()?.role).toBe('user');
+  });
+
   it('leaves 401s of the sign-in calls to their callers', async () => {
     const result = TestBed.inject(IdentityApi).signIn({} as PublicKeyCredentialJSON);
 

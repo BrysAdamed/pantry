@@ -89,6 +89,10 @@ namespace Pantry.Api.Modules.Identity.Persistence.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("credential_id");
 
+                    b.Property<DateTimeOffset?>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_used_at");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");

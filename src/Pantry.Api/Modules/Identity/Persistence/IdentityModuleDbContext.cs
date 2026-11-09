@@ -31,7 +31,11 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("user_claims");
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins");
         builder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
-        builder.Entity<IdentityUserPasskey<Guid>>().ToTable("user_passkeys");
+        builder.Entity<IdentityUserPasskey<Guid>>(passkey =>
+        {
+            passkey.ToTable("user_passkeys");
+            passkey.Property<DateTimeOffset?>(PasskeyUsage.LastUsedAt);
+        });
 
         builder.Entity<PasskeyLink>(link =>
         {

@@ -8,7 +8,10 @@ import { DEFAULT_UI_LANGUAGE, isUiLanguage, UiLanguage } from './ui-language';
 
 const STORAGE_KEY = 'pantry.uiLanguage';
 
-/** The UI language of the current device. E3 replaces the local preference with the user's setting. */
+/**
+ * The UI language of this device, kept in `localStorage` for the screens before sign-in.
+ * After sign-in `UserPreferences` sets it from the user's saved choice.
+ */
 @Injectable({ providedIn: 'root' })
 export class UiLanguageService {
   private readonly transloco = inject(TranslocoService);

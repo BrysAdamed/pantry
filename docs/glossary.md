@@ -37,6 +37,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Content language** | Household setting telling agents which language to write recipes and items in. |
 | **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
 | **Theme** | Light or dark look of the app (*Motyw*). Follows the system unless the user picks one. |
-| **Passkey** | The sign-in credential (*Klucz dostępu*) stored by the phone or computer. No passwords (ADR 0004). |
+| **Passkey** | The sign-in credential (*Klucz dostępu*) stored by the phone or computer. No passwords (ADR 0004). A user can have several and manages them in *My account*; the last one cannot be removed. |
+| **My account** | The settings section (*Moje konto*) that applies only to the signed-in user: UI language, theme, passkeys and signing out other devices. |
 | **Session** | A signed-in browser (*Sesja*). Starts with a passkey sign-in, lasts while the device keeps using the app (30 days idle by default) and ends with sign-out. |
 | **Access token** | Personal token an MCP client uses to call the app. Revocable. |

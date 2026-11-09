@@ -178,4 +178,40 @@ describe('MembersSection account administration', () => {
 
     expect(page.querySelector('[role="alert"]')?.textContent).toContain('The last admin has to stay.');
   });
+
+  it('reads the members again when an invite finds the member already has an account', async () => {
+    const { page, button, settle, tick } = await render('admin');
+
+    button('Toddler', 'Invite')!.click();
+    await settle();
+    http
+      .expectOne({ method: 'POST', url: `${PASSKEY_LINKS_URL}/invites` })
+      .flush({ title: 'member already has an account' }, { status: 409, statusText: 'Conflict' });
+    await tick();
+    http.expectOne(MEMBERS_URL).flush({ members: [admin, { ...toddler, account: 'user', userId: 'u-t' }, partner], householdServing: 2.3 });
+    http.expectOne(PASSKEY_LINKS_URL).flush([]);
+    await settle();
+
+    const alert = page.querySelector('[role="alert"]')?.textContent;
+    expect(alert).toContain('Someone changed this in the meantime.');
+    expect(alert).not.toContain('The last admin has to stay.');
+    expect(button('Toddler', 'Recover access')).toBeDefined();
+  });
+
+  it('reads the links again when a revoked link was already used', async () => {
+    const { page, button, settle, tick } = await render('admin', [invite]);
+
+    button('Toddler', 'Revoke link')!.click();
+    await settle();
+    http
+      .expectOne({ method: 'DELETE', url: `${PASSKEY_LINKS_URL}/l1` })
+      .flush({ title: 'link already used' }, { status: 409, statusText: 'Conflict' });
+    await tick();
+    http.expectOne(MEMBERS_URL).flush({ members: [admin, toddler, partner], householdServing: 2.3 });
+    http.expectOne(PASSKEY_LINKS_URL).flush([]);
+    await settle();
+
+    expect(page.querySelector('[role="alert"]')?.textContent).not.toContain('The last admin has to stay.');
+    expect(button('Toddler', 'Revoke link')).toBeUndefined();
+  });
 });

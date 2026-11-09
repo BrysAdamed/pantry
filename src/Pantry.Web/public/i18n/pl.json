@@ -73,6 +73,7 @@
     "skipToContent": "Przejdź do treści",
     "mainNavigation": "Nawigacja główna",
     "account": "Konto",
+    "myAccount": "Moje konto",
     "signOut": "Wyloguj się"
   },
   "nav": {
@@ -200,6 +201,7 @@
       "removeUser": "Usuń konto",
       "confirmRemoveUser": "Usunąć konto: {{name}}? Domownik zostaje.",
       "lastAdmin": "Ostatni administrator musi zostać. Najpierw nadaj tę rolę komuś innemu.",
+      "outdated": "Ktoś to w międzyczasie zmienił. Lista jest znowu aktualna.",
       "issued": {
         "invite": {
           "title": "Zaproszenie dla: {{name}}",
@@ -230,6 +232,44 @@
       "loadFailed": "Nie udało się wczytać posiłków. Sprawdź połączenie.",
       "retry": "Spróbuj ponownie",
       "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "account": {
+      "intro": "Te ustawienia dotyczą tylko Ciebie, na każdym urządzeniu, na którym się logujesz.",
+      "language": "Język interfejsu",
+      "theme": "Motyw",
+      "themeNote": "Systemowy podąża za ustawieniem telefonu lub komputera.",
+      "preferencesNotSaved": "Zmiana działa na tym urządzeniu, ale nie zapisano jej na koncie. Sprawdź połączenie.",
+      "passkeys": {
+        "title": "Klucze dostępu",
+        "add": "Dodaj",
+        "adding": "Czekam na klucz dostępu…",
+        "unnamed": "Klucz dostępu",
+        "nameLabel": "Nazwa klucza",
+        "rename": "Zmień nazwę: {{name}}",
+        "added": "Dodany {{date}}",
+        "lastUsed": "ostatnio użyty {{date}}",
+        "notUsedYet": "jeszcze nie użyty do logowania",
+        "remove": "Usuń: {{name}}",
+        "confirmRemove": "Usunąć: {{name}}? Inne urządzenia trzeba będzie zalogować ponownie.",
+        "cancel": "Anuluj",
+        "confirm": "Usuń",
+        "onlyOne": "To Twój jedyny klucz. Zanim go usuniesz, dodaj drugi.",
+        "lastPasskey": "Ostatni klucz musi zostać. Najpierw dodaj drugi.",
+        "note": "Klucze synchronizują się przez menedżer haseł telefonu. Dodaj drugi, jeśli używasz kilku urządzeń bez wspólnego konta.",
+        "loadFailed": "Nie udało się wczytać kluczy. Sprawdź połączenie.",
+        "retry": "Spróbuj ponownie",
+        "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz.",
+        "cancelled": "Dodawanie klucza przerwane. Spróbuj jeszcze raz.",
+        "unsupported": "Klucze dostępu tu nie działają. Otwórz aplikację przez HTTPS w aktualnej przeglądarce.",
+        "addFailed": "Nie udało się zapisać klucza. Sprawdź połączenie i spróbuj jeszcze raz."
+      },
+      "sessions": {
+        "title": "Inne urządzenia",
+        "body": "Zgubiony telefon albo logowanie na cudzym komputerze? Wyloguj wszędzie poza tym urządzeniem.",
+        "signOutOthers": "Wyloguj inne urządzenia",
+        "done": "Inne urządzenia są wylogowane.",
+        "failed": "Nie udało się wylogować innych urządzeń. Sprawdź połączenie i spróbuj jeszcze raz."
+      }
     }
   },
   "signIn": {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Pantry.Api.Infrastructure.Antiforgery;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
+using Pantry.Api.Modules.Identity.Persistence;
 
 namespace Pantry.Api.Modules.Identity.Features.SignIn;
 
@@ -24,6 +25,8 @@ public static class SignInWithPasskey
         HttpContext httpContext,
         UserManager<User> userManager,
         SignInManager<User> signInManager,
+        IdentityModuleDbContext db,
+        TimeProvider time,
         ILoggerFactory loggerFactory)
     {
         if (request.Credential.ValueKind != JsonValueKind.Object)
@@ -60,6 +63,7 @@ public static class SignInWithPasskey
             return SignInFailed();
         }
 
+        await db.RecordPasskeyUseAsync(assertion.Passkey.CredentialId, time.GetUtcNow());
         await signInManager.SignInAsync(user, isPersistent: true, AuthenticationMethod);
         httpContext.User = await signInManager.CreateUserPrincipalAsync(user);
         ApiAntiforgery.IssueRequestToken(httpContext);

@@ -7,6 +7,7 @@ using Pantry.Api.Modules.Identity.Auth;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
 using Pantry.Api.Modules.Identity.Features.PasskeyLinks;
+using Pantry.Api.Modules.Identity.Features.Passkeys;
 using Pantry.Api.Modules.Identity.Features.Redeem;
 using Pantry.Api.Modules.Identity.Features.Setup;
 using Pantry.Api.Modules.Identity.Features.SignIn;
@@ -71,7 +72,18 @@ public static class IdentityModule
         auth.MapSignInWithPasskey();
         auth.MapSignOut();
 
-        api.MapGetMe();
+        var me = api.MapGroup("/me");
+        me.MapGetMe();
+        me.MapChangeUiLanguage();
+        me.MapChangeTheme();
+        me.MapSignOutOtherSessions();
+
+        var passkeys = me.MapGroup("/passkeys");
+        passkeys.MapGetMyPasskeys();
+        passkeys.MapCreatePasskeyOptions();
+        passkeys.MapAddPasskey();
+        passkeys.MapRenamePasskey();
+        passkeys.MapRemovePasskey();
 
         var links = api.MapGroup("/passkey-links").RequireAuthorization(IdentityPolicies.Admin);
         links.MapGetOpenPasskeyLinks();

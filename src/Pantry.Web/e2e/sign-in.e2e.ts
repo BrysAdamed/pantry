@@ -127,6 +127,31 @@ test('tells when the passkey is not known here', async ({ page }) => {
   await expect(page).toHaveURL('/sign-in');
 });
 
+test('offers to try again when the server cannot sign in', async ({ page }) => {
+  await mockApi(page, { signInStatus: 500 });
+  await withoutPasskeyAutofill(page);
+  await addPasskey(page);
+  await page.goto('/sign-in');
+
+  await page.getByTestId('sign-in-passkey').click();
+
+  await expect(page.getByRole('alert')).toContainText('Could not sign in.');
+  await expect(page.getByTestId('sign-in-passkey')).toHaveText('Try again');
+  await expect(page.getByTestId('sign-in-passkey')).toBeEnabled();
+});
+
+test('explains that passkeys do not work in a browser without them', async ({ page }) => {
+  await mockApi(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'PublicKeyCredential', { value: undefined, configurable: true });
+  });
+
+  await page.goto('/sign-in');
+
+  await expect(page.getByRole('alert')).toContainText('Passkeys do not work here.');
+  await expect(page.getByTestId('sign-in-passkey')).toBeDisabled();
+});
+
 test('signs in with a passkey picked from the autofill where the browser supports it', async ({ page }) => {
   await mockApi(page);
   await page.addInitScript(() => {

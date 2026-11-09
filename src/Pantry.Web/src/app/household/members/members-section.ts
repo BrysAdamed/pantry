@@ -74,6 +74,7 @@ export class MembersSection {
   protected readonly removingUserOf = signal<string | null>(null);
   protected readonly saveFailed = signal(false);
   protected readonly lastAdmin = signal(false);
+  protected readonly outdated = signal(false);
   protected readonly issued = signal<IssuedLink | null>(null);
   protected readonly copied = signal(false);
 
@@ -143,7 +144,7 @@ export class MembersSection {
 
   /** Issues an invite for a member without an account, or a recovery link for a member's user. */
   protected async issueLink(member: Member): Promise<void> {
-    await this.administer(async () => {
+    await this.administer('outdated', async () => {
       const link = member.userId
         ? await this.userAdmin.issueRecoveryLink(member.userId)
         : await this.userAdmin.issueInvite(member.id);
@@ -153,11 +154,11 @@ export class MembersSection {
   }
 
   protected async revokeLink(link: OpenPasskeyLink): Promise<void> {
-    await this.administer(() => this.userAdmin.revokeLink(link.id));
+    await this.administer('outdated', () => this.userAdmin.revokeLink(link.id));
   }
 
   protected async changeRole(member: Member, role: 'admin' | 'user'): Promise<void> {
-    await this.administer(async () => {
+    await this.administer('lastAdmin', async () => {
       await this.userAdmin.changeRole(member.userId!, role);
       this.members.update((members) => members.map((m) => (m.id === member.id ? { ...m, account: role } : m)));
     });
@@ -165,7 +166,7 @@ export class MembersSection {
 
   protected async removeUser(member: Member): Promise<void> {
     this.removingUserOf.set(null);
-    await this.administer(async () => {
+    await this.administer('lastAdmin', async () => {
       await this.userAdmin.removeUser(member.userId!);
       this.members.update((members) => members.map((m) => (m.id === member.id ? { ...m, account: null, userId: null } : m)));
     });
@@ -184,14 +185,22 @@ export class MembersSection {
     }
   }
 
-  private async administer(action: () => Promise<unknown>): Promise<void> {
+  /**
+   * Runs an account action. A 409 means the last admin would go (`lastAdmin`), or the member or link changed
+   * meanwhile (`outdated`: the member already has an account, the link was already used), so the list is read again.
+   */
+  private async administer(conflict: 'lastAdmin' | 'outdated', action: () => Promise<unknown>): Promise<void> {
     this.lastAdmin.set(false);
+    this.outdated.set(false);
     try {
       await action();
       this.saveFailed.set(false);
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.Conflict) {
-        this.lastAdmin.set(true);
+        this[conflict].set(true);
+        if (conflict === 'outdated') {
+          this.household.reload();
+        }
       } else {
         this.failAndReload();
       }

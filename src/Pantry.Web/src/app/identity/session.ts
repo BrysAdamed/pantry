@@ -11,6 +11,7 @@ export const SIGN_IN_PATH = 'sign-in';
 export class Session {
   private readonly api = inject(IdentityApi);
   private readonly current = signal<CurrentUser | null>(null);
+  private refreshing?: Promise<void>;
 
   readonly user = this.current.asReadonly();
 
@@ -30,6 +31,28 @@ export class Session {
       }
       throw error;
     }
+  }
+
+  /**
+   * Asks the API for the signed-in user again, so a changed role shows without a reload. One call at a time;
+   * a 401 goes through the auth interceptor to sign-in.
+   */
+  refresh(): Promise<void> {
+    if (!this.current()) {
+      return Promise.resolve();
+    }
+    this.refreshing ??= this.api
+      .me({ handlesUnauthorized: false })
+      .then(
+        (user) => {
+          if (this.current()?.id === user.id) {
+            this.current.set(user);
+          }
+        },
+        () => undefined,
+      )
+      .finally(() => (this.refreshing = undefined));
+    return this.refreshing;
   }
 
   signedIn(user: CurrentUser): void {
@@ -92,7 +115,10 @@ export const requireSignedOut: CanActivateFn = async (route) => {
   }
 };
 
-/** A 401 from the API means the session is gone: forget the user and send them to sign-in, back to this screen afterwards. */
+/**
+ * A 401 from the API means the session is gone: forget the user and send them to sign-in, back to this screen afterwards.
+ * A 403 means the user's role may have changed since it was read: read the user again.
+ */
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const session = inject(Session);
@@ -105,6 +131,9 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
       ) {
         session.ended();
         void router.navigateByUrl(signInUrl(router, router.url, 'expired'));
+      }
+      if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.Forbidden) {
+        void session.refresh();
       }
       return throwError(() => error);
     }),

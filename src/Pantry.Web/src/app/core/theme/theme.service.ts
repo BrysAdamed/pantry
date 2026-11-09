@@ -5,7 +5,10 @@ import { DEFAULT_THEME_PREFERENCE, isThemePreference, Theme, ThemePreference } f
 const STORAGE_KEY = 'pantry.theme';
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 
-/** The colour theme of the current device. E3 replaces the local preference with the user's setting. */
+/**
+ * The colour theme of this device, kept in `localStorage` for the screens before sign-in.
+ * After sign-in `UserPreferences` sets it from the user's saved choice.
+ */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly document = inject(DOCUMENT);

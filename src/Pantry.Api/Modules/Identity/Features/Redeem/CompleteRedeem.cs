@@ -69,6 +69,7 @@ public static class CompleteRedeem
             }
 
             user = existing;
+            user.UiLanguage ??= request.UiLanguage;
             EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
         }
         else
@@ -79,6 +80,7 @@ public static class CompleteRedeem
             }
 
             user = User.Create(userId, attestation.UserEntity.DisplayName, UserRole.User);
+            user.UiLanguage = request.UiLanguage;
             EnsureSucceeded(await userManager.CreateAsync(user));
             EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
             if (!await household.LinkMemberToUserAsync(redeemable.Link.MemberId!.Value, user.Id, transaction.GetDbTransaction(), cancellationToken))
@@ -89,6 +91,7 @@ public static class CompleteRedeem
 
         redeemable.Link.MarkUsed(now);
         await db.SaveChangesAsync(cancellationToken);
+        await db.RecordPasskeyUseAsync(attestation.Passkey.CredentialId, now, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         await signInManager.SignInAsync(user, isPersistent: true);
@@ -111,4 +114,5 @@ public static class CompleteRedeem
     }
 }
 
-public sealed record CompleteRedeemRequest(JsonElement Credential);
+/// <summary>The new passkey, and the UI language of the redeem screen, kept as the user's UI language unless they have one.</summary>
+public sealed record CompleteRedeemRequest(JsonElement Credential, UiLanguage? UiLanguage = null);

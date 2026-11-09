@@ -82,7 +82,7 @@ export class RedeemLink implements OnInit {
       await this.api.refreshAntiforgeryToken();
       const options = await this.api.redeemPasskeyOptions(this.token(), this.displayName().trim());
       const credential = await this.passkeys.create(options);
-      this.session.signedIn(await this.api.completeRedeem(this.token(), credential));
+      this.session.signedIn(await this.api.completeRedeem(this.token(), credential, this.language()));
       this.state.set('done');
     } catch (error) {
       this.state.set(stateFor(error));

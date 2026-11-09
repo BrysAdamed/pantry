@@ -2,6 +2,7 @@ import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { UiLanguage } from '../core/i18n/ui-language';
+import { ThemePreference } from '../core/theme/theme';
 
 export interface SetupStatus {
   firstRunNeeded: boolean;
@@ -11,8 +12,8 @@ export interface CurrentUser {
   id: string;
   displayName: string;
   role: 'admin' | 'user';
-  uiLanguage: 'pl' | 'en' | null;
-  theme: 'system' | 'light' | 'dark';
+  uiLanguage: UiLanguage | null;
+  theme: ThemePreference;
 }
 
 export type PasskeyLinkKind = 'invite' | 'recovery';
@@ -51,9 +52,12 @@ export class IdentityApi {
     return firstValueFrom(this.http.post<CurrentUser>('/api/setup/complete', { credential, uiLanguage }));
   }
 
-  /** The signed-in user. Fails with 401 when there is no session. */
-  me(): Promise<CurrentUser> {
-    return firstValueFrom(this.http.get<CurrentUser>('/api/me', handlesUnauthorized()));
+  /**
+   * The signed-in user. Fails with 401 when there is no session, which the caller handles; with
+   * `{ handlesUnauthorized: false }` the auth interceptor sends the user to sign-in instead.
+   */
+  me({ handlesUnauthorized: callerHandles = true } = {}): Promise<CurrentUser> {
+    return firstValueFrom(this.http.get<CurrentUser>('/api/me', callerHandles ? handlesUnauthorized() : {}));
   }
 
   /** Refreshes the antiforgery token for whoever the browser is now; a token from an ended session would be rejected. */
@@ -81,8 +85,11 @@ export class IdentityApi {
     );
   }
 
-  completeRedeem(token: string, credential: PublicKeyCredentialJSON): Promise<CurrentUser> {
-    return firstValueFrom(this.http.post<CurrentUser>(`${redeemUrl(token)}/complete`, { credential }, handlesUnauthorized()));
+  /** Redeems the link. A new user gets the UI language of the redeem screen. */
+  completeRedeem(token: string, credential: PublicKeyCredentialJSON, uiLanguage: UiLanguage): Promise<CurrentUser> {
+    return firstValueFrom(
+      this.http.post<CurrentUser>(`${redeemUrl(token)}/complete`, { credential, uiLanguage }, handlesUnauthorized()),
+    );
   }
 
   async signOut(): Promise<void> {

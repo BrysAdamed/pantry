@@ -9,9 +9,12 @@ const destinations: { name: string; path: string | RegExp; heading?: string }[] 
 
 test.beforeEach(async ({ page }) => {
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
-  await page.route('/api/me', (route) =>
-    route.fulfill({ json: { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' } }),
-  );
+  const me = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' };
+  await page.route('/api/me', (route) => route.fulfill({ json: me }));
+  await page.route(/\/api\/me\/(ui-language|theme)$/, (route) => {
+    Object.assign(me, route.request().postDataJSON());
+    return route.fulfill({ status: 204 });
+  });
   await page.route('/api/household/members', (route) => route.fulfill({ json: { members: [], householdServing: 0 } }));
   await page.addInitScript(() => {
     if (!sessionStorage.getItem('e2e.seeded')) {

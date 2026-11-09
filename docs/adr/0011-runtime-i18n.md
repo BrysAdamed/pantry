@@ -9,7 +9,7 @@ The UI language is chosen per user (see 0010) and the app is one container servi
 - Translations are loaded at runtime with Transloco from `public/i18n/<lang>.json` (`pl`, `en`).
 - Templates use the `*transloco` directive. No UI string is written in a template or component.
 - English is the default and fallback language. A missing key falls back to English and is logged in development.
-- Until users exist (E3), the UI language is stored per device in `localStorage`, with the browser language as the first guess. E3 moves it to the user's settings.
+- The UI language is saved on the user (`PUT /api/me/ui-language`, PAN-24), so it follows them to every device. After sign-in the user's saved language wins. The device keeps a copy in `localStorage` for the screens before sign-in, with the browser language as the first guess. First run and an invite save the language of the screen on the new user.
 - A unit test checks that every language file has the same keys and no empty labels.
 
 ## Consequences

@@ -12,6 +12,7 @@ ADR 0004 says the admin brings people in with an invite link and needs a recover
 - **Serialized writes.** Issuing, revoking, redeeming, removing users and changing roles take one Postgres advisory lock for the transaction, so "single use" and "the last admin cannot be removed or demoted" hold under concurrent requests.
 - **Admin endpoints** (`/api/passkey-links`, `/api/users`) require the `admin` policy and answer `403` to other users.
 - **Removing a user** deletes the user with their passkeys and recovery links and unlinks the member (the member stays). There is no soft delete: a removed person comes back with a new invite.
+- **Own passkeys** (My account, PAN-24, `/api/me/passkeys`): a user lists, adds, renames and removes their passkeys. The last passkey cannot be removed (checked under the same advisory lock). Removing a passkey changes the user's security stamp, so the sessions on every other device end at their next check, because a session does not record which passkey started it; the current session is reissued with the new stamp. The same is available on its own as "sign out other devices" (`POST /api/me/sign-out-others`). When a passkey last signed someone in is kept in our own `last_used_at` column on Identity's `user_passkeys` table, which Identity's store does not touch.
 - **Sessions are rechecked every minute** (`Identity:Session:ValidationInterval`). The check rebuilds the role claim and rejects sessions of removed users, so a demotion or removal applies within a minute instead of 30. Integration tests set it to zero.
 
 ## Consequences

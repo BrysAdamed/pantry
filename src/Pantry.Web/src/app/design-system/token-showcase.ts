@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { LanguageSwitcher } from '../core/i18n/language-switcher';
-import { ThemeSwitcher } from '../core/theme/theme-switcher';
+import { LanguageSwitcher } from '../account/language-switcher';
+import { ThemeSwitcher } from '../account/theme-switcher';
 
 interface Swatch {
   token: string;

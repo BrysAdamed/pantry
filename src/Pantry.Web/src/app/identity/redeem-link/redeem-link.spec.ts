@@ -71,7 +71,7 @@ describe('RedeemLink', () => {
 
     expect(api.refreshAntiforgeryToken).toHaveBeenCalled();
     expect(api.redeemPasskeyOptions).toHaveBeenCalledWith('tok', 'Sam B');
-    expect(api.completeRedeem).toHaveBeenCalledWith('tok', { id: 'cred' });
+    expect(api.completeRedeem).toHaveBeenCalledWith('tok', { id: 'cred' }, 'en');
     expect(testId('redeem-done')?.textContent).toBe('Welcome home!');
     expect(TestBed.inject(Session).user()).toEqual(user);
   });

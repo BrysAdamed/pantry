@@ -24,6 +24,7 @@ public static class CompleteFirstRun
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         IHouseholdModule household,
+        TimeProvider time,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
@@ -56,8 +57,10 @@ public static class CompleteFirstRun
         }
 
         var admin = User.CreateAdmin(Guid.Parse(attestation.UserEntity.Id), attestation.UserEntity.DisplayName);
+        admin.UiLanguage = request.UiLanguage;
         EnsureSucceeded(await userManager.CreateAsync(admin));
         EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(admin, attestation.Passkey));
+        await db.RecordPasskeyUseAsync(attestation.Passkey.CredentialId, time.GetUtcNow(), cancellationToken);
         await household.CompleteFirstRunAsync(new FirstRunAdmin(admin.Id, admin.DisplayName, ToContentLanguage(request.UiLanguage)), transaction.GetDbTransaction(), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
@@ -84,5 +87,8 @@ public static class CompleteFirstRun
     }
 }
 
-/// <summary>The new passkey, and the UI language the admin set the app up in, which names the default meal slots.</summary>
+/// <summary>
+/// The new passkey, and the UI language the admin set the app up in: it becomes the admin's UI language and names the
+/// default meal slots.
+/// </summary>
 public sealed record CompleteFirstRunRequest(JsonElement Credential, UiLanguage? UiLanguage = null);

@@ -13,8 +13,8 @@ internal static class IdentityLocks
         db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({FirstRunKey})", cancellationToken);
 
     /// <summary>
-    /// Serializes changes to users and passkey links (issue, revoke, redeem, remove, change role), so checks like
-    /// "single use" and "last admin" hold under concurrent requests.
+    /// Serializes changes to users, passkey links (issue, revoke, redeem, remove, change role) and passkey removal,
+    /// so checks like "single use", "last admin" and "last passkey" hold under concurrent requests.
     /// </summary>
     public static Task LockUserAdministrationAsync(this IdentityModuleDbContext db, CancellationToken cancellationToken) =>
         db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({UserAdministrationKey})", cancellationToken);

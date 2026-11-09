@@ -71,6 +71,7 @@ Use these exact words. If the meaning changes, change the glossary first.
 | Invite | Zaproszenie | Invite |
 | Recovery link | Link odzyskania | Recovery link |
 | Theme | Motyw | Theme |
+| My account | Moje konto | My account |
 
 ## Patterns
 
