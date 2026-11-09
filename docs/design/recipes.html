@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przepisy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* PAN-14 recipe prototype. Tokens mirror src/Pantry.Web/src/styles.css (ADR 0013). */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff4e6, #1b141e);
+  --foreground: light-dark(#2a1b2d, #fbefe3);
+  --card: light-dark(#ffffff, #251c29);
+  --secondary: light-dark(#fde6cc, #322536);
+  --muted-foreground: light-dark(#6e5b70, #c2aec3);
+  --border: light-dark(#f0d9bf, #3d2e42);
+  --outline: light-dark(#2a1b2d, #7a6280);
+  --primary: light-dark(#6e2a5e, #e59cd0);
+  --primary-foreground: light-dark(#fff4e6, #1b141e);
+  --accent: #f4a259;
+  --accent-foreground: light-dark(#2a1b2d, #1b141e);
+  --agent: light-dark(#1c6964, #6fd0c6);
+  --agent-surface: light-dark(#ddf1ee, #173a37);
+  --success: light-dark(#28724a, #7dd3a0);
+  --success-surface: light-dark(#e2f2e7, #17311f);
+  --warning: light-dark(#a8520f, #f4a259);
+  --warning-surface: light-dark(#fcead6, #3a2814);
+  --danger: light-dark(#b8342a, #ff8a7a);
+  --danger-surface: light-dark(#fbe3df, #3d1c19);
+  --info: var(--agent);
+  --info-surface: var(--agent-surface);
+  --page: light-dark(#f6efe6, #141113);
+
+  --radius-chip: 8px; --radius-control: 12px; --radius-card: 16px;
+  --shadow-control: 2px 2px 0 var(--outline);
+  --shadow-card: 3px 3px 0 var(--outline);
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.i.sm { width: 14px; height: 14px; }
+
+.wrap { max-width: 1340px; margin: 0 auto; padding: 20px 16px 64px; display: grid; gap: 28px; }
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 700; }
+.pagebar h1 { font-size: clamp(24px, 3vw, 32px); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
+.ctl { display: grid; gap: 4px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-control); background: var(--secondary); }
+.seg button { border: 0; background: none; padding: 7px 13px; min-height: 36px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow-control); outline: 2px solid var(--outline); outline-offset: -2px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); font-weight: 700; font-size: 14px; white-space: nowrap; transition: translate .08s, box-shadow .08s; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.btn.accent { background: var(--accent); color: var(--accent-foreground); }
+.btn.ghost { border-color: transparent; box-shadow: none; background: none; }
+.btn.danger { color: var(--danger); }
+.btn.icon { width: 44px; padding: 0; }
+.btn.icon.sm { width: 36px; }
+.btn:active { translate: 1px 1px; box-shadow: none; }
+
+.frame-label { margin-bottom: 10px; }
+.scroller { overflow-x: auto; border-radius: 20px; border: 2px solid var(--outline); box-shadow: var(--shadow-card); }
+
+.desk { min-width: 1200px; height: 800px; display: grid; grid-template-columns: 84px 380px minmax(0, 1fr); background: var(--background); }
+.side { background: var(--card); border-right: 2px solid var(--outline); padding: 18px 8px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.mark { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--accent); color: var(--accent-foreground); border-radius: 10px; }
+.nav { display: grid; gap: 4px; }
+.nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; min-height: 56px; width: 64px; font-size: 11px; border-radius: var(--radius-control); color: var(--muted-foreground); text-decoration: none; font-weight: 700; border: 2px solid transparent; }
+.nav a.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); }
+
+.libcol { border-right: 2px solid var(--outline); display: flex; flex-direction: column; min-height: 0; background: var(--background); }
+.libhead { padding: 20px 16px 12px; display: grid; gap: 12px; }
+.libhead .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.libhead h2 { font-size: 28px; }
+.search { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: var(--radius-control); border: 2px solid var(--outline); background: var(--card); color: var(--muted-foreground); }
+.search input { border: 0; background: none; flex: 1; min-width: 0; outline: none; color: var(--foreground); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 2px solid var(--border); background: var(--card); padding: 5px 11px; min-height: 34px; font-size: 13px; font-weight: 700; color: var(--muted-foreground); border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; }
+.chip[aria-pressed="true"] { color: var(--accent-foreground); background: var(--accent); border-color: var(--outline); }
+.sortrow { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted-foreground); }
+.sortrow select { border: 2px solid var(--border); background: var(--card); border-radius: var(--radius-chip); padding: 4px 8px; font-weight: 700; min-height: 34px; }
+.list { flex: 1; overflow-y: auto; padding: 4px 16px 24px; display: grid; gap: 10px; align-content: start; }
+
+.toRate { display: grid; gap: 8px; padding: 12px; border-radius: var(--radius-card); border: 2px dashed var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--card)); }
+.toRate .row { display: flex; align-items: center; gap: 10px; }
+.toRate .txt { flex: 1; font-size: 14px; }
+.toRate .txt b { display: block; }
+
+.rcard { width: 100%; text-align: left; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 10px; border-radius: var(--radius-card); border: 2px solid var(--outline); background: var(--card); box-shadow: var(--shadow-control); }
+.rcard[aria-current="true"] { outline: 3px solid var(--primary); outline-offset: 2px; }
+.thumb { width: 56px; height: 56px; border-radius: var(--radius-control); border: 2px solid var(--outline); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.rcard .nm { font-weight: 800; font-size: 15px; line-height: 1.25; }
+.rcard .meta { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 12px; color: var(--muted-foreground); margin-top: 3px; align-items: center; }
+.stars { color: var(--warning); letter-spacing: 1px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 999px; border: 1.5px solid currentColor; }
+.badge.never { color: var(--danger); background: var(--danger-surface); }
+.badge.avoid { color: var(--warning); background: var(--warning-surface); }
+.badge.again { color: var(--success); background: var(--success-surface); }
+.badge.tag { color: var(--muted-foreground); border-color: var(--border); }
+.empty { text-align: center; color: var(--muted-foreground); padding: 24px 8px; font-size: 14px; }
+
+.detail { overflow-y: auto; padding: 24px 28px 40px; display: grid; gap: 20px; align-content: start; min-width: 0; }
+.dhead { display: grid; gap: 10px; }
+.dhead .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.dhead h2 { font-size: 34px; line-height: 1.1; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--muted-foreground); align-items: center; }
+.facts span { display: inline-flex; gap: 5px; align-items: center; }
+.facts a { color: var(--primary); font-weight: 700; }
+.alert { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-control); border: 2px solid currentColor; font-size: 14px; }
+.alert.never { color: var(--danger); background: var(--danger-surface); }
+.alert .txt { color: var(--foreground); }
+.alert b { color: var(--danger); }
+.cols { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.card h3 { font-size: 20px; }
+.card .ch { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper output { min-width: 46px; text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; }
+.note { font-size: 12px; color: var(--muted-foreground); }
+.note b { color: var(--primary); }
+.ings { list-style: none; margin: 0; padding: 0; display: grid; }
+.ings li { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 10px; padding: 8px 4px; border-top: 1px solid var(--border); align-items: baseline; }
+.ings li:first-child { border-top: 0; }
+.ings .q { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+.ings li.never { background: var(--danger-surface); border-radius: var(--radius-chip); color: var(--danger); }
+.ings li.never .q { color: var(--danger); }
+.ings .flag { margin-left: 6px; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 14px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; }
+.steps li::before { content: counter(s); width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--outline); background: var(--accent); color: var(--accent-foreground); font-family: var(--font-display); font-weight: 800; display: grid; place-items: center; }
+.nutr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.nutr div { border: 2px solid var(--border); border-radius: var(--radius-control); padding: 8px 10px; display: grid; }
+.nutr b { font-family: var(--font-display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.nutr span { font-size: 12px; color: var(--muted-foreground); }
+.hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.hist li { display: flex; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--border); padding-top: 6px; }
+.hist li:first-child { border-top: 0; padding-top: 0; }
+.hist .when { color: var(--muted-foreground); }
+.bigrate { display: flex; align-items: baseline; gap: 10px; }
+.bigrate b { font-family: var(--font-display); font-size: 34px; }
+
+/* Edit form */
+.form { display: grid; gap: 18px; }
+.field { display: grid; gap: 6px; }
+.field > span { font-size: 13px; font-weight: 700; }
+.input, select.input, textarea.input { width: 100%; border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 10px 12px; min-height: 44px; outline-offset: 2px; }
+textarea.input { resize: vertical; min-height: 64px; line-height: 1.4; }
+.input.title { font-family: var(--font-display); font-weight: 800; font-size: 24px; }
+.lines { display: grid; gap: 8px; }
+.line { display: grid; grid-template-columns: 80px 104px minmax(0, 1fr) 36px; gap: 8px; align-items: start; }
+.line .hint { grid-column: 3 / 4; font-size: 12px; font-weight: 700; display: flex; gap: 4px; align-items: center; margin-top: -2px; }
+.hint.new { color: var(--info); }
+.hint.never { color: var(--danger); }
+.hint.avoid { color: var(--warning); }
+.linehead { display: grid; grid-template-columns: 80px 104px minmax(0, 1fr) 36px; gap: 8px; font-size: 12px; color: var(--muted-foreground); font-weight: 700; }
+.stepline { display: grid; grid-template-columns: 32px minmax(0, 1fr) 36px; gap: 8px; align-items: start; }
+.stepline .n { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--outline); background: var(--accent); color: var(--accent-foreground); font-family: var(--font-display); font-weight: 800; display: grid; place-items: center; margin-top: 6px; }
+.addbtn { justify-self: start; border: 2px dashed var(--border); background: none; border-radius: var(--radius-control); min-height: 40px; padding: 0 14px; font-weight: 700; color: var(--primary); display: inline-flex; gap: 6px; align-items: center; }
+.tagedit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 6px; min-height: 44px; }
+.tagedit .badge { padding: 4px 6px 4px 10px; font-size: 13px; color: var(--foreground); border-color: var(--outline); background: var(--secondary); }
+.tagedit .badge button { border: 0; background: none; padding: 0 2px; display: grid; place-items: center; min-width: 22px; min-height: 22px; }
+.tagedit input { border: 0; background: none; outline: none; flex: 1; min-width: 100px; padding: 4px; }
+.photo { border: 2px dashed var(--border); border-radius: var(--radius-card); min-height: 110px; display: grid; place-items: center; align-content: center; gap: 6px; color: var(--muted-foreground); font-size: 13px; text-align: center; padding: 12px; }
+.formbar { position: sticky; bottom: -40px; display: flex; justify-content: flex-end; gap: 10px; padding: 12px 0; background: linear-gradient(transparent, var(--background) 30%); }
+.twocol { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
+
+/* Phone */
+.duo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; }
+.phone { width: 390px; max-width: 100%; height: 820px; border-radius: 44px; border: 10px solid #1b1714; background: var(--background); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px -25px rgb(0 0 0 / .45); }
+.statusbar { height: 40px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-size: 13px; font-weight: 700; }
+.pview { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.pview .libhead { padding: 4px 16px 10px; }
+.pview .list { padding: 4px 14px 100px; }
+.pbar { display: flex; align-items: center; gap: 8px; padding: 4px 10px 8px; flex: none; }
+.pbar .ttl { flex: 1; font-weight: 800; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pscroll { flex: 1; overflow-y: auto; padding: 0 14px 110px; display: grid; gap: 16px; align-content: start; }
+.phone .dhead h2 { font-size: 26px; }
+.phone .cols, .phone .twocol { grid-template-columns: minmax(0, 1fr); }
+.phone .detail { padding: 0; overflow: visible; }
+.phone .line, .phone .linehead { grid-template-columns: 64px 84px minmax(0, 1fr) 36px; gap: 6px; }
+.phone .nutr { grid-template-columns: repeat(2, 1fr); }
+.phone .formbar { bottom: -110px; padding-bottom: 20px; }
+.phone .dhead .top .btn.sm span { display: none; }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; height: 76px; padding-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border-top: 2px solid var(--outline); }
+.tabbar a { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-decoration: none; }
+.tabbar a.on { color: var(--primary); }
+.fab { position: absolute; right: 16px; bottom: 92px; z-index: 5; min-height: 56px; padding: 0 20px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-card); background: var(--primary); color: var(--primary-foreground); font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+.scrim { position: absolute; inset: 0; z-index: 8; background: rgb(20 12 22 / .45); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; max-height: 86%; overflow-y: auto; background: var(--card); border-top: 2px solid var(--outline); border-radius: 24px 24px 0 0; padding: 8px 18px 26px; display: grid; gap: 16px; animation: up .18s ease-out; }
+.desk-modal { position: absolute; z-index: 9; left: 50%; top: 50%; translate: -50% -50%; width: 420px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 22px; display: grid; gap: 16px; animation: up .18s ease-out; }
+@keyframes up { from { translate: 0 30px; opacity: 0; } }
+.desk-modal { animation-name: fade; }
+@keyframes fade { from { opacity: 0; } }
+.handle { width: 44px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto; }
+.rate { display: grid; gap: 16px; }
+.rate h3 { font-size: 22px; }
+.starpick { display: flex; gap: 6px; justify-content: center; }
+.starpick button { width: 52px; height: 52px; border-radius: var(--radius-control); border: 2px solid var(--border); background: var(--background); font-size: 28px; line-height: 1; color: var(--muted-foreground); display: grid; place-items: center; }
+.starpick button.on { color: var(--warning); border-color: var(--outline); background: var(--warning-surface); }
+.starlabel { text-align: center; font-weight: 700; min-height: 22px; color: var(--muted-foreground); }
+.again { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.again button { min-height: 48px; border-radius: var(--radius-control); border: 2px solid var(--border); background: var(--card); font-weight: 800; display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+.again button[aria-pressed="true"] { border-color: var(--outline); background: var(--secondary); box-shadow: var(--shadow-control); }
+.rate .acts { display: flex; gap: 10px; justify-content: space-between; }
+.toast { position: absolute; left: 50%; bottom: 96px; translate: -50% 0; z-index: 10; background: var(--foreground); color: var(--background); border-radius: var(--radius-control); padding: 10px 16px; font-weight: 700; font-size: 14px; white-space: nowrap; }
+
+.notes { display: grid; gap: 16px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; min-width: 0; }
+.notes h3 { font-size: 22px; }
+.notes .lg { display: grid; gap: 8px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.notes li { max-width: 68ch; }
+.notes p { color: var(--muted-foreground); }
+
+@media (max-width: 900px) { .duo { grid-template-columns: minmax(0, 1fr); } .phone { margin: 0 auto; } }
+@media (max-width: 440px) { .phone { border-width: 6px; border-radius: 32px; height: 760px; } }
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pagebar">
+    <div>
+      <div class="label">PAN-14 · Spiżarnia</div>
+      <h1>Przepisy</h1>
+    </div>
+    <div class="switches">
+      <button class="btn sm" data-act="mark-eaten">Symuluj: oznacz obiad jako zjedzony</button>
+      <div class="ctl"><span class="label">Motyw</span><div class="seg" id="theme">
+        <button data-v="system">System</button><button data-v="light">Jasny</button><button data-v="dark">Ciemny</button>
+      </div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="label frame-label">Biblioteka i przepis · komputer</div>
+    <div class="scroller">
+      <div class="desk" id="desk" style="position:relative">
+        <aside class="side">
+          <span class="mark" data-icon="jar" title="Spiżarnia"></span>
+          <nav class="nav">
+            <a href="#"><span data-icon="cal"></span>Plan</a>
+            <a href="#" class="on"><span data-icon="book"></span>Przepisy</a>
+            <a href="#"><span data-icon="cart"></span>Zakupy</a>
+            <a href="#"><span data-icon="home"></span>Dom</a>
+          </nav>
+        </aside>
+        <div class="libcol" id="desk-lib"></div>
+        <div class="detail" id="desk-detail"></div>
+        <div id="desk-modal"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="duo">
+    <div>
+      <div class="label frame-label">Ten sam przepis · telefon</div>
+      <div class="phone" id="phone">
+        <div class="statusbar"><span>18:05</span><span>64%</span></div>
+        <div class="pview" id="pview"></div>
+        <nav class="tabbar">
+          <a href="#"><span data-icon="cal"></span>Plan</a>
+          <a href="#" class="on"><span data-icon="book"></span>Przepisy</a>
+          <a href="#"><span data-icon="cart"></span>Zakupy</a>
+          <a href="#"><span data-icon="home"></span>Dom</a>
+        </nav>
+        <div id="psheet"></div>
+      </div>
+    </div>
+    <div class="notes">
+      <div>
+        <h3>Jak to działa</h3>
+        <p>Komputer i telefon pokazują te same dane. Edycja albo ocena w jednym widoku od razu widać w drugim.</p>
+      </div>
+      <div class="lg">
+        <div class="label">Biblioteka</div>
+        <ul>
+          <li>Wyszukiwarka szuka w nazwach, tagach i składnikach. Tagi to szybkie filtry, a sortowanie ma też „Dawno nie było”, żeby łatwo wrócić do zapomnianych dań.</li>
+          <li>Przepis ze składnikiem z listy <b>nigdy</b> ma czerwony znaczek na liście, a filtr „Bez nigdy” go chowa. Agent i tak go nie zaproponuje.</li>
+          <li>Na górze leżą dania „Do oceny”: wszystko, co zostało zjedzone, a nikt jeszcze nie ocenił.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Przepis</div>
+        <ul>
+          <li>Ilości w przepisie są zapisane na 1 porcję. Widok od razu liczy je na porcje domowe (2,3); stepper pozwala policzyć inną liczbę bez zmiany przepisu.</li>
+          <li>Sztuki, ząbki i łyżki zaokrąglamy do połówek, gramy do 5 g, żeby dało się to odmierzyć.</li>
+          <li>Kalorie i makro są na osobę. Bez danych sekcja mówi to wprost zamiast pokazywać zera.</li>
+          <li>Historia pokazuje, kiedy danie było jedzone i jak je oceniliście.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Edycja</div>
+        <ul>
+          <li>Składnik spoza katalogu dostaje dopisek „nowy”. Po zapisie trafia do katalogu, gdzie można mu dodać przeliczniki.</li>
+          <li>Składnik z listy „nigdy” albo „unikamy” jest oznaczony już przy wpisywaniu.</li>
+          <li>Zdjęcie jest opcjonalne. Bez niego przepis ma kolorowy kafelek z inicjałem.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Ocena po jedzeniu</div>
+        <ul>
+          <li>Po oznaczeniu pozycji planu jako zjedzonej pojawia się prośba o ocenę: gwiazdki domowe i „Ugotować znowu?”. Na telefonie to arkusz od dołu, na komputerze małe okno.</li>
+          <li>„Później” niczego nie gubi: danie czeka w „Do oceny” w bibliotece.</li>
+          <li>„Nie” przy „Ugotować znowu?” sprawia, że agent przestaje proponować to danie.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const ICONS = {
+  jar: '<path d="M7 3h10M8 3v3l-2 3v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M6 12h12"/>',
+  cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  left: '<path d="M15 18l-6-6 6-6"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>',
+  ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
+};
+const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const hydrateIcons = root => root.querySelectorAll('[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon, el.classList.contains('sm') ? 'sm' : ''); });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = n => n.toLocaleString('pl-PL', { maximumFractionDigits: 1 });
+
+const HOUSEHOLD = 2.3;
+const DISLIKES = { 'orzechy włoskie': { level: 'never', why: 'alergia' }, 'kolendra': { level: 'avoid' } };
+const CATALOG = ['pierś z kurczaka', 'ryż basmati', 'mleczko kokosowe', 'cebula', 'czosnek', 'pasta curry', 'kolendra', 'burak', 'rukola', 'ser kozi', 'orzechy włoskie', 'oliwa', 'miód', 'pomidory z puszki', 'ryż', 'bulion warzywny', 'śmietana 18%', 'cukinia', 'papryka', 'kiełbasa', 'mąka pszenna', 'mleko', 'jajko', 'twaróg', 'cukier', 'ziemniaki', 'łosoś', 'płatki owsiane', 'jabłko', 'cynamon', 'koperek', 'cytryna'];
+const UNITS = ['g', 'ml', 'szt.', 'ząbek', 'łyżka', 'łyżeczka'];
+const COLORS = ['var(--accent)', 'var(--agent-surface)', 'var(--secondary)', 'var(--success-surface)', 'var(--warning-surface)', 'var(--danger-surface)'];
+
+let recipes = [
+  { id: 'curry', n: 'Kurczak curry z ryżem', t: 40, tags: ['obiad', 'kurczak', 'na 2 dni'], again: true, src: 'https://example.com/curry', nut: { kcal: 640, p: 38, f: 22, c: 70 },
+    hist: [['21 paź', 5], ['30 wrz', 5], ['2 wrz', 4], ['5 sie', 5]],
+    ing: [[150, 'g', 'pierś z kurczaka'], [70, 'g', 'ryż basmati'], [100, 'ml', 'mleczko kokosowe'], [0.5, 'szt.', 'cebula'], [1, 'ząbek', 'czosnek'], [0.5, 'łyżka', 'pasta curry'], [2, 'g', 'kolendra']],
+    steps: ['Ugotuj ryż według instrukcji na opakowaniu.', 'Pokrój kurczaka w kostkę, cebulę w piórka, czosnek posiekaj.', 'Podsmaż cebulę i czosnek, dodaj pastę curry i smaż minutę.', 'Dodaj kurczaka, a gdy się zetnie, wlej mleczko kokosowe. Duś 15 minut.', 'Podawaj z ryżem i posiekaną kolendrą.'] },
+  { id: 'burak', n: 'Sałatka z pieczonym burakiem i kozim serem', t: 50, tags: ['kolacja', 'wege'], again: true, nut: { kcal: 430, p: 14, f: 28, c: 30 },
+    hist: [['12 paź', 4]],
+    ing: [[150, 'g', 'burak'], [30, 'g', 'rukola'], [40, 'g', 'ser kozi'], [15, 'g', 'orzechy włoskie'], [1, 'łyżka', 'oliwa'], [0.5, 'łyżeczka', 'miód']],
+    steps: ['Upiecz buraki w folii, około 40 minut w 200°C.', 'Obierz i pokrój w ćwiartki.', 'Ułóż rukolę, buraki i pokruszony ser, posyp orzechami.', 'Polej oliwą wymieszaną z miodem.'] },
+  { id: 'pomidorowa', n: 'Pomidorowa z ryżem', t: 35, tags: ['obiad', 'zupa', 'szybkie'], again: true, nut: { kcal: 410, p: 14, f: 12, c: 58 },
+    hist: [['26 paź', 5], ['5 paź', 4], ['14 wrz', 5]],
+    ing: [[200, 'g', 'pomidory z puszki'], [40, 'g', 'ryż'], [300, 'ml', 'bulion warzywny'], [30, 'ml', 'śmietana 18%']],
+    steps: ['Ugotuj ryż.', 'Zagotuj bulion z pomidorami i zmiksuj.', 'Zahartuj śmietanę i wlej do zupy.', 'Podawaj z ryżem.'] },
+  { id: 'leczo', n: 'Leczo z cukinią', t: 30, tags: ['obiad', 'szybkie'], again: true, nut: { kcal: 360, p: 16, f: 22, c: 24 },
+    hist: [['3 wrz', 4]],
+    ing: [[150, 'g', 'cukinia'], [100, 'g', 'papryka'], [60, 'g', 'kiełbasa'], [0.5, 'szt.', 'cebula'], [100, 'g', 'pomidory z puszki']],
+    steps: ['Pokrój warzywa i kiełbasę.', 'Podsmaż kiełbasę z cebulą.', 'Dodaj paprykę i cukinię, duś 10 minut.', 'Wlej pomidory i duś kolejne 10 minut.'] },
+  { id: 'nalesniki', n: 'Naleśniki z twarogiem', t: 25, tags: ['śniadanie', 'na słodko', 'szybkie'], again: true, nut: { kcal: 520, p: 24, f: 16, c: 68 },
+    hist: [['19 paź', 5], ['28 wrz', 5]],
+    ing: [[50, 'g', 'mąka pszenna'], [100, 'ml', 'mleko'], [0.5, 'szt.', 'jajko'], [100, 'g', 'twaróg'], [1, 'łyżeczka', 'cukier']],
+    steps: ['Zmiksuj mąkę, mleko i jajko na gładkie ciasto.', 'Smaż cienkie naleśniki na rozgrzanej patelni.', 'Wymieszaj twaróg z cukrem.', 'Nałóż farsz i zwiń.'] },
+  { id: 'pierogi', n: 'Pierogi ruskie', t: 90, tags: ['obiad', 'na weekend'], again: true, nut: null,
+    hist: [['18 paź', 5], ['20 wrz', 4]],
+    ing: [[80, 'g', 'mąka pszenna'], [100, 'g', 'ziemniaki'], [50, 'g', 'twaróg'], [0.3, 'szt.', 'cebula']],
+    steps: ['Ugotuj ziemniaki i przeciśnij przez praskę.', 'Wymieszaj z twarogiem i podsmażoną cebulą.', 'Zagnieć ciasto z mąki i ciepłej wody.', 'Lep pierogi i gotuj 3 minuty od wypłynięcia.'] },
+  { id: 'losos', n: 'Łosoś z pieczonymi ziemniakami', t: 45, tags: ['obiad', 'ryba'], again: false, nut: { kcal: 690, p: 42, f: 34, c: 48 },
+    hist: [['26 paź', 3]],
+    ing: [[150, 'g', 'łosoś'], [250, 'g', 'ziemniaki'], [1, 'łyżka', 'oliwa'], [0.25, 'szt.', 'cytryna'], [2, 'g', 'koperek']],
+    steps: ['Pokrój ziemniaki w łódeczki i piecz 25 minut w 200°C.', 'Dołóż łososia skropionego cytryną i piecz kolejne 15 minut.', 'Posyp koperkiem.'] },
+  { id: 'owsianka', n: 'Owsianka z jabłkiem i cynamonem', t: 10, tags: ['śniadanie', 'szybkie', 'wege'], again: true, nut: { kcal: 380, p: 12, f: 10, c: 60 },
+    hist: [['8 lis', 4], ['2 lis', 4], ['28 paź', 5]],
+    ing: [[50, 'g', 'płatki owsiane'], [200, 'ml', 'mleko'], [0.5, 'szt.', 'jabłko'], [0.25, 'łyżeczka', 'cynamon']],
+    steps: ['Zagotuj mleko z płatkami.', 'Dodaj starte jabłko i cynamon.', 'Gotuj 3 minuty, mieszając.'] }
+];
+let toRate = [{ id: 'leczo', when: 'Wczoraj, obiad' }];
+
+const TAGS = ['obiad', 'śniadanie', 'kolacja', 'wege', 'szybkie'];
+const state = { q: '', tag: null, noNever: false, sort: 'rating', sel: 'curry', srv: HOUSEHOLD, editing: false, draft: null, pview: 'list', rating: null, toast: '' };
+
+const byId = id => recipes.find(r => r.id === id);
+const avg = r => r.hist.length ? r.hist.reduce((a, h) => a + h[1], 0) / r.hist.length : 0;
+const neverIn = r => r.ing.filter(l => DISLIKES[l[2]]?.level === 'never').map(l => l[2]);
+const avoidIn = r => r.ing.filter(l => DISLIKES[l[2]]?.level === 'avoid').map(l => l[2]);
+const starsTxt = v => { const n = Math.round(v); return '★'.repeat(n) + '☆'.repeat(5 - n); };
+const timeTxt = t => t >= 60 ? `${Math.floor(t / 60)} h${t % 60 ? ' ' + (t % 60) : ''}` : `${t} min`;
+const ago = { '8 lis': 'wczoraj', '2 lis': 'tydzień temu', '28 paź': '2 tyg. temu', '26 paź': '2 tyg. temu', '21 paź': '3 tyg. temu', '19 paź': '3 tyg. temu', '18 paź': '3 tyg. temu', '12 paź': 'miesiąc temu', '3 wrz': '2 mies. temu', 'dziś': 'dziś' };
+const ORDER = ['dziś', '8 lis', '2 lis', '28 paź', '26 paź', '21 paź', '19 paź', '18 paź', '12 paź', '3 wrz'];
+const lastAgo = r => r.hist.length ? (ago[r.hist[0][0]] ?? r.hist[0][0]) : 'jeszcze nie';
+const recency = r => r.hist.length ? ORDER.indexOf(r.hist[0][0]) : 99;
+
+function unitLabel(u, n) {
+  const forms = { 'ząbek': ['ząbek', 'ząbki', 'ząbków', 'ząbka'], 'łyżka': ['łyżka', 'łyżki', 'łyżek', 'łyżki'], 'łyżeczka': ['łyżeczka', 'łyżeczki', 'łyżeczek', 'łyżeczki'] }[u];
+  if (!forms) return u;
+  if (!Number.isInteger(n)) return forms[3];
+  if (n === 1) return forms[0];
+  return n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? forms[1] : forms[2];
+}
+function scaled(q, u, srv) {
+  const v = q * srv;
+  if (u === 'g' || u === 'ml') return v >= 20 ? Math.round(v / 5) * 5 : Math.round(v);
+  return Math.max(0.5, Math.round(v * 2) / 2);
+}
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  let list = recipes.filter(r => (!state.tag || r.tags.includes(state.tag))
+    && (!state.noNever || !neverIn(r).length)
+    && (!q || r.n.toLowerCase().includes(q) || r.tags.some(t => t.includes(q)) || r.ing.some(l => l[2].includes(q))));
+  const sorts = { rating: (a, b) => avg(b) - avg(a), recent: (a, b) => recency(a) - recency(b), forgotten: (a, b) => recency(b) - recency(a), time: (a, b) => a.t - b.t };
+  return list.sort(sorts[state.sort]);
+}
+
+function thumb(r) {
+  const c = COLORS[recipes.indexOf(r) % COLORS.length];
+  return `<span class="thumb" style="background:${c}" aria-hidden="true">${esc(r.n[0])}</span>`;
+}
+
+function libHtml(where) {
+  const list = filtered();
+  const rateCards = toRate.map(x => {
+    const r = byId(x.id);
+    return `<div class="toRate"><span class="label">Do oceny</span><div class="row"><div class="txt"><b>${esc(r.n)}</b>${x.when}</div><button class="btn sm accent" data-act="rate" data-id="${r.id}">Oceń</button></div></div>`;
+  }).join('');
+  return `<div class="libhead">
+      <div class="top"><h2>Przepisy</h2><button class="btn sm primary" data-act="new">${icon('plus', 'sm')}Nowy</button></div>
+      <label class="search">${icon('search')}<input data-input="q" type="search" value="${esc(state.q)}" placeholder="Szukaj w nazwach, tagach, składnikach" aria-label="Szukaj przepisu"></label>
+      <div class="chips" role="group" aria-label="Filtry">
+        ${TAGS.map(t => `<button class="chip" data-act="tag" data-tag="${t}" aria-pressed="${state.tag === t}">${t}</button>`).join('')}
+        <button class="chip" data-act="never" aria-pressed="${state.noNever}">${icon('ban', 'sm')}Bez „nigdy”</button>
+      </div>
+      <div class="sortrow"><span>${list.length} ${list.length === 1 ? 'przepis' : (list.length % 10 >= 2 && list.length % 10 <= 4 && (list.length < 10 || list.length > 20) ? 'przepisy' : 'przepisów')}</span>
+        <label>Sortuj: <select data-input="sort" aria-label="Sortuj">
+          ${[['rating', 'Ocena'], ['recent', 'Ostatnio jedzone'], ['forgotten', 'Dawno nie było'], ['time', 'Czas']].map(([v, l]) => `<option value="${v}" ${state.sort === v ? 'selected' : ''}>${l}</option>`).join('')}
+        </select></label></div>
+    </div>
+    <div class="list">${rateCards}${list.length ? list.map(r => cardHtml(r, where)).join('') : '<div class="empty">Nic nie pasuje. Zmień filtry albo dodaj nowy przepis.</div>'}</div>`;
+}
+
+function cardHtml(r, where) {
+  const never = neverIn(r).length ? `<span class="badge never">${icon('ban', 'sm')}nigdy</span>` : '';
+  const avoid = avoidIn(r).length ? `<span class="badge avoid">unikamy</span>` : '';
+  const again = r.again ? '' : `<span class="badge tag">nie gotujemy znowu</span>`;
+  const cur = where === 'desk' && r.id === state.sel ? 'aria-current="true"' : '';
+  return `<button class="rcard" data-act="open" data-id="${r.id}" ${cur}>${thumb(r)}<div>
+    <div class="nm">${esc(r.n)}</div>
+    <div class="meta"><span class="stars" aria-label="Ocena ${fmt(avg(r))} na 5">${starsTxt(avg(r))}</span><span>${timeTxt(r.t)}</span><span>${lastAgo(r)}</span>${r.nut ? `<span>${r.nut.kcal} kcal</span>` : ''}</div>
+    <div class="meta">${never}${avoid}${again}</div></div></button>`;
+}
+
+function detailHtml(r, where) {
+  const never = neverIn(r);
+  const avoid = avoidIn(r);
+  const changed = state.srv !== HOUSEHOLD;
+  const nb = never.length ? `<div class="alert never">${icon('ban')}<div class="txt">Zawiera <b>${never.join(', ')}</b> — u Was: nigdy (${DISLIKES[never[0]].why}). Agent nie zaproponuje tego przepisu, a ręcznie dodasz go tylko świadomie.</div></div>` : '';
+  const ings = r.ing.map(([q, u, name]) => {
+    const v = scaled(q, u, state.srv);
+    const d = DISLIKES[name];
+    const flag = d ? `<span class="badge ${d.level} flag">${d.level === 'never' ? 'nigdy' : 'unikamy'}</span>` : '';
+    return `<li class="${d?.level === 'never' ? 'never' : ''}"><span class="q">${fmt(v)} ${unitLabel(u, v)}</span><span>${esc(name)}${flag}</span></li>`;
+  }).join('');
+  const nutr = r.nut
+    ? `<div class="nutr"><div><b>${r.nut.kcal}</b><span>kcal</span></div><div><b>${r.nut.p} g</b><span>białko</span></div><div><b>${r.nut.f} g</b><span>tłuszcz</span></div><div><b>${r.nut.c} g</b><span>węglowodany</span></div></div><p class="note">Na 1 porcję.</p>`
+    : '<p class="note">Ten przepis nie ma danych o wartościach odżywczych. Dni z nim w planie są oznaczone jako niepełne.</p>';
+  const hist = r.hist.length
+    ? `<div class="bigrate"><b>${fmt(Math.round(avg(r) * 10) / 10)}</b><span class="stars">${starsTxt(avg(r))}</span><span class="note">${r.hist.length} ${r.hist.length === 1 ? 'raz' : 'razy'}</span></div>
+       <ul class="hist">${r.hist.map(([d, v]) => `<li><span class="when">${d}</span><span class="stars" aria-label="${v} na 5">${starsTxt(v)}</span></li>`).join('')}</ul>
+       <div>${r.again ? `<span class="badge again">${icon('repeat', 'sm')}ugotujemy znowu</span>` : '<span class="badge tag">nie gotujemy znowu · agent go pomija</span>'}</div>`
+    : '<p class="note">Jeszcze nie jedliście tego dania.</p>';
+  return `<div class="dhead">
+      <div class="top"><h2>${esc(r.n)}</h2><div class="row" style="display:flex;gap:8px"><button class="btn sm" data-act="edit" data-id="${r.id}" aria-label="Edytuj">${icon('edit', 'sm')}<span>Edytuj</span></button><button class="btn sm primary" data-act="plan">${icon('cal', 'sm')}<span>Do planu</span></button></div></div>
+      <div class="facts"><span>${icon('clock', 'sm')}${timeTxt(r.t)}</span><span class="stars">${starsTxt(avg(r))}</span><span>Ostatnio: ${lastAgo(r)}</span>${r.src ? `<span>${icon('link', 'sm')}<a href="${esc(r.src)}" target="_blank" rel="noopener">Źródło</a></span>` : ''}</div>
+      <div class="facts">${r.tags.map(t => `<span class="badge tag">${esc(t)}</span>`).join('')}${avoid.length ? `<span class="badge avoid">${icon('alert', 'sm')}unikamy: ${avoid.join(', ')}</span>` : ''}</div>
+    </div>
+    ${nb}
+    <div class="cols">
+      <div class="card">
+        <div class="ch"><h3>Składniki</h3>
+          <div class="stepper"><button class="btn icon sm" data-act="srv-down" aria-label="Mniej porcji">${icon('minus', 'sm')}</button><output aria-live="polite">${fmt(state.srv)}</output><button class="btn icon sm" data-act="srv-up" aria-label="Więcej porcji">${icon('plus', 'sm')}</button></div></div>
+        <p class="note">${changed ? `Przeliczone na <b>${fmt(state.srv)} porcji</b>. <button class="btn ghost sm" style="min-height:0;padding:0;color:var(--primary);text-decoration:underline" data-act="srv-reset">Wróć do porcji domowych</button>` : `Na porcje domowe (${fmt(HOUSEHOLD)}). Przepis zapisany na 1 porcję.`}</p>
+        <ul class="ings">${ings}</ul>
+      </div>
+      <div class="card"><h3>Przygotowanie</h3><ol class="steps">${r.steps.map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol></div>
+    </div>
+    <div class="cols">
+      <div class="card"><h3>Wartości odżywcze</h3>${nutr}</div>
+      <div class="card"><h3>Historia i ocena</h3>${hist}</div>
+    </div>`;
+}
+
+function lineHint(name) {
+  const n = name.trim().toLowerCase();
+  if (!n) return '';
+  const d = DISLIKES[n];
+  if (d?.level === 'never') return `<div class="hint never">${icon('ban', 'sm')}Na liście „nigdy” (${d.why})</div>`;
+  if (d?.level === 'avoid') return `<div class="hint avoid">${icon('alert', 'sm')}Na liście „unikamy”</div>`;
+  if (!CATALOG.includes(n)) return `<div class="hint new">${icon('sparkle', 'sm')}Nowy składnik — trafi do katalogu</div>`;
+  return '';
+}
+
+function editHtml() {
+  const d = state.draft;
+  const lines = d.ing.map(([q, u, name], i) => `<div class="line" data-line="${i}">
+      <input class="input" type="number" min="0" step="any" value="${q}" data-input="ing-q" data-i="${i}" aria-label="Ilość na porcję">
+      <select class="input" data-input="ing-u" data-i="${i}" aria-label="Jednostka">${UNITS.map(x => `<option ${x === u ? 'selected' : ''}>${x}</option>`).join('')}</select>
+      <input class="input" list="catalog" value="${esc(name)}" data-input="ing-n" data-i="${i}" aria-label="Składnik" placeholder="np. cebula">
+      <button class="btn icon sm ghost" data-act="del-line" data-i="${i}" aria-label="Usuń składnik">${icon('x', 'sm')}</button>
+      <span class="hint-slot" data-hint="${i}" style="grid-column:3/4">${lineHint(name)}</span>
+    </div>`).join('');
+  const steps = d.steps.map((s, i) => `<div class="stepline"><span class="n">${i + 1}</span><textarea class="input" rows="2" data-input="step" data-i="${i}" aria-label="Krok ${i + 1}">${esc(s)}</textarea><button class="btn icon sm ghost" data-act="del-step" data-i="${i}" aria-label="Usuń krok">${icon('x', 'sm')}</button></div>`).join('');
+  return `<div class="form">
+    <div class="dhead"><div class="top"><h2>${d.isNew ? 'Nowy przepis' : 'Edycja przepisu'}</h2></div></div>
+    <label class="field"><span>Nazwa</span><input class="input title" data-input="name" value="${esc(d.n)}" placeholder="np. Zupa krem z dyni"></label>
+    <div class="twocol">
+      <div class="card">
+        <div class="ch"><h3>Składniki</h3><span class="note">Ilości na <b>1 porcję</b></span></div>
+        <div class="linehead"><span>Ilość</span><span>Jednostka</span><span>Składnik</span><span></span></div>
+        <div class="lines">${lines}</div>
+        <button class="addbtn" data-act="add-line">${icon('plus', 'sm')}Dodaj składnik</button>
+      </div>
+      <div style="display:grid;gap:16px">
+        <label class="field"><span>Czas</span><input class="input" type="number" min="0" data-input="time" value="${d.t}" aria-describedby="tm"><span id="tm" class="note">minut</span></label>
+        <div class="field"><span>Tagi</span><div class="tagedit">${d.tags.map((t, i) => `<span class="badge">${esc(t)}<button data-act="del-tag" data-i="${i}" aria-label="Usuń tag ${esc(t)}">${icon('x', 'sm')}</button></span>`).join('')}<input data-input="tag" placeholder="Dodaj i Enter" aria-label="Nowy tag"></div></div>
+        <label class="field"><span>Źródło</span><input class="input" type="url" data-input="src" value="${esc(d.src ?? '')}" placeholder="https://"></label>
+        <div class="field"><span>Zdjęcie</span><div class="photo">${icon('image')}Upuść zdjęcie albo stuknij<br><span class="note">Opcjonalne</span></div></div>
+      </div>
+    </div>
+    <div class="card"><h3>Przygotowanie</h3>${steps}<button class="addbtn" data-act="add-step">${icon('plus', 'sm')}Dodaj krok</button></div>
+    <div class="formbar">${d.isNew ? '' : `<button class="btn danger ghost" data-act="delete" style="margin-right:auto">${icon('trash', 'sm')}Usuń przepis</button>`}<button class="btn" data-act="cancel">Anuluj</button><button class="btn primary" data-act="save">${icon('check', 'sm')}Zapisz</button></div>
+  </div>`;
+}
+
+const STAR_WORDS = ['', 'Nie smakowało', 'Takie sobie', 'Dobre', 'Bardzo dobre', 'Rewelacja'];
+function rateHtml() {
+  const x = state.rating;
+  const r = byId(x.id);
+  return `<div class="rate">
+    <div><span class="label">Jak smakowało?</span><h3>${esc(r.n)}</h3><p class="note">${x.when} · ocena całego domu</p></div>
+    <div><div class="starpick" role="radiogroup" aria-label="Ocena">${[1, 2, 3, 4, 5].map(n => `<button role="radio" aria-checked="${x.stars === n}" aria-label="${n} na 5" class="${n <= x.stars ? 'on' : ''}" data-act="star" data-n="${n}">★</button>`).join('')}</div>
+    <div class="starlabel">${STAR_WORDS[x.stars] ?? ''}</div></div>
+    <div class="field"><span>Ugotować znowu?</span><div class="again">
+      <button data-act="again" data-v="yes" aria-pressed="${x.again === true}">${icon('repeat', 'sm')}Tak</button>
+      <button data-act="again" data-v="no" aria-pressed="${x.again === false}">${icon('x', 'sm')}Raczej nie</button></div>
+      ${x.again === false ? '<span class="note">Agent przestanie proponować to danie. Możesz to zmienić w przepisie.</span>' : ''}</div>
+    <div class="acts"><button class="btn ghost" data-act="rate-later">Później</button><button class="btn primary" data-act="rate-save" ${x.stars ? '' : 'disabled style="opacity:.5"'}>${icon('check', 'sm')}Zapisz ocenę</button></div>
+  </div>`;
+}
+
+function render() {
+  const lib = document.getElementById('desk-lib');
+  const keepScroll = lib.querySelector('.list')?.scrollTop ?? 0;
+  lib.innerHTML = libHtml('desk');
+  lib.querySelector('.list').scrollTop = keepScroll;
+  const r = byId(state.sel);
+  document.getElementById('desk-detail').innerHTML = state.editing ? editHtml() : (r ? detailHtml(r, 'desk') : '<div class="empty">Wybierz przepis z listy.</div>');
+  document.getElementById('desk-modal').innerHTML = state.rating?.where === 'desk' ? `<div class="scrim" data-act="rate-later"></div><div class="desk-modal" role="dialog" aria-modal="true">${rateHtml()}</div>` : '';
+
+  const pv = document.getElementById('pview');
+  const pscroll = pv.querySelector('.pscroll, .list')?.scrollTop ?? 0;
+  if (state.pview === 'list') pv.innerHTML = libHtml('phone') + `<button class="fab" data-act="new">${icon('plus')}Nowy przepis</button>`;
+  else {
+    const title = state.pview === 'edit' ? (state.draft?.isNew ? 'Nowy przepis' : 'Edycja') : r.n;
+    pv.innerHTML = `<div class="pbar"><button class="btn icon ghost" data-act="back" aria-label="Wstecz">${icon('left')}</button><span class="ttl">${esc(title)}</span></div>
+      <div class="pscroll"><div class="detail">${state.pview === 'edit' ? editHtml() : detailHtml(r, 'phone')}</div></div>`;
+  }
+  const ps = pv.querySelector('.pscroll, .list');
+  if (ps) ps.scrollTop = state.keepPhoneScroll ? pscroll : 0;
+  state.keepPhoneScroll = true;
+  document.getElementById('psheet').innerHTML = (state.rating?.where === 'phone' ? `<div class="scrim" data-act="rate-later"></div><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${rateHtml()}</div>` : '')
+    + (state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '');
+}
+
+function startEdit(r) {
+  state.draft = r ? { ...structuredClone(r), isNew: false } : { id: 'new' + Date.now(), n: '', t: 30, tags: [], ing: [[100, 'g', '']], steps: [''], hist: [], again: true, nut: null, isNew: true };
+  state.editing = true;
+}
+function toast(msg) { state.toast = msg; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { state.toast = ''; render(); }, 2200); }
+
+function act(el) {
+  const a = el.dataset.act;
+  const inPhone = !!el.closest('#phone');
+  const id = el.dataset.id;
+  const i = Number(el.dataset.i);
+  switch (a) {
+    case 'open': state.sel = id; state.srv = HOUSEHOLD; state.editing = false; if (inPhone) { state.pview = 'detail'; state.keepPhoneScroll = false; } break;
+    case 'tag': state.tag = state.tag === el.dataset.tag ? null : el.dataset.tag; break;
+    case 'never': state.noNever = !state.noNever; break;
+    case 'srv-up': state.srv = Math.round((state.srv + 0.5) * 10) / 10; break;
+    case 'srv-down': state.srv = Math.max(1, Math.round((state.srv - 0.5) * 10) / 10); break;
+    case 'srv-reset': state.srv = HOUSEHOLD; break;
+    case 'edit': startEdit(byId(id)); if (inPhone) { state.pview = 'edit'; state.keepPhoneScroll = false; } break;
+    case 'new': startEdit(null); state.pview = inPhone ? 'edit' : state.pview; state.keepPhoneScroll = false; break;
+    case 'plan': toast('Otwórz szufladę dań w planerze, żeby wstawić'); return;
+    case 'cancel': state.editing = false; state.draft = null; if (state.pview === 'edit') state.pview = byId(state.sel) ? 'detail' : 'list'; break;
+    case 'save': {
+      const d = state.draft;
+      d.n = d.n.trim() || 'Bez nazwy';
+      d.ing = d.ing.filter(l => l[2].trim()).map(l => [Number(l[0]) || 0, l[1], l[2].trim().toLowerCase()]);
+      d.ing.forEach(l => { if (!CATALOG.includes(l[2])) CATALOG.push(l[2]); });
+      d.steps = d.steps.filter(s => s.trim());
+      const { isNew, ...clean } = d;
+      if (isNew) recipes.unshift(clean); else recipes = recipes.map(x => x.id === d.id ? clean : x);
+      state.sel = d.id; state.editing = false; state.draft = null;
+      if (state.pview === 'edit') state.pview = 'detail';
+      state.keepPhoneScroll = false;
+      toast('Zapisano przepis');
+      return;
+    }
+    case 'delete': recipes = recipes.filter(x => x.id !== state.draft.id); state.editing = false; state.draft = null; state.sel = recipes[0]?.id; state.pview = 'list'; toast('Usunięto przepis'); return;
+    case 'add-line': state.draft.ing.push([100, 'g', '']); break;
+    case 'del-line': state.draft.ing.splice(i, 1); break;
+    case 'add-step': state.draft.steps.push(''); break;
+    case 'del-step': state.draft.steps.splice(i, 1); break;
+    case 'del-tag': state.draft.tags.splice(i, 1); break;
+    case 'back': state.pview = state.pview === 'edit' ? 'detail' : 'list'; state.editing = false; state.draft = null; state.keepPhoneScroll = false; break;
+    case 'rate': state.rating = { id, when: toRate.find(x => x.id === id)?.when ?? 'Dziś', stars: 0, again: byId(id).again, where: inPhone ? 'phone' : 'desk' }; break;
+    case 'mark-eaten':
+      if (!toRate.some(x => x.id === 'pomidorowa')) toRate.unshift({ id: 'pomidorowa', when: 'Dziś, obiad' });
+      state.rating = { id: 'pomidorowa', when: 'Dziś, obiad', stars: 0, again: true, where: 'phone' };
+      document.getElementById('phone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      break;
+    case 'star': state.rating.stars = Number(el.dataset.n); break;
+    case 'again': state.rating.again = el.dataset.v === 'yes'; break;
+    case 'rate-later': state.rating = null; break;
+    case 'rate-save': {
+      const x = state.rating;
+      const r = byId(x.id);
+      r.hist.unshift(['dziś', x.stars]);
+      r.again = x.again;
+      toRate = toRate.filter(t => t.id !== x.id);
+      state.rating = null;
+      toast('Dzięki! Ocena zapisana');
+      return;
+    }
+    default: return;
+  }
+  render();
+}
+
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]');
+  if (el && !el.disabled) act(el);
+});
+
+function onInput(ev) {
+  const el = ev.target;
+  const k = el.dataset.input;
+  if (!k) return;
+  const i = Number(el.dataset.i);
+  const d = state.draft;
+  if (k === 'q') { state.q = el.value; rerenderLists(el); return; }
+  if (k === 'sort') { state.sort = el.value; render(); return; }
+  if (!d) return;
+  if (k === 'name') d.n = el.value;
+  if (k === 'time') d.t = Number(el.value) || 0;
+  if (k === 'src') d.src = el.value;
+  if (k === 'step') d.steps[i] = el.value;
+  if (k === 'ing-q') d.ing[i][0] = el.value;
+  if (k === 'ing-u') d.ing[i][1] = el.value;
+  if (k === 'ing-n') {
+    d.ing[i][2] = el.value;
+    document.querySelectorAll(`[data-hint="${i}"]`).forEach(h => h.innerHTML = lineHint(el.value));
+  }
+}
+function rerenderLists(input) {
+  const pos = input.selectionStart;
+  const inPhone = !!input.closest('#phone');
+  render();
+  const again = document.querySelector(`${inPhone ? '#phone' : '#desk'} [data-input="q"]`);
+  if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+}
+document.addEventListener('input', onInput);
+document.addEventListener('change', ev => { if (ev.target.dataset.input === 'sort' || ev.target.dataset.input === 'ing-u') onInput(ev); });
+document.addEventListener('keydown', ev => {
+  if (ev.target.dataset?.input === 'tag' && ev.key === 'Enter' && ev.target.value.trim()) {
+    ev.preventDefault();
+    const inPhone = !!ev.target.closest('#phone');
+    state.draft.tags.push(ev.target.value.trim().toLowerCase());
+    render();
+    document.querySelector(`${inPhone ? '#phone' : '#desk'} [data-input="tag"]`)?.focus();
+  }
+  if (ev.key === 'Escape' && state.rating) { state.rating = null; render(); }
+});
+
+const seg = document.getElementById('theme');
+function setTheme(v) {
+  if (v === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', v);
+  seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+}
+seg.addEventListener('click', ev => { const b = ev.target.closest('button[data-v]'); if (b) setTheme(b.dataset.v); });
+
+const dl = document.createElement('datalist');
+dl.id = 'catalog';
+dl.innerHTML = CATALOG.map(c => `<option value="${c}">`).join('');
+document.body.append(dl);
+
+hydrateIcons(document);
+setTheme('system');
+render();
+</script>
+</body>
+</html>
