@@ -6,15 +6,22 @@ using Pantry.Api.Modules.Identity;
 namespace Pantry.Api.Modules.Household.Features.Members;
 
 /// <summary>
-/// A member as the settings screen shows it. <c>Account</c> is the linked user's role and <c>UserId</c> that user,
-/// both null without an account.
+/// A member as the settings screen shows it. <c>Account</c> is the linked user's role, <c>UserId</c> that user and
+/// <c>SignInMethods</c> how they sign in; all null without an account.
 /// </summary>
-public sealed record MemberResponse(Guid Id, string Name, decimal PortionFactor, int Position, MemberAccount? Account, Guid? UserId)
+public sealed record MemberResponse(
+    Guid Id,
+    string Name,
+    decimal PortionFactor,
+    int Position,
+    MemberAccount? Account,
+    Guid? UserId,
+    IReadOnlyList<SignInMethod>? SignInMethods)
 {
     public static MemberResponse From(Member member, IReadOnlyList<UserAccount> users)
     {
         var user = users.FirstOrDefault(u => u.Id == member.UserId);
-        return new(member.Id, member.Name, member.PortionFactor, member.Position, ToMemberAccount(user?.Role), user?.Id);
+        return new(member.Id, member.Name, member.PortionFactor, member.Position, ToMemberAccount(user?.Role), user?.Id, user?.SignInMethods);
     }
 
     private static MemberAccount? ToMemberAccount(AccountRole? role) => role switch

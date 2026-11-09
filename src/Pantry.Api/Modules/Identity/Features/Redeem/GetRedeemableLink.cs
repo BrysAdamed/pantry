@@ -20,9 +20,12 @@ public static class GetRedeemableLink
         }
 
         return TypedResults.Ok(new RedeemableLinkResponse(
-            redeemable.Link.Kind, redeemable.Name, redeemable.InvitedBy, redeemable.Link.ExpiresAt));
+            redeemable.Link.Kind, redeemable.Name, redeemable.User?.ChosenUserName, redeemable.InvitedBy, redeemable.Link.ExpiresAt));
     }
 }
 
-/// <summary><c>Name</c> is the member's name for an invite (a suggestion for the display name) or the user's display name for recovery.</summary>
-public sealed record RedeemableLinkResponse(PasskeyLinkKind Kind, string Name, string? InvitedBy, DateTimeOffset ExpiresAt);
+/// <summary>
+/// <c>Name</c> is the member's name for an invite (a suggestion for the display name) or the user's display name for recovery.
+/// <c>UserName</c> is the recovering user's username; null for an invite or a user who has none yet.
+/// </summary>
+public sealed record RedeemableLinkResponse(PasskeyLinkKind Kind, string Name, string? UserName, string? InvitedBy, DateTimeOffset ExpiresAt);

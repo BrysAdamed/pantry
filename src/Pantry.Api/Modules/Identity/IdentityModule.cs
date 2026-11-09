@@ -6,6 +6,7 @@ using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Modules.Identity.Auth;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
+using Pantry.Api.Modules.Identity.Features.Password;
 using Pantry.Api.Modules.Identity.Features.PasskeyLinks;
 using Pantry.Api.Modules.Identity.Features.Passkeys;
 using Pantry.Api.Modules.Identity.Features.Redeem;
@@ -42,8 +43,12 @@ public static class IdentityModule
             {
                 options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
                 options.User.RequireUniqueEmail = false;
+                options.User.AllowedUserNameCharacters = string.Empty;
+                PasswordConfiguration.Apply(options);
             })
             .AddEntityFrameworkStores<IdentityModuleDbContext>()
+            .AddUserValidator<UserNameValidator>()
+            .AddPasswordValidator<MaxLengthPasswordValidator>()
             .AddSignInManager()
             .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory>();
 
@@ -66,10 +71,12 @@ public static class IdentityModule
         setup.MapGetSetupStatus();
         setup.MapCreateFirstRunPasskeyOptions();
         setup.MapCompleteFirstRun();
+        setup.MapCompleteFirstRunWithPassword();
 
         var auth = api.MapGroup("/auth").AllowAnonymous();
         auth.MapCreateSignInPasskeyOptions();
         auth.MapSignInWithPasskey();
+        auth.MapSignInWithPassword();
         auth.MapSignOut();
 
         var me = api.MapGroup("/me");
@@ -77,6 +84,11 @@ public static class IdentityModule
         me.MapChangeUiLanguage();
         me.MapChangeTheme();
         me.MapSignOutOtherSessions();
+
+        var password = me.MapGroup("/password");
+        password.MapSetPassword();
+        password.MapChangePassword();
+        password.MapRemovePassword();
 
         var passkeys = me.MapGroup("/passkeys");
         passkeys.MapGetMyPasskeys();
@@ -95,6 +107,7 @@ public static class IdentityModule
         redeem.MapGetRedeemableLink();
         redeem.MapCreateRedeemPasskeyOptions();
         redeem.MapCompleteRedeem();
+        redeem.MapCompleteRedeemWithPassword();
 
         var users = api.MapGroup("/users").RequireAuthorization(IdentityPolicies.Admin);
         users.MapRemoveUser();

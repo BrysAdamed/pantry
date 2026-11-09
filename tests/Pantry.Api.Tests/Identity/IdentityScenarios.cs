@@ -18,6 +18,26 @@ internal static class IdentityScenarios
         return await client.PostAsJsonAsync("/api/auth/sign-in", new { credential });
     }
 
+    /// <summary>The SPA's password sign-in: fetch a token, post the username and password.</summary>
+    public static async Task<HttpResponseMessage> SignInWithPasswordAsync(HttpClient client, string userName, string password)
+    {
+        Assert.Equal(HttpStatusCode.NoContent, (await client.GetAsync("/api/antiforgery")).StatusCode);
+        return await client.PostAsJsonAsync("/api/auth/sign-in/password", new { userName, password });
+    }
+
+    public static Task<HttpResponseMessage> CompleteLinkWithPasswordAsync(
+        HttpClient client, string token, string? userName, string password, string displayName = "Invited example") =>
+        client.PostAsJsonAsync($"{RedeemUrl(token)}/complete-with-password", new { displayName, userName, password });
+
+    /// <summary>Opens the link on <paramref name="client"/>, redeems it with a password and returns the signed-in user's id.</summary>
+    public static async Task<Guid> RedeemWithPasswordAsync(HttpClient client, string token, string? userName, string password)
+    {
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync(RedeemUrl(token))).StatusCode);
+        var response = await CompleteLinkWithPasswordAsync(client, token, userName, password);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+    }
+
     public static async Task<Guid> AddMemberAsync(HttpClient admin, string name = "Guest")
     {
         var response = await admin.PostAsJsonAsync("/api/household/members", new { name, portionFactor = 1m });

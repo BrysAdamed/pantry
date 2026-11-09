@@ -2,17 +2,18 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
-using Pantry.Api.Infrastructure.Antiforgery;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
+using Pantry.Api.Modules.Identity.Features.SignIn;
 using Pantry.Api.Modules.Identity.Persistence;
 
 namespace Pantry.Api.Modules.Identity.Features.Redeem;
 
 /// <summary>
-/// Finishes redeeming a link and signs the person in. An invite creates the user and links it to the member in one
-/// transaction (ADR 0015); a recovery link adds the new passkey to the existing user. Either way the link is used up.
+/// Finishes redeeming a link with a passkey and signs the person in. An invite creates the user and links it to the member
+/// in one transaction (ADR 0015); a recovery link adds the new passkey to the existing user and ends their other sessions.
+/// Either way the link is used up.
 /// </summary>
 public static class CompleteRedeem
 {
@@ -70,7 +71,8 @@ public static class CompleteRedeem
 
             user = existing;
             user.UiLanguage ??= request.UiLanguage;
-            EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
+            RedeemableLinks.EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
+            await RedeemableLinks.RecoverAsync(user, userManager);
         }
         else
         {
@@ -81,8 +83,8 @@ public static class CompleteRedeem
 
             user = User.Create(userId, attestation.UserEntity.DisplayName, UserRole.User);
             user.UiLanguage = request.UiLanguage;
-            EnsureSucceeded(await userManager.CreateAsync(user));
-            EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
+            RedeemableLinks.EnsureSucceeded(await userManager.CreateAsync(user));
+            RedeemableLinks.EnsureSucceeded(await userManager.AddOrUpdatePasskeyAsync(user, attestation.Passkey));
             if (!await household.LinkMemberToUserAsync(redeemable.Link.MemberId!.Value, user.Id, transaction.GetDbTransaction(), cancellationToken))
             {
                 return RedeemableLinks.Gone(PasskeyLinkState.Revoked);
@@ -94,24 +96,11 @@ public static class CompleteRedeem
         await db.RecordPasskeyUseAsync(attestation.Passkey.CredentialId, now, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
-        await signInManager.SignInAsync(user, isPersistent: true);
-        httpContext.User = await signInManager.CreateUserPrincipalAsync(user);
-        ApiAntiforgery.IssueRequestToken(httpContext);
-
-        return TypedResults.Ok(CurrentUserResponse.From(user));
+        return await NewSession.StartAsync(user, httpContext, signInManager, db, cancellationToken);
     }
 
     private static ProblemHttpResult AttestationFailed(string detail) =>
         TypedResults.Problem(title: "Passkey creation failed.", detail: detail, statusCode: StatusCodes.Status400BadRequest);
-
-    private static void EnsureSucceeded(IdentityResult result)
-    {
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException(
-                $"Redeeming the link failed: {string.Join("; ", result.Errors.Select(e => e.Description))}");
-        }
-    }
 }
 
 /// <summary>The new passkey, and the UI language of the redeem screen, kept as the user's UI language unless they have one.</summary>

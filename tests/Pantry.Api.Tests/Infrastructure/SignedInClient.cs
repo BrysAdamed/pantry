@@ -27,4 +27,15 @@ public static class SignedInClient
         Assert.Equal(HttpStatusCode.OK, complete.StatusCode);
         return client;
     }
+
+    /// <summary>Runs the first run with a username and password instead of a passkey and returns the client signed in as the admin.</summary>
+    public static async Task<HttpClient> CreateAdminWithPasswordAsync(
+        this PantryApiFactory factory, string userName, string password, string displayName = "Admin example")
+    {
+        var client = factory.CreateBrowserClient();
+        await client.GetAsync("/api/setup");
+        var complete = await client.PostAsJsonAsync("/api/setup/complete-with-password", new { displayName, userName, password });
+        Assert.Equal(HttpStatusCode.OK, complete.StatusCode);
+        return client;
+    }
 }

@@ -1,8 +1,10 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Identity.Domain;
+using Pantry.Api.Modules.Identity.Features.Me;
 using Pantry.Api.Modules.Identity.Persistence;
 
 namespace Pantry.Api.Modules.Identity.Features.Redeem;
@@ -46,6 +48,30 @@ internal static class RedeemableLinks
 
         var user = await db.Users.SingleAsync(u => u.Id == link.UserId, cancellationToken);
         return (new RedeemableLink(link, user.DisplayName, invitedBy, user), null);
+    }
+
+    /// <summary>
+    /// What a recovery link does besides the new passkey or password: ends the user's sessions on every other device,
+    /// which may be the lost one, and lifts a password lockout.
+    /// </summary>
+    public static async Task RecoverAsync(User user, UserManager<User> userManager)
+    {
+        EnsureSucceeded(await userManager.ResetAccessFailedCountAsync(user));
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            EnsureSucceeded(await userManager.SetLockoutEndDateAsync(user, null));
+        }
+
+        await OtherSessions.RevokeAsync(user, userManager);
+    }
+
+    public static void EnsureSucceeded(IdentityResult result)
+    {
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Redeeming the link failed: {string.Join("; ", result.Errors.Select(e => e.Description))}");
+        }
     }
 
     public static ProblemHttpResult Gone(PasskeyLinkState state) => TypedResults.Problem(

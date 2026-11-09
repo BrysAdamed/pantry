@@ -9,7 +9,7 @@ namespace Pantry.Api.Modules.Identity.Features.Passkeys;
 
 /// <summary>
 /// Removes one of the signed-in user's passkeys, for example of a lost phone, and ends their sessions on other devices,
-/// because a session does not know which passkey started it. The last passkey cannot be removed.
+/// because a session does not know which passkey started it. The last passkey of a user without a password cannot be removed.
 /// </summary>
 public static class RemovePasskey
 {
@@ -50,12 +50,9 @@ public static class RemovePasskey
                 return TypedResults.NotFound();
             }
 
-            if (passkeys.Count == 1)
+            if (passkeys.Count == 1 && !user.HasPassword)
             {
-                return TypedResults.Problem(
-                    title: "The last passkey cannot be removed.",
-                    detail: "Add another passkey first.",
-                    statusCode: StatusCodes.Status409Conflict);
+                return SignInMethods.LastOne("Add another passkey or set a password first.");
             }
 
             var result = await userManager.RemovePasskeyAsync(user, credentialId);
