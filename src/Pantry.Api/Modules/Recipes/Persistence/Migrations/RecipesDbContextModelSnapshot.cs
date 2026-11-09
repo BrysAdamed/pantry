@@ -108,6 +108,11 @@ namespace Pantry.Api.Modules.Recipes.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("prep_time_minutes");
 
+                    b.Property<string>("SearchKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("search_key");
+
                     b.Property<int>("Servings")
                         .HasColumnType("integer")
                         .HasColumnName("servings");

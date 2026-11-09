@@ -33,6 +33,20 @@ internal sealed class CatalogModuleContract(CatalogDbContext db, IOptions<Possib
         return ingredient is null ? null : ToContract(ingredient);
     }
 
+    public async Task<IReadOnlyList<Guid>> SearchIngredientIdsAsync(string search, CancellationToken cancellationToken = default)
+    {
+        var key = IngredientName.KeyOf(search);
+        if (key.Length == 0)
+        {
+            return [];
+        }
+
+        return await db.Ingredients.AsNoTracking()
+            .Where(i => i.Names.Any(n => n.Key.Contains(key)))
+            .Select(i => i.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<BaseQuantity?> ConvertToBaseUnitAsync(
         Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default) =>
         (await GetIngredientAsync(ingredientId, cancellationToken))?.ConvertToBaseUnit(quantity, unit);

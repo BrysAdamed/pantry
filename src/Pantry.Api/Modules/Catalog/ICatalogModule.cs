@@ -19,6 +19,12 @@ public interface ICatalogModule
     Task<CatalogIngredient?> FindIngredientAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// The ids of the ingredients with a name or an alias that contains <paramref name="search"/>, ignoring letter case,
+    /// diacritics and extra whitespace; empty for a blank search.
+    /// </summary>
+    Task<IReadOnlyList<Guid>> SearchIngredientIdsAsync(string search, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// The ingredient that has <paramref name="name"/> as its name or an alias (as <see cref="FindIngredientAsync"/>), or
     /// a new one created and committed right away: base unit guessed from <paramref name="unitUsed"/>, category
     /// <c>other</c>, needs review. Parallel calls with the same new name create one ingredient. Throws
