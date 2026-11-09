@@ -4,6 +4,7 @@ const destinations: { name: string; path: string | RegExp; heading?: string }[] 
   { name: 'Plan', path: '/planner', heading: 'Plan this week' },
   { name: 'Recipes', path: '/recipes', heading: 'Add your first recipe' },
   { name: 'Shopping', path: '/shopping', heading: 'Everything is in the cart' },
+  { name: 'Ingredients', path: '/ingredients' },
   { name: 'Household', path: /\/household(\/members)?$/ },
 ];
 
@@ -15,6 +16,7 @@ test.beforeEach(async ({ page }) => {
     Object.assign(me, route.request().postDataJSON());
     return route.fulfill({ status: 204 });
   });
+  await page.route(/\/api\/catalog\/ingredients/, (route) => route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 1 } }));
   await page.route('/api/household/members', (route) => route.fulfill({ json: { members: [], householdServing: 0 } }));
   await page.addInitScript(() => {
     if (!sessionStorage.getItem('e2e.seeded')) {
@@ -24,7 +26,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('opens the planner and navigates all four destinations', async ({ page }) => {
+test('opens the planner and navigates all five destinations', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL('/planner');
 

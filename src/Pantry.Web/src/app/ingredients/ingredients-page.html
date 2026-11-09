@@ -1,0 +1,155 @@
+<ng-container *transloco="let t">
+  <div class="md:grid md:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] md:items-start md:gap-7">
+    <section
+      class="content-start gap-3 md:sticky md:top-6 md:grid md:max-h-[calc(100dvh-4rem)] md:overflow-y-auto md:pr-1"
+      [class.grid]="!open()"
+      [class.hidden]="open()"
+      aria-labelledby="ingredients-title"
+      data-testid="ingredient-list"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <h2 id="ingredients-title" class="sr-only text-[28px] md:not-sr-only">{{ t('ingredients.title') }}</h2>
+        <a hlmBtn size="sm" class="ml-auto" [routerLink]="newPath">
+          <app-icon name="plus" class="size-4" />
+          {{ t('ingredients.new') }}
+        </a>
+      </div>
+
+      @if (screen.catalogEmpty()) {
+        <app-empty-state
+          class="md:hidden"
+          illustration="ingredients"
+          [heading]="t('ingredients.empty.title')"
+          [description]="t('ingredients.empty.description')"
+          [agentHint]="t('ingredients.empty.agentHint')"
+        >
+          <a hlmBtn [routerLink]="newPath">
+            <app-icon name="plus" class="size-4" />
+            {{ t('ingredients.empty.action') }}
+          </a>
+        </app-empty-state>
+      } @else {
+        <label class="flex h-tap items-center gap-2 rounded-control border-2 border-outline bg-card px-3.5 text-muted-foreground focus-within:ring-3 focus-within:ring-ring/50">
+          <app-icon name="search" class="size-5" />
+          <input
+            type="search"
+            class="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+            autocomplete="off"
+            [attr.aria-label]="t('ingredients.search')"
+            [placeholder]="t('ingredients.searchPlaceholder')"
+            [value]="screen.searchText()"
+            (input)="screen.searchText.set($any($event.target).value)"
+          />
+        </label>
+
+        <div class="flex flex-wrap items-center gap-1.5" role="group" [attr.aria-label]="t('ingredients.filters')">
+          <button
+            type="button"
+            class="inline-flex min-h-9 items-center gap-1.5 rounded-full border-2 border-border bg-card px-3 text-[13px] font-bold text-muted-foreground aria-pressed:border-outline aria-pressed:bg-accent aria-pressed:text-accent-foreground pointer-coarse:min-h-tap"
+            [attr.aria-pressed]="screen.needsReviewOnly()"
+            data-testid="filter-needs-review"
+            (click)="screen.needsReviewOnly.set(!screen.needsReviewOnly())"
+          >
+            <app-icon name="sparkle" class="size-3.5" />
+            {{ t('ingredients.filter.needsReview') }}
+            @if (screen.needsReviewCount() > 0) {
+              <span class="tabular-nums">{{ screen.needsReviewCount() }}</span>
+            }
+          </button>
+          <button
+            type="button"
+            class="inline-flex min-h-9 items-center gap-1.5 rounded-full border-2 border-border bg-card px-3 text-[13px] font-bold text-muted-foreground aria-pressed:border-outline aria-pressed:bg-accent aria-pressed:text-accent-foreground pointer-coarse:min-h-tap"
+            [attr.aria-pressed]="screen.staplesOnly()"
+            data-testid="filter-staples"
+            (click)="screen.staplesOnly.set(!screen.staplesOnly())"
+          >
+            {{ t('ingredients.filter.staples') }}
+          </button>
+          <select
+            class="min-h-9 max-w-full rounded-full border-2 px-2.5 text-[13px] font-bold pointer-coarse:min-h-tap"
+            [class]="screen.category() ? 'border-outline bg-accent text-accent-foreground' : 'border-border bg-card text-muted-foreground'"
+            [attr.aria-label]="t('ingredients.filter.category')"
+            data-testid="filter-category"
+            (change)="setCategory($any($event.target).value)"
+          >
+            <option value="" [selected]="!screen.category()">{{ t('ingredients.filter.allCategories') }}</option>
+            @for (category of categories; track category) {
+              <option [value]="category" [selected]="screen.category() === category">{{ t('catalog.category.' + category) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="flex min-h-6 items-center justify-between text-[13px] text-muted-foreground">
+          <span data-testid="ingredient-count" aria-live="polite">
+            @if (screen.items(); as items) {
+              @if (screen.filtered() && screen.total() !== null) {
+                {{ t('ingredients.countOf', { count: items.length, total: screen.total() }) }}
+              } @else {
+                {{ t('ingredients.count', { count: items.length }) }}
+              }
+            }
+          </span>
+          @if (screen.filtered()) {
+            <button hlmBtn variant="link" size="xs" type="button" (click)="screen.clearFilters()">{{ t('ingredients.clear') }}</button>
+          }
+        </div>
+
+        <app-tidy-up-card />
+
+        @if (screen.loadFailed()) {
+          <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+            <span class="flex-1">{{ t('ingredients.loadFailed') }}</span>
+            <button hlmBtn variant="outline" size="sm" type="button" (click)="screen.retry()">{{ t('ingredients.retry') }}</button>
+          </div>
+        } @else if (screen.items()) {
+          @for (group of screen.groups(); track group.category) {
+            <section class="grid gap-1" [attr.aria-labelledby]="'category-' + group.category" data-testid="ingredient-group">
+              <h3
+                class="sticky top-0 z-1 flex justify-between bg-background px-1 pt-2.5 pb-1 font-sans text-xs font-extrabold tracking-[0.08em] text-muted-foreground uppercase"
+                [id]="'category-' + group.category"
+              >
+                <span>{{ t('catalog.category.' + group.category) }}</span>
+                <span aria-hidden="true">{{ group.items.length }}</span>
+              </h3>
+              <ul class="grid gap-1">
+                @for (ingredient of group.items; track ingredient.id) {
+                  <li>
+                    <app-ingredient-row [ingredient]="ingredient" [search]="screen.search()" [current]="open() === ingredient.id"
+                      [duplicate]="screen.isPossibleDuplicate(ingredient.id)"
+                    />
+                  </li>
+                }
+              </ul>
+            </section>
+          } @empty {
+            @if (screen.needsReviewOnly() && !screen.search() && !screen.staplesOnly() && !screen.category()) {
+              <div class="grid justify-items-center gap-3 px-3 py-7 text-center text-sm text-muted-foreground" data-testid="review-done">
+                <app-icon name="check" class="size-6 text-success" />
+                <h3 class="text-[22px] text-foreground">{{ t('ingredients.reviewDone.title') }}</h3>
+                <p>{{ t('ingredients.reviewDone.text') }}</p>
+                <button hlmBtn variant="outline" size="sm" type="button" (click)="screen.needsReviewOnly.set(false)">{{ t('ingredients.tidy.showAll') }}</button>
+              </div>
+            } @else {
+              <div class="grid justify-items-center gap-3 px-3 py-7 text-center text-sm text-muted-foreground" data-testid="no-results">
+                @if (screen.search(); as query) {
+                  <p>{{ t('ingredients.noResults.search', { query }) }}</p>
+                  <a hlmBtn size="sm" [routerLink]="newPath" [queryParams]="{ name: query }">
+                    <app-icon name="plus" class="size-4" />
+                    {{ t('ingredients.noResults.add', { query }) }}
+                  </a>
+                } @else {
+                  <p>{{ t('ingredients.noResults.filters') }}</p>
+                }
+                <button hlmBtn variant="link" size="sm" type="button" (click)="screen.clearFilters()">{{ t('ingredients.clearFilters') }}</button>
+              </div>
+            }
+          }
+        }
+      }
+    </section>
+
+    <div class="min-w-0 md:block" [class.hidden]="!open()">
+      <router-outlet />
+    </div>
+  </div>
+</ng-container>

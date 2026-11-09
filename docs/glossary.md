@@ -20,10 +20,20 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Leftover** | A plan entry that eats a dish cooked in an earlier entry. Adds nothing to the shopping list. |
 | **Tray** | The planner side panel (*Szuflada dań*) with favourite, recent and searched recipes to place in the plan. A bottom sheet on phones. |
 | **Recipe** | A dish with ingredient lines (quantity per one serving), steps, tags and optional nutrition. |
-| **Ingredient** | A canonical catalog item (e.g. *onion*), with a base unit and optional conversions. |
+| **Ingredient** | A canonical catalog item (*Składnik*, e.g. *onion*): one name in the content language, aliases, a base unit, a category, a staple flag and optional unit conversions. Names and aliases are unique across the catalog regardless of letter case and diacritics. |
+| **Catalog** | All ingredients of the household (*Katalog składników*). Other modules keep only ingredient ids. |
+| **Alias** | Another name an ingredient is found by (*Alias*, e.g. *cebulka* for *cebula*). Used instead of translations: an ingredient has no per-language names. |
+| **Category** | The group an ingredient belongs to on a shopping list (*Kategoria*): one of a fixed, built-in set in a fixed order (vegetables and fruit, dairy and eggs, meat and fish, bakery, dry and canned, spices, frozen, drinks, other). Default *other*. |
+| **Unit** | A unit a quantity is written in (*Jednostka*), from a fixed vocabulary: `g`, `kg`, `ml`, `l`, `piece`, `clove`, `tbsp`, `tsp`, `pinch`, `can`, `jar`, `pack`, `slice`, `bunch`, `handful`, `glass`. |
+| **Quantity** | An amount in a unit (*Ilość*, e.g. *300 g*). A total that cannot be added up into one unit has several parts, shown as *3 szt. + 300 g*. |
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
-| **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Quantities without a conversion are not summed into the base unit. |
+| **Generic conversion** | A conversion that holds for every ingredient: `kg` to `g`, `l` to `ml`, `tbsp` = 15 ml, `tsp` = 5 ml. |
+| **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Takes precedence over a generic conversion. One per unit; written in the base unit, so changing the base unit removes them. Quantities without a conversion are not summed into the base unit. |
+| **Ingredient total** | What the quantity calculator gives for one ingredient: the sum in its base unit plus the amounts that could not be converted, summed per unit (*3 piece + 300 g*), with its category and staple flag. No rounding; pack sizes are the agent's job. An ingredient used only *to taste* has a total with no amount. |
+| **Needs review** | Flag on an ingredient created automatically from an unknown name (*Do sprawdzenia*). Cleared when a person or an agent confirms it, or when another ingredient is merged into it. |
+| **Merge** | Turning two ingredients into one (*Scal*): the source's names become aliases of the target, every module moves its references to the target, and the source is deleted. The target keeps its base unit, category and staple flag and is confirmed. The **merge preview** shows what will move before anything changes. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |
+| **Possible duplicate** | Two ingredients with similar names or aliases that may mean the same thing (*Możliwy duplikat*). People either merge them or mark them *not duplicates*, and a dismissed pair is not suggested again. Found by how many three-letter sequences the names share (*similarity*, 0 to 1), ignoring case and diacritics. |
 | **Dislike** | A household-wide ingredient preference: *never* (allergy, hard no) or *avoid*. |
 | **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |
 | **Rating** | Household feedback on a recipe after it was eaten, plus a *make again* flag. |

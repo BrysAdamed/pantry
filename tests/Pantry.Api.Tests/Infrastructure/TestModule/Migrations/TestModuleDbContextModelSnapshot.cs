@@ -23,6 +23,26 @@ namespace Pantry.Api.Tests.Infrastructure.TestModule.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Pantry.Api.Tests.Infrastructure.TestModule.TestIngredientReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("IngredientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ingredient_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ingredient_references");
+
+                    b.HasIndex("IngredientId")
+                        .HasDatabaseName("ix_ingredient_references_ingredient_id");
+
+                    b.ToTable("ingredient_references", "test_module");
+                });
+
             modelBuilder.Entity("Pantry.Api.Tests.Infrastructure.TestModule.TestItem", b =>
                 {
                     b.Property<Guid>("Id")

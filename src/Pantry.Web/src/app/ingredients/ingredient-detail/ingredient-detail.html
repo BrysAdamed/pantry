@@ -1,0 +1,451 @@
+<ng-container *transloco="let t">
+  <a
+    routerLink="/ingredients"
+    class="inline-flex min-h-tap items-center gap-1.5 justify-self-start rounded-control pr-3 font-bold text-muted-foreground hover:text-foreground md:hidden"
+    data-testid="ingredient-back"
+  >
+    <app-icon name="chevronLeft" class="size-5" />
+    {{ t('ingredients.back') }}
+  </a>
+
+  @if (draft(); as d) {
+    <header class="grid gap-2">
+      <div class="flex items-start justify-between gap-4">
+        <h2 class="text-[26px] leading-tight [overflow-wrap:anywhere] md:text-[34px]" data-testid="ingredient-title">
+          {{ isNew() ? t('ingredients.detail.newTitle') : saved()?.name }}
+        </h2>
+        @if (saved()) {
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            type="button"
+            class="mt-1 shrink-0"
+            data-testid="merge-with"
+            [attr.aria-label]="t('ingredients.merge.withLabel')"
+            (click)="mergeWith()"
+          >
+            <app-icon name="merge" class="size-4" />
+            <span>{{ t('ingredients.merge.with') }}</span>
+          </button>
+        }
+      </div>
+      @if (saved(); as s) {
+        <p class="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 text-sm text-muted-foreground">
+          <span>{{ t('catalog.category.' + s.category) }}</span>
+          <span>· {{ t('ingredients.detail.baseUnitFact', { unit: unitLabel(s.baseUnit) }) }}</span>
+          @if (s.isStaple) {
+            <span class="inline-flex items-center rounded-full border-[1.5px] border-border bg-secondary px-1.75 py-0.5 text-[11px] font-extrabold text-foreground">
+              {{ t('ingredients.badge.staple') }}
+            </span>
+          }
+          @if (s.needsReview) {
+            <span
+              class="inline-flex items-center rounded-full border-[1.5px] border-current bg-ingredient-review-surface px-1.75 py-0.5 text-[11px] font-extrabold text-ingredient-review"
+            >
+              {{ t('ingredients.badge.needsReview') }}
+            </span>
+          }
+        </p>
+      }
+    </header>
+
+    @if (saved()?.needsReview) {
+      <section
+        class="grid grid-cols-[26px_minmax(0,1fr)] gap-x-2.5 gap-y-1 rounded-control border-2 border-current bg-ingredient-review-surface px-3.5 py-3 text-sm text-ingredient-review"
+        aria-labelledby="review-title"
+        data-testid="review-banner"
+      >
+        <app-icon name="sparkle" class="mt-0.5 size-5" />
+        <div class="grid gap-0.5 text-foreground">
+          <h3 id="review-title" class="font-sans text-sm font-extrabold">{{ t('ingredients.detail.review.title') }}</h3>
+          <p>{{ t('ingredients.detail.review.text') }}</p>
+        </div>
+        <div class="col-start-2 mt-2 flex flex-wrap gap-2">
+          <button hlmBtn size="sm" type="button" [disabled]="saving() || (dirty() && !canSave())" (click)="confirm(false)">
+            <app-icon name="check" class="size-4" />
+            {{ dirty() ? t('ingredients.detail.review.saveAndConfirm') : t('ingredients.detail.review.confirm') }}
+          </button>
+          @if (canConfirmAndNext()) {
+            <button hlmBtn variant="outline" size="sm" type="button" [disabled]="saving() || (dirty() && !canSave())" (click)="confirm(true)">
+              {{ t('ingredients.detail.review.confirmAndNext') }}
+              <app-icon name="chevronRight" class="size-4" />
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @for (other of duplicates(); track other.id) {
+      <section
+        class="grid grid-cols-[26px_minmax(0,1fr)] gap-x-2.5 gap-y-1 rounded-control border-2 border-current bg-ingredient-duplicate-surface px-3.5 py-3 text-sm text-ingredient-duplicate"
+        [attr.aria-label]="t('ingredients.duplicates.bannerTitle', { name: other.name })"
+        data-testid="duplicate-banner"
+      >
+        <app-icon name="twins" class="mt-0.5 size-5" />
+        <div class="grid gap-0.5 text-foreground">
+          <h3 class="font-sans text-sm font-extrabold">{{ t('ingredients.duplicates.bannerTitle', { name: other.name }) }}</h3>
+          <p>{{ t('ingredients.duplicates.bannerText') }}</p>
+        </div>
+        <div class="col-start-2 mt-2 flex flex-wrap gap-2">
+          <button hlmBtn variant="outline" size="sm" type="button" (click)="mergeWith(other)">
+            <app-icon name="merge" class="size-4" />
+            {{ t('ingredients.merge.pair') }}
+          </button>
+          <button hlmBtn variant="ghost" size="sm" type="button" (click)="notDuplicates(other)">{{ t('ingredients.duplicates.notDuplicates') }}</button>
+        </div>
+      </section>
+    }
+
+    @if (saveError(); as error) {
+      <p class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert" data-testid="save-error">
+        <app-icon name="alert" class="size-4 text-danger" />
+        {{
+          error === 'invalid'
+            ? t('ingredients.detail.invalid')
+            : error === 'deleteFailed'
+              ? t('ingredients.dialog.delete.failed')
+              : t('ingredients.detail.saveFailed')
+        }}
+      </p>
+    }
+
+    <div class="grid gap-4.5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] xl:items-start">
+      <form
+        id="ingredient-form"
+        class="grid min-w-0 gap-3.5 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card"
+        novalidate
+        (submit)="$event.preventDefault(); onSave()"
+      >
+        <label class="grid gap-1.5">
+          <span class="text-[13px] font-bold">{{ t('ingredients.detail.name') }}</span>
+          <input
+            class="min-h-tap w-full rounded-control border-2 border-outline bg-card px-3 py-2 font-display text-[22px] font-extrabold aria-invalid:border-danger"
+            autocomplete="off"
+            data-testid="ingredient-name-input"
+            [maxLength]="nameMaxLength"
+            [placeholder]="t('ingredients.detail.namePlaceholder')"
+            [value]="d.name"
+            [attr.aria-invalid]="!!nameConflict() || null"
+            [attr.aria-describedby]="nameConflict() ? 'name-error' : null"
+            (input)="update({ name: $any($event.target).value })"
+          />
+        </label>
+        @if (nameConflict(); as conflict) {
+          <p id="name-error" class="flex flex-wrap items-center gap-1 text-xs font-bold text-danger" data-testid="name-error">
+            <app-icon name="alert" class="size-3.5" />
+            <span>{{ t('ingredients.detail.nameTaken', { name: conflict.ingredientName }) }}</span>
+            @if (saved()) {
+              <button hlmBtn variant="link" size="xs" type="button" data-testid="merge-with-clash" (click)="mergeWithClash(conflict.ingredientId)">
+                {{ t('ingredients.merge.withIt') }}
+              </button>
+            }
+          </p>
+        }
+
+        <div class="grid gap-1.5">
+          <span id="aliases-label" class="text-[13px] font-bold">{{ t('ingredients.detail.aliases') }}</span>
+          <div
+            class="flex min-h-tap flex-wrap items-center gap-1.5 rounded-control border-2 border-outline bg-card p-1.5 focus-within:ring-3 focus-within:ring-ring/50"
+            role="group"
+            aria-labelledby="aliases-label"
+            data-testid="aliases"
+            [class.border-danger]="aliasError() || aliasConflicts().length"
+          >
+            @for (alias of d.aliases; track $index) {
+              <span class="inline-flex items-center gap-0.5 rounded-full border-[1.5px] border-outline bg-secondary py-1 pr-1.5 pl-2.5 text-[13px] font-extrabold" data-testid="alias">
+                {{ alias }}
+                <button
+                  type="button"
+                  class="grid size-5.5 place-items-center rounded-full hover:bg-card pointer-coarse:size-7"
+                  [attr.aria-label]="t('ingredients.detail.removeAlias', { alias })"
+                  (click)="removeAlias($index)"
+                >
+                  <app-icon name="close" class="size-3.5" />
+                </button>
+              </span>
+            }
+            <input
+              class="min-w-30 flex-1 bg-transparent p-1 outline-none placeholder:text-muted-foreground"
+              autocomplete="off"
+              data-testid="alias-input"
+              aria-describedby="aliases-hint"
+              [maxLength]="nameMaxLength"
+              [attr.aria-label]="t('ingredients.detail.aliasInput')"
+              [placeholder]="t('ingredients.detail.aliasPlaceholder')"
+              [value]="aliasText()"
+              (input)="aliasText.set($any($event.target).value); aliasError.set(null)"
+              (keydown)="onAliasKeydown($event)"
+              (blur)="addAlias()"
+            />
+          </div>
+          <div id="aliases-hint" class="grid gap-1">
+            @if (aliasError(); as problem) {
+              <p class="flex items-center gap-1 text-xs font-bold text-danger" data-testid="alias-error">
+                <app-icon name="alert" class="size-3.5" />
+                {{ problem === 'tooMany' ? t('ingredients.detail.aliasTooMany', { max: maxAliases }) : t('ingredients.detail.aliasRepeated') }}
+              </p>
+            }
+            @for (conflict of aliasConflicts(); track conflict.name) {
+              <p class="flex items-center gap-1 text-xs font-bold text-danger" data-testid="alias-error">
+                <app-icon name="alert" class="size-3.5" />
+                {{ t('ingredients.detail.aliasTaken', { alias: conflict.name, name: conflict.ingredientName }) }}
+              </p>
+            }
+            @if (!aliasError() && !aliasConflicts().length) {
+              <p class="text-xs text-muted-foreground">{{ t('ingredients.detail.aliasesHint') }}</p>
+            }
+          </div>
+        </div>
+
+        <label class="grid gap-1.5">
+          <span class="text-[13px] font-bold">{{ t('ingredients.detail.category') }}</span>
+          <select
+            class="min-h-tap w-full rounded-control border-2 border-outline bg-card px-3"
+            data-testid="category-select"
+            (change)="update({ category: $any($event.target).value })"
+          >
+            @for (category of categories; track category) {
+              <option [value]="category" [selected]="d.category === category">{{ t('catalog.category.' + category) }}</option>
+            }
+          </select>
+          <span class="text-xs text-muted-foreground">{{ t('ingredients.detail.categoryHint') }}</span>
+        </label>
+
+        <div class="grid gap-1.5">
+          <span id="base-unit-label" class="text-[13px] font-bold">{{ t('ingredients.detail.baseUnit') }}</span>
+          <div #baseUnitGroup class="grid grid-cols-3 gap-1.5" role="radiogroup" aria-labelledby="base-unit-label" data-testid="base-unit">
+            @for (unit of baseUnits; track unit) {
+              <button
+                type="button"
+                role="radio"
+                class="grid min-h-13 content-center justify-items-center rounded-control border-2 border-border bg-card leading-tight aria-checked:border-outline aria-checked:bg-secondary aria-checked:shadow-control"
+                [attr.aria-checked]="d.baseUnit === unit"
+                [attr.tabindex]="d.baseUnit === unit ? 0 : -1"
+                (click)="chooseBaseUnit(unit)"
+                (keydown)="onBaseUnitKeydown($event, unit)"
+              >
+                <b class="font-display text-lg">{{ unitLabel(unit) }}</b>
+                <span class="text-[11px] text-muted-foreground">{{ t('ingredients.detail.baseUnitKind.' + unit) }}</span>
+              </button>
+            }
+          </div>
+          <span class="text-xs text-muted-foreground">{{ t('ingredients.detail.baseUnitHint') }}</span>
+        </div>
+
+        <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5">
+          <span class="grid">
+            <b class="text-sm">{{ t('ingredients.detail.staple') }}</b>
+            <span class="text-xs text-muted-foreground">{{ t('ingredients.detail.stapleHint') }}</span>
+          </span>
+          <app-switch [checked]="d.isStaple" [label]="t('ingredients.detail.staple')" (toggled)="update({ isStaple: $event })" />
+        </div>
+      </form>
+
+      <div class="grid min-w-0 gap-4.5">
+        <section
+          class="grid min-w-0 gap-3.5 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card"
+          aria-labelledby="conversions-title"
+          data-testid="conversions"
+        >
+          <h3 id="conversions-title" class="text-xl">{{ t('ingredients.detail.conversions.title') }}</h3>
+          @if (conversionLines().length) {
+            <ul class="grid gap-1.5">
+              @for (line of conversionLines(); track line.unit) {
+                <li
+                  class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-control bg-secondary py-1.5 pr-1 pl-3 font-bold tabular-nums"
+                  data-testid="conversion"
+                >
+                  <span>{{ line.text }}</span>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [attr.aria-label]="t('ingredients.detail.conversions.remove', { unit: unitLabel(line.unit) })"
+                    (click)="removeConversion(line.unit)"
+                  >
+                    <app-icon name="close" class="size-4" />
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="text-xs text-muted-foreground">{{ t('ingredients.detail.conversions.none', { base: unitLabel(d.baseUnit) }) }}</p>
+          }
+
+          <div class="grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(4.5rem,6rem)_auto] items-center gap-1.5">
+            <span aria-hidden="true">1</span>
+            <select
+              class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-2"
+              data-testid="conversion-unit"
+              [attr.aria-label]="t('ingredients.detail.conversions.unit')"
+              [attr.aria-invalid]="conversionError() === 'pickUnit' || null"
+              (change)="conversionUnit.set($any($event.target).value); conversionError.set(null)"
+            >
+              <option value="" [selected]="!conversionUnit()">{{ t('ingredients.detail.conversions.unitPlaceholder') }}</option>
+              @for (unit of availableConversionUnits(); track unit) {
+                <option [value]="unit" [selected]="conversionUnit() === unit">{{ unitLabel(unit) }}</option>
+              }
+            </select>
+            <span class="font-extrabold text-muted-foreground" aria-hidden="true">=</span>
+            <input
+              class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-2.5 aria-invalid:border-danger"
+              inputmode="decimal"
+              autocomplete="off"
+              placeholder="0"
+              data-testid="conversion-amount"
+              [attr.aria-label]="t('ingredients.detail.conversions.amount', { base: unitLabel(d.baseUnit) })"
+              [attr.aria-invalid]="(conversionError() && conversionError() !== 'pickUnit') || null"
+              [value]="conversionAmount()"
+              (input)="conversionAmount.set($any($event.target).value); conversionError.set(null)"
+              (keydown.enter)="$event.preventDefault(); addConversion()"
+            />
+            <span class="font-extrabold" aria-hidden="true">{{ unitLabel(d.baseUnit) }}</span>
+            <button hlmBtn variant="outline" size="sm" type="button" class="col-span-full justify-self-end" (click)="addConversion()">
+              <app-icon name="plus" class="size-4" />
+              {{ t('ingredients.detail.conversions.add') }}
+            </button>
+          </div>
+          @if (conversionError(); as error) {
+            <p class="flex items-center gap-1 text-xs font-bold text-danger" role="alert" data-testid="conversion-error">
+              <app-icon name="alert" class="size-3.5" />
+              {{
+                error === 'pickUnit'
+                  ? t('ingredients.detail.conversions.pickUnit')
+                  : error === 'notPositive'
+                    ? t('ingredients.detail.conversions.amountPositive')
+                    : t('ingredients.detail.conversions.amountInvalid')
+              }}
+            </p>
+          }
+          <p class="border-t border-dashed border-border pt-2.5 text-xs text-muted-foreground">
+            {{ builtIn() ? t('ingredients.detail.conversions.builtIn', { list: builtIn() }) : t('ingredients.detail.conversions.builtInNone') }}
+          </p>
+        </section>
+
+        @if (!isNew()) {
+          <section
+            class="grid min-w-0 gap-3.5 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card"
+            aria-labelledby="usage-title"
+            data-testid="usage"
+          >
+            <h3 id="usage-title" class="text-xl">{{ t('ingredients.detail.usage.title') }}</h3>
+            @if (usedIn(); as used) {
+              @if (used.length) {
+                <ul class="grid">
+                  @for (reference of used; track reference.module) {
+                    <li class="flex justify-between gap-2.5 border-t border-border px-0.5 py-2 text-sm first:border-t-0">
+                      <span>{{ knownModules.includes(reference.module) ? t('ingredients.detail.usage.module.' + reference.module) : reference.module }}</span>
+                      <b class="tabular-nums">{{ reference.count }}</b>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="text-xs text-muted-foreground">{{ t('ingredients.detail.usage.unused') }}</p>
+              }
+            } @else if (references.error()) {
+              <p class="text-xs text-muted-foreground">{{ t('ingredients.detail.usage.loadFailed') }}</p>
+            }
+          </section>
+        }
+      </div>
+    </div>
+
+    <div
+      class="bottom-20 z-2 flex flex-wrap items-center justify-end gap-2.5 bg-linear-to-b from-transparent to-background to-30% pt-3.5 pb-4.5 md:bottom-0"
+      [class.sticky]="dirty() || isNew()"
+      data-testid="form-bar"
+    >
+      @if (dirty() && !isNew()) {
+        <span class="mr-auto hidden items-center gap-1.5 text-[13px] font-bold text-muted-foreground sm:inline-flex" data-testid="unsaved">
+          <span class="size-2 rounded-full border-[1.5px] border-outline bg-accent" aria-hidden="true"></span>
+          {{ t('ingredients.detail.unsaved') }}
+        </span>
+      }
+      @if (!isNew()) {
+        <button hlmBtn variant="destructive" type="button" class="border-transparent shadow-none" [class.mr-auto]="!dirty()" (click)="delete()">
+          <app-icon name="trash" class="size-4" />
+          {{ t('ingredients.detail.delete') }}
+        </button>
+      }
+      @if (dirty() || isNew()) {
+        <button hlmBtn variant="outline" type="button" (click)="cancel()">{{ t('ingredients.detail.cancel') }}</button>
+        <button hlmBtn type="submit" form="ingredient-form" [disabled]="!canSave()">
+          <app-icon name="check" class="size-4" />
+          {{ isNew() ? t('ingredients.detail.add') : t('ingredients.detail.save') }}
+        </button>
+      }
+    </div>
+  } @else if (gone()) {
+    <p class="rounded-control border-2 border-border bg-card px-3.5 py-3 text-sm" role="alert" data-testid="ingredient-gone">
+      {{ t('ingredients.detail.gone') }}
+    </p>
+  } @else if (ingredient.error()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('ingredients.detail.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="ingredient.reload()">{{ t('ingredients.retry') }}</button>
+    </div>
+  }
+
+  <ng-template #baseUnitDialog let-change let-dialog="dialogRef">
+    <app-dialog-frame [label]="t('ingredients.detail.baseUnit')">
+      <h3 class="text-[22px]">{{ t('ingredients.dialog.baseUnit.title', { unit: unitLabel(change.unit) }) }}</h3>
+      <p>{{ t('ingredients.dialog.baseUnit.text', { base: unitLabel(change.base), list: change.list }) }}</p>
+      <p class="text-xs text-muted-foreground">{{ t('ingredients.dialog.baseUnit.note') }}</p>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        <button hlmBtn variant="outline" type="button" (click)="dialog.close()">{{ t('ingredients.dialog.baseUnit.cancel') }}</button>
+        <button hlmBtn type="button" (click)="dialog.close(true)">{{ t('ingredients.dialog.baseUnit.confirm') }}</button>
+      </div>
+    </app-dialog-frame>
+  </ng-template>
+
+  <ng-template #deleteDialog let-name let-dialog="dialogRef">
+    <app-dialog-frame [label]="t('ingredients.detail.delete')">
+      <h3 class="text-[22px]">{{ t('ingredients.dialog.delete.title', { name }) }}</h3>
+      <p>{{ t('ingredients.dialog.delete.text') }}</p>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        <button hlmBtn variant="outline" type="button" (click)="dialog.close()">{{ t('ingredients.dialog.delete.cancel') }}</button>
+        <button hlmBtn type="button" class="bg-danger text-primary-foreground hover:bg-danger/90" (click)="dialog.close(true)">
+          <app-icon name="trash" class="size-4" />
+          {{ t('ingredients.dialog.delete.confirm') }}
+        </button>
+      </div>
+    </app-dialog-frame>
+  </ng-template>
+
+  <ng-template #inUseDialog let-name let-dialog="dialogRef">
+    <app-dialog-frame [label]="t('ingredients.detail.delete')">
+      <h3 class="text-[22px]">{{ t('ingredients.dialog.inUse.title', { name }) }}</h3>
+      <div
+        class="grid grid-cols-[26px_minmax(0,1fr)] gap-x-2.5 rounded-control border-2 border-current bg-danger-surface px-3.5 py-3 text-sm text-danger"
+        data-testid="in-use"
+      >
+        <app-icon name="ban" class="mt-0.5 size-5" />
+        <div class="grid gap-0.5 text-foreground">
+          <b class="font-extrabold">{{ t('ingredients.dialog.inUse.label') }}</b>
+          <span>{{ usageText(usedIn() ?? []) }}.</span>
+        </div>
+      </div>
+      <p>{{ t('ingredients.dialog.inUse.text') }}</p>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        <button hlmBtn variant="outline" type="button" (click)="dialog.close()">{{ t('ingredients.dialog.inUse.close') }}</button>
+        <button hlmBtn type="button" (click)="dialog.close(true)">
+          <app-icon name="merge" class="size-4" />
+          {{ t('ingredients.merge.with') }}
+        </button>
+      </div>
+    </app-dialog-frame>
+  </ng-template>
+
+  <ng-template #discardDialog let-name let-dialog="dialogRef">
+    <app-dialog-frame>
+      <h3 class="text-[22px]">{{ t('ingredients.dialog.discard.title') }}</h3>
+      <p>{{ name ? t('ingredients.dialog.discard.text', { name }) : t('ingredients.dialog.discard.textNew') }}</p>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        <button hlmBtn variant="outline" type="button" (click)="dialog.close(false)">{{ t('ingredients.dialog.discard.keep') }}</button>
+        <button hlmBtn variant="destructive" type="button" (click)="dialog.close(true)">{{ t('ingredients.dialog.discard.discard') }}</button>
+      </div>
+    </app-dialog-frame>
+  </ng-template>
+</ng-container>

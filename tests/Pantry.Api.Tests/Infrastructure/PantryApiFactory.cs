@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Pantry.Api.Infrastructure.Database;
+using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Tests.Infrastructure.TestModule;
 using Testcontainers.PostgreSql;
 
@@ -51,6 +52,16 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         await command.ExecuteNonQueryAsync();
     }
 
+    /// <summary>Empties the ingredient catalog.</summary>
+    public async Task DeleteAllIngredientsAsync()
+    {
+        _ = Services;
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("TRUNCATE catalog.ingredients, test_module.ingredient_references CASCADE;", connection);
+        await command.ExecuteNonQueryAsync();
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -58,7 +69,12 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting("Identity:Passkeys:RelyingPartyId", RelyingPartyId);
         builder.UseSetting("Identity:Passkeys:Origins:0", Origin);
         builder.UseSetting("Identity:Session:ValidationInterval", "00:00:00");
-        builder.ConfigureTestServices(services => services.AddModuleDbContext<TestModuleDbContext>(TestModuleDbContext.Schema));
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddModuleDbContext<TestModuleDbContext>(TestModuleDbContext.Schema);
+            services.AddSingleton<TestIngredientReferenceFailure>();
+            services.AddScoped<IIngredientReferenceHandler, TestIngredientReferenceHandler>();
+        });
     }
 }
 

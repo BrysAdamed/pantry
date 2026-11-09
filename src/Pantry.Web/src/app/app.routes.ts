@@ -14,6 +14,10 @@ export const routes: Routes = [
       { path: 'planner', loadChildren: () => import('./planner/planner.routes').then((m) => m.plannerRoutes) },
       { path: 'recipes', loadChildren: () => import('./recipes/recipes.routes').then((m) => m.recipesRoutes) },
       { path: 'shopping', loadChildren: () => import('./shopping/shopping.routes').then((m) => m.shoppingRoutes) },
+      {
+        path: 'ingredients',
+        loadChildren: () => import('./ingredients/ingredients.routes').then((m) => m.ingredientsRoutes),
+      },
       { path: 'household', loadChildren: () => import('./household/household.routes').then((m) => m.householdRoutes) },
     ],
   },

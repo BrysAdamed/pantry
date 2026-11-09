@@ -22,3 +22,7 @@ Short records of decisions that shape the project. Format: context, decision, co
 | [0016](0016-data-protection-keys.md) | Data Protection keys in Postgres, so sessions survive container recreation | Accepted |
 | [0017](0017-passkey-links-and-user-administration.md) | Invites and recovery links as hashed single-use passkey links; serialized user administration; sessions rechecked every minute | Accepted (amended by 0018) |
 | [0018](0018-password-sign-in.md) | Password sign-in with a username as an alternative to passkeys; lockout; the last sign-in method stays | Accepted |
+| [0019](0019-ingredient-catalog.md) | Ingredient catalog: fixed categories and units, aliases instead of translations, auto-created ingredients need review, merge through reference handlers | Accepted |
+| [0020](0020-merging-ingredients.md) | Merging ingredients: target wins, conversions copied only between equal base units, alias limit holds, one transaction with rows locked in id order | Accepted |
+| [0021](0021-icu-plural-labels.md) | ICU plural and select labels rendered by an in-app transpiler with `Intl.PluralRules` | Accepted |
+| [0022](0022-possible-duplicates.md) | Possible duplicates: `pg_trgm` similarity of name keys with a configurable threshold, not duplicates stored per pair and removed with either ingredient | Accepted |

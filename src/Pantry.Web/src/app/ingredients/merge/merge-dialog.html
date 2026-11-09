@@ -1,0 +1,186 @@
+<ng-container *transloco="let t">
+  @if (other()) {
+    <app-dialog-frame
+      [label]="withPicker ? t('ingredients.merge.label') + ' · ' + t('ingredients.merge.step', { step: 2 }) : t('ingredients.merge.label')"
+      data-testid="merge-dialog"
+    >
+      <h3 class="text-[22px]">{{ t('ingredients.merge.keepTitle') }}</h3>
+
+      <div
+        #keepGroup
+        class="grid grid-cols-1 gap-2.5 sm:grid-cols-2"
+        role="radiogroup"
+        [attr.aria-label]="t('ingredients.merge.keepTitle')"
+      >
+        @for (choice of choices(); track choice.id) {
+          <button
+            type="button"
+            role="radio"
+            class="grid content-start gap-1.5 rounded-control border-2 border-border bg-card p-3 text-left aria-checked:border-outline aria-checked:bg-secondary aria-checked:shadow-control sm:min-h-30"
+            data-testid="merge-keep"
+            [attr.aria-checked]="keepId() === choice.id"
+            [attr.tabindex]="keepId() === choice.id ? 0 : -1"
+            (click)="keep(choice.id)"
+            (keydown)="onKeepKeydown($event)"
+          >
+            <span class="flex items-center gap-2">
+              <span class="grid size-5.5 shrink-0 place-items-center rounded-full border-2 border-outline" aria-hidden="true">
+                @if (keepId() === choice.id) {
+                  <span class="size-2.5 rounded-full bg-primary"></span>
+                }
+              </span>
+              <b class="text-base [overflow-wrap:anywhere]">{{ choice.name }}</b>
+            </span>
+            <span class="flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <span>{{ t('catalog.category.' + choice.category) }}</span>
+              <span>{{ texts.unit(choice.baseUnit) }}</span>
+              @if (choice.isStaple) {
+                <span>{{ t('ingredients.badge.staple') }}</span>
+              }
+            </span>
+            <span class="text-xs text-muted-foreground">
+              {{
+                choice.aliases.length
+                  ? t('ingredients.merge.aliases', { list: choice.aliases.join(', ') })
+                  : t('ingredients.merge.noAliases')
+              }}
+            </span>
+            <span class="text-xs text-muted-foreground">
+              {{
+                choice.conversions.length ? texts.conversions(choice.conversions, choice.baseUnit) : t('ingredients.merge.noConversions')
+              }}
+            </span>
+            @if (usageOf(choice); as usage) {
+              <span class="text-xs text-muted-foreground">{{ usage }}</span>
+            } @else if (plan()) {
+              <span class="text-xs text-muted-foreground">{{ t('ingredients.merge.unused') }}</span>
+            }
+            @if (choice.needsReview) {
+              <span>
+                <span
+                  class="inline-flex items-center rounded-full border-[1.5px] border-current bg-ingredient-review-surface px-1.75 py-0.5 text-[11px] font-extrabold text-ingredient-review"
+                  >{{ t('ingredients.badge.needsReview') }}</span
+                >
+              </span>
+            }
+          </button>
+        }
+      </div>
+
+      <section
+        class="grid gap-2 rounded-control border-2 border-border px-3.5 py-3"
+        aria-labelledby="merge-preview-title"
+        data-testid="merge-preview"
+        aria-live="polite"
+      >
+        <h4 id="merge-preview-title" class="font-sans text-xs font-bold tracking-[0.08em] text-muted-foreground uppercase">
+          {{ t('ingredients.merge.previewTitle') }}
+        </h4>
+        @if (plan(); as p) {
+          @if (lines(); as l) {
+            <ul class="grid list-disc gap-1.5 pl-4.5 text-sm">
+              <li>
+                <span class="text-muted-foreground line-through">{{ l.gone }}</span>
+                {{ t('ingredients.merge.gone') }}
+                @if (p.aliasesToAdd.length) {
+                  {{ t('ingredients.merge.goneAliases', { keep: l.keep, list: l.aliases }) }}
+                }
+              </li>
+              @if (l.moves) {
+                <li>{{ t('ingredients.merge.moves', { keep: l.keep, usage: l.moves }) }}</li>
+              }
+              @if (p.conversionsToAdd.length) {
+                <li>{{ t('ingredients.merge.conversionsAdded', { list: l.added }) }}</li>
+              }
+              @if (p.conversionsSkipped.length) {
+                <li>
+                  {{
+                    p.sameBaseUnit
+                      ? t('ingredients.merge.conversionsSkippedOwn', {
+                          list: l.skipped,
+                          keep: l.keep,
+                        })
+                      : t('ingredients.merge.conversionsSkippedUnit', { list: l.skipped })
+                  }}
+                </li>
+              }
+              <li>
+                {{
+                  p.target.needsReview
+                    ? t('ingredients.merge.keptConfirmed', { keep: l.keep })
+                    : t('ingredients.merge.kept', { keep: l.keep })
+                }}
+              </li>
+            </ul>
+            @if (!p.sameBaseUnit) {
+              <p class="flex items-start gap-2 text-[13px] font-bold text-warning" data-testid="merge-unit-warning">
+                <app-icon name="alert" class="mt-0.5 size-4" />
+                <span class="font-medium text-foreground">{{
+                  t('ingredients.merge.unitWarning', { keep: l.keepUnit, gone: l.goneUnit })
+                }}</span>
+              </p>
+            }
+            @if (p.exceedsAliasLimit) {
+              <p class="flex items-start gap-2 text-[13px] font-bold text-danger" role="alert" data-testid="merge-alias-limit">
+                <app-icon name="alert" class="mt-0.5 size-4" />
+                <span>{{
+                  t('ingredients.merge.tooManyAliases', {
+                    keep: l.keep,
+                    count: p.aliasCountAfter,
+                    max: maxAliases,
+                  })
+                }}</span>
+              </p>
+            }
+          }
+        } @else if (!error()) {
+          <p class="text-sm text-muted-foreground">{{ t('ingredients.merge.loading') }}</p>
+        }
+      </section>
+
+      @if (error(); as problem) {
+        <p
+          class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm"
+          role="alert"
+          data-testid="merge-error"
+        >
+          <app-icon name="alert" class="size-4 text-danger" />
+          {{ t('ingredients.merge.error.' + problem) }}
+        </p>
+      }
+
+      <p class="text-xs text-muted-foreground">{{ t('ingredients.merge.irreversible') }}</p>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        @if (withPicker) {
+          <button hlmBtn variant="ghost" type="button" class="mr-auto" (click)="back()">
+            {{ t('ingredients.merge.back') }}
+          </button>
+        }
+        <button hlmBtn variant="outline" type="button" (click)="cancel()">
+          {{ t('ingredients.merge.cancel') }}
+        </button>
+        <button hlmBtn type="button" [disabled]="!canMerge()" (click)="merge()">
+          <app-icon name="merge" class="size-4" />
+          {{ t('ingredients.merge.confirm') }}
+        </button>
+      </div>
+    </app-dialog-frame>
+  } @else {
+    <app-dialog-frame [label]="t('ingredients.merge.label') + ' · ' + t('ingredients.merge.step', { step: 1 })" data-testid="merge-dialog">
+      <div class="grid gap-1">
+        <h3 class="text-[22px]">
+          {{ t('ingredients.merge.pickTitle', { name: ingredient.name }) }}
+        </h3>
+        <p class="text-xs text-muted-foreground">{{ t('ingredients.merge.pickText') }}</p>
+      </div>
+      <div class="md:min-h-72">
+        <app-ingredient-picker [label]="t('ingredients.merge.pickLabel')" [allowNew]="false" [exclude]="excluded" (picked)="pick($event)" />
+      </div>
+      <div class="flex flex-wrap justify-end gap-2.5">
+        <button hlmBtn variant="outline" type="button" (click)="cancel()">
+          {{ t('ingredients.merge.cancel') }}
+        </button>
+      </div>
+    </app-dialog-frame>
+  }
+</ng-container>

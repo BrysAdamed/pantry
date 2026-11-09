@@ -22,7 +22,15 @@ export type IconName =
   | 'chevronDown'
   | 'signOut'
   | 'link'
-  | 'copy';
+  | 'copy'
+  | 'search'
+  | 'carrot'
+  | 'check'
+  | 'trash'
+  | 'sparkle'
+  | 'alert'
+  | 'merge'
+  | 'twins';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
 @Component({
@@ -120,6 +128,38 @@ export type IconName =
         @case ('copy') {
           <rect x="9" y="9" width="12" height="12" rx="2" />
           <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+        }
+        @case ('search') {
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-4-4" />
+        }
+        @case ('carrot') {
+          <path d="M14.5 9.5L4.6 19.4a1.4 1.4 0 0 1-2-2l9.9-9.9" />
+          <path d="M12.5 7.5a3 3 0 0 1 4 4" />
+          <path d="M16 8l5-5M15 5l1.5-3M19 9l3-1.5" />
+          <path d="M8 13l2 2M6 16l1.5 1.5" />
+        }
+        @case ('check') {
+          <path d="M5 12.5l4.5 4.5L19 7" />
+        }
+        @case ('trash') {
+          <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+        }
+        @case ('sparkle') {
+          <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
+        }
+        @case ('alert') {
+          <path d="M12 3l10 18H2z" />
+          <path d="M12 10v4M12 17.5v.5" />
+        }
+        @case ('merge') {
+          <path d="M7 3v4a5 5 0 0 0 5 5 5 5 0 0 1 5 5v4" />
+          <path d="M17 3v4a5 5 0 0 1-5 5" />
+          <path d="M4 18l3 3 3-3" />
+        }
+        @case ('twins') {
+          <circle cx="8" cy="12" r="4" />
+          <circle cx="16" cy="12" r="4" />
         }
       }
     </svg>
