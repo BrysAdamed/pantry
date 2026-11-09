@@ -7,8 +7,8 @@ using Pantry.Api.Modules.Recipes.Persistence;
 namespace Pantry.Api.Modules.Recipes;
 
 /// <summary>
-/// Recipe ingredient lines as references to catalog ingredients (ADR 0020), archived recipes included. On a merge the
-/// source's lines point at the target; a recipe with lines for both keeps both lines.
+/// Recipe ingredient lines as references to catalog ingredients (ADR 0019); the count is of recipes using the ingredient,
+/// archived ones included. On a merge the source's lines point at the target; a recipe with lines for both keeps both.
 /// </summary>
 internal sealed class RecipeIngredientReferences(RecipesDbContext db, DbContextOptions<RecipesDbContext> options)
     : IIngredientReferenceHandler
@@ -18,7 +18,7 @@ internal sealed class RecipeIngredientReferences(RecipesDbContext db, DbContextO
     public string Module => ModuleName;
 
     public Task<int> CountReferencesAsync(Guid ingredientId, CancellationToken cancellationToken = default) =>
-        db.Recipes.SelectMany(r => r.Lines).CountAsync(l => l.IngredientId == ingredientId, cancellationToken);
+        db.Recipes.CountAsync(r => r.Lines.Any(l => l.IngredientId == ingredientId), cancellationToken);
 
     public async Task MoveReferencesAsync(Guid sourceId, Guid targetId, DbTransaction transaction, CancellationToken cancellationToken = default)
     {

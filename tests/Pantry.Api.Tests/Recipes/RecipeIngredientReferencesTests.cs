@@ -26,7 +26,7 @@ public sealed class RecipeIngredientReferencesTests(PantryApiFactory factory) : 
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task An_ingredient_used_in_recipes_cannot_be_deleted_and_lines_are_counted()
+    public async Task An_ingredient_used_in_recipes_cannot_be_deleted_and_recipes_are_counted_once()
     {
         // Arrange
         var flour = await factory.SeedIngredientAsync("Flour", [], Unit.G);
@@ -42,7 +42,7 @@ public sealed class RecipeIngredientReferencesTests(PantryApiFactory factory) : 
         var problem = await response.Content.ReadFromJsonAsync<JsonElement>();
         var references = Assert.Single(problem.GetProperty("references").EnumerateArray());
         Assert.Equal("recipes", references.GetProperty("module").GetString());
-        Assert.Equal(3, references.GetProperty("count").GetInt32());
+        Assert.Equal(2, references.GetProperty("count").GetInt32());
     }
 
     [Fact]
