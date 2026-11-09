@@ -154,8 +154,8 @@ svg.i.sm { width: 14px; height: 14px; }
 .entry.proposed { background: var(--proposed-bg); border: var(--bw) dashed var(--proposed); box-shadow: none; }
 .entry.proposed .tag { color: var(--proposed); }
 .entry .acts { display: flex; gap: 4px; }
-.entry .acts button { width: 30px; height: 30px; border-radius: var(--radius-box); border: var(--bw) solid var(--proposed); background: var(--surface); display: grid; place-items: center; color: var(--proposed); }
-.entry .acts button.yes { background: var(--proposed); color: var(--surface); }
+.entry .acts > * { width: 30px; height: 30px; border-radius: var(--radius-box); border: var(--bw) solid var(--proposed); background: var(--surface); display: grid; place-items: center; color: var(--proposed); }
+.entry .acts > .yes { background: var(--proposed); color: var(--surface); }
 .entry.eaten { background: transparent; box-shadow: none; border-color: var(--line); }
 .entry.eaten .nm { color: var(--muted); }
 .entry.eaten .tag { color: var(--eaten); }
@@ -394,9 +394,11 @@ function entryHtml(e, d, s, live = true) {
   const time = e.t ? `<span>${icon('clock', 'sm')}${e.t}</span>` : '';
   const srv = e.srv ? `<span>${icon('users', 'sm')}${e.srv}</span>` : '';
   if (e.s === 'proposed') {
-    const a = live ? `data-d="${d}" data-s="${s}"` : 'tabindex="-1"';
+    const acts = live
+      ? `<button aria-label="Odrzuć" data-act="no" data-d="${d}" data-s="${s}">${icon('x', 'sm')}</button><button class="yes" aria-label="Akceptuj" data-act="yes" data-d="${d}" data-s="${s}">${icon('check', 'sm')}</button>`
+      : `<span>${icon('x', 'sm')}</span><span class="yes">${icon('check', 'sm')}</span>`;
     return `<div class="entry proposed"><span class="tag">${icon('spark', 'sm')}Propozycja</span><div class="nm">${e.n}</div>
-      <div class="meta">${time}<span class="acts" style="margin-left:auto"><button aria-label="Odrzuć" data-act="no" ${a}>${icon('x', 'sm')}</button><button class="yes" aria-label="Akceptuj" data-act="yes" ${a}>${icon('check', 'sm')}</button></span></div></div>`;
+      <div class="meta">${time}<span class="acts" style="margin-left:auto">${acts}</span></div></div>`;
   }
   if (e.s === 'eaten') return `<div class="entry eaten"><span class="tag">${icon('check', 'sm')}Zjedzone</span><div class="nm">${e.n}</div><div class="meta">${time}</div></div>`;
   if (e.s === 'leftover') return `<div class="entry leftover"><span class="tag">${icon('repeat', 'sm')}Resztki ${e.from}</span><div class="nm">${e.n}</div><div class="meta"><span>Nie trafia na listę zakupów</span></div></div>`;
