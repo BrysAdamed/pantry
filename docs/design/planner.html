@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planer posiłków</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* PAN-13 planner prototype. Tokens mirror src/Pantry.Web/src/styles.css (ADR 0013). */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff4e6, #1b141e);
+  --foreground: light-dark(#2a1b2d, #fbefe3);
+  --card: light-dark(#ffffff, #251c29);
+  --secondary: light-dark(#fde6cc, #322536);
+  --muted-foreground: light-dark(#6e5b70, #c2aec3);
+  --border: light-dark(#f0d9bf, #3d2e42);
+  --outline: light-dark(#2a1b2d, #7a6280);
+  --primary: light-dark(#6e2a5e, #e59cd0);
+  --primary-foreground: light-dark(#fff4e6, #1b141e);
+  --accent: #f4a259;
+  --accent-foreground: light-dark(#2a1b2d, #1b141e);
+  --agent: light-dark(#1c6964, #6fd0c6);
+  --agent-surface: light-dark(#ddf1ee, #173a37);
+  --success: light-dark(#28724a, #7dd3a0);
+  --warning: light-dark(#a8520f, #f4a259);
+  --danger: light-dark(#b8342a, #ff8a7a);
+  --danger-surface: light-dark(#fbe3df, #3d1c19);
+  --eaten: light-dark(#5c6c41, #b2c28e);
+  --leftover-surface: light-dark(#f3e9f5, #2e2333);
+  --page: light-dark(#f6efe6, #141113);
+
+  --radius-chip: 8px; --radius-control: 12px; --radius-card: 16px;
+  --shadow-control: 2px 2px 0 var(--outline);
+  --shadow-card: 3px 3px 0 var(--outline);
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.i.sm { width: 14px; height: 14px; }
+
+.wrap { max-width: 1340px; margin: 0 auto; padding: 20px 16px 64px; display: grid; gap: 28px; }
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.eyebrow, .label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 700; }
+.pagebar h1 { font-size: clamp(24px, 3vw, 32px); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.ctl { display: grid; gap: 4px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-control); background: var(--secondary); }
+.seg button { border: 0; background: none; padding: 7px 13px; min-height: 36px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow-control); outline: 2px solid var(--outline); outline-offset: -2px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); font-weight: 700; font-size: 14px; white-space: nowrap; transition: translate .08s, box-shadow .08s; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.btn.agent { background: var(--agent); color: var(--card); border-color: var(--outline); }
+.btn.ghost { border-color: transparent; box-shadow: none; background: none; }
+.btn.danger { color: var(--danger); }
+.btn.icon { width: 44px; padding: 0; }
+.btn:active { translate: 1px 1px; box-shadow: none; }
+
+.frame-label { margin-bottom: 10px; }
+.scroller { overflow-x: auto; border-radius: 20px; border: 2px solid var(--outline); box-shadow: var(--shadow-card); }
+
+/* Desktop */
+.desk { min-width: 1200px; display: grid; grid-template-columns: 84px minmax(0, 1fr) 264px; background: var(--background); min-height: 740px; }
+.side { background: var(--card); border-right: 2px solid var(--outline); padding: 18px 8px; align-items: center; display: flex; flex-direction: column; gap: 22px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 21px; }
+.brand .mark { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--accent); color: var(--accent-foreground); border-radius: 10px; }
+.nav { display: grid; gap: 4px; }
+.nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; min-height: 56px; width: 64px; font-size: 11px; border-radius: var(--radius-control); color: var(--muted-foreground); text-decoration: none; font-weight: 700; border: 2px solid transparent; }
+.nav a.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); }
+.sync { margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--muted-foreground); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); flex: none; }
+
+.main { padding: 22px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.mainhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.mainhead h2 { font-size: 30px; }
+.sub { color: var(--muted-foreground); font-size: 14px; margin-top: 4px; }
+.weeknav { display: flex; gap: 8px; align-items: center; }
+
+.agentbar { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 14px; border-radius: var(--radius-control); background: var(--agent-surface); border: 2px dashed var(--agent); }
+.agentbar > svg { color: var(--agent); }
+.agentbar .txt { flex: 1; font-size: 14px; }
+.agentbar b { color: var(--agent); }
+
+.weeksum { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 13px; color: var(--muted-foreground); padding: 2px 2px 0; }
+.weeksum strong { color: var(--foreground); font-variant-numeric: tabular-nums; }
+.weeksum .part { color: var(--warning); font-weight: 700; display: inline-flex; gap: 4px; align-items: center; }
+
+.grid { display: grid; grid-template-columns: 84px repeat(7, minmax(0, 1fr)); gap: 8px; }
+.dayhead { padding: 6px 8px 8px; display: grid; border-radius: var(--radius-chip); border: 2px solid transparent; }
+.dayhead .dn { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-foreground); font-weight: 700; }
+.dayhead .dd { font-family: var(--font-display); font-weight: 800; font-size: 24px; line-height: 1.1; }
+.dayhead.today { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); }
+.dayhead.today .dn { color: var(--accent-foreground); }
+.slotlabel { font-size: 13px; font-weight: 700; color: var(--muted-foreground); padding: 10px 4px 0 2px; }
+.cell { min-height: 108px; display: grid; border-radius: 10px; }
+.cell.over { outline: 3px solid var(--primary); outline-offset: 2px; }
+.kcal { font-size: 12px; color: var(--muted-foreground); padding: 4px 6px; font-variant-numeric: tabular-nums; display: flex; gap: 4px; align-items: center; }
+.kcal.part { color: var(--warning); }
+
+.entry { position: relative; text-align: left; border-radius: 10px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); min-width: 0; width: 100%; }
+.entry[draggable="true"] { cursor: grab; }
+.entry.dragging { opacity: .4; }
+.entry .nm { font-weight: 700; font-size: 14px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.entry .meta { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: var(--muted-foreground); align-items: center; margin-top: auto; }
+.entry .meta span { display: inline-flex; align-items: center; gap: 3px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; width: fit-content; }
+.srv { color: var(--primary); font-weight: 800; }
+.entry.proposed { background: var(--agent-surface); border-style: dashed; border-color: var(--agent); box-shadow: none; }
+.entry.proposed .tag { color: var(--agent); }
+.acts { display: flex; gap: 4px; margin-left: auto; }
+.acts button { width: 30px; height: 30px; border-radius: var(--radius-chip); border: 2px solid var(--agent); background: var(--card); color: var(--agent); display: grid; place-items: center; padding: 0; }
+.acts button.yes { background: var(--agent); color: var(--card); }
+.entry.eaten { background: transparent; box-shadow: none; border-color: var(--border); }
+.entry.eaten .nm { color: var(--muted-foreground); }
+.entry.eaten .tag { color: var(--eaten); }
+.entry.leftover { background: var(--leftover-surface); box-shadow: none; border-color: var(--border); }
+.entry.leftover .tag { color: var(--muted-foreground); }
+.entry.marker { background: transparent; border-style: dotted; border-color: var(--agent); box-shadow: none; color: var(--agent); align-items: center; justify-content: center; text-align: center; font-size: 13px; font-weight: 700; }
+.empty { border: 2px dashed var(--border); border-radius: 10px; display: grid; place-items: center; align-content: center; gap: 6px; color: var(--muted-foreground); font-size: 12px; padding: 6px; }
+.empty .ask { opacity: 0; transition: opacity .12s; border: 0; background: none; color: var(--agent); font-weight: 700; font-size: 12px; display: inline-flex; gap: 4px; align-items: center; padding: 6px; border-radius: var(--radius-chip); }
+.cell:hover .ask, .ask:focus-visible { opacity: 1; }
+
+.tray { background: var(--card); border-left: 2px solid var(--outline); padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; position: relative; }
+.tray h3 { font-size: 20px; }
+.search { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: var(--radius-control); border: 2px solid var(--outline); background: var(--background); color: var(--muted-foreground); }
+.search input { border: 0; background: none; font: inherit; color: var(--foreground); flex: 1; min-width: 0; outline: none; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs button { border: 2px solid transparent; background: none; padding: 6px 12px; min-height: 36px; font-size: 13px; font-weight: 700; color: var(--muted-foreground); border-radius: var(--radius-control); }
+.tabs button[aria-pressed="true"] { color: var(--accent-foreground); background: var(--accent); border-color: var(--outline); }
+.dishes { display: grid; gap: 10px; align-content: start; }
+.dish { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; padding: 10px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); text-align: left; width: 100%; }
+.dish[draggable="true"] { cursor: grab; }
+.dish .grip { color: var(--muted-foreground); padding-top: 2px; }
+.dish .nm { font-weight: 700; font-size: 14px; }
+.dish .meta { font-size: 12px; color: var(--muted-foreground); display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; }
+.dish .note { color: var(--warning); font-weight: 700; }
+.dish.cool { opacity: .72; }
+.stars { color: var(--warning); letter-spacing: 1px; }
+.trayhint { margin-top: auto; font-size: 12px; color: var(--muted-foreground); border-top: 1px dashed var(--border); padding-top: 12px; }
+.trash { position: absolute; inset: 8px; border-radius: var(--radius-card); border: 3px dashed var(--danger); background: color-mix(in srgb, var(--danger-surface) 92%, transparent); color: var(--danger); display: none; place-items: center; align-content: center; gap: 8px; font-weight: 800; text-align: center; padding: 20px; }
+.tray.removing .trash { display: grid; }
+.tray.removing.over .trash { background: var(--danger-surface); }
+
+.pop { position: absolute; z-index: 20; width: 300px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 16px; display: grid; gap: 12px; }
+.details { display: grid; gap: 12px; }
+.details h4 { font-size: 20px; }
+.details .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--muted-foreground); }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.stepper output { min-width: 64px; text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 22px; font-variant-numeric: tabular-nums; }
+.srvnote { font-size: 12px; color: var(--muted-foreground); }
+.srvnote b { color: var(--primary); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.linkbtn { border: 0; background: none; color: var(--primary); font-weight: 700; padding: 0; text-decoration: underline; text-underline-offset: 3px; font-size: 12px; }
+
+/* Phone */
+.duo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; }
+.phone { width: 390px; max-width: 100%; height: 820px; border-radius: 44px; border: 10px solid #1b1714; background: var(--background); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px -25px rgb(0 0 0 / .45); }
+.statusbar { height: 40px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-size: 13px; font-weight: 700; }
+.phead { padding: 4px 16px 10px; display: grid; gap: 10px; flex: none; }
+.phead .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.phead h2 { font-size: 28px; }
+.strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.strip button { position: relative; border: 2px solid transparent; background: none; border-radius: var(--radius-control); padding: 4px 0 6px; min-height: 52px; display: grid; justify-items: center; }
+.strip .dn { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted-foreground); font-weight: 700; }
+.strip .dd { font-family: var(--font-display); font-weight: 800; font-size: 19px; line-height: 1.1; }
+.strip button.today .dd { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+.strip button[aria-current="true"] { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); box-shadow: var(--shadow-control); }
+.strip button[aria-current="true"] .dn { color: var(--accent-foreground); }
+.strip .pdot { position: absolute; top: 4px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--agent); border: 1.5px solid var(--card); }
+.weekbtn { border: 2px solid var(--agent); background: var(--agent-surface); color: var(--agent); border-radius: var(--radius-control); font-size: 12px; font-weight: 800; padding: 6px 10px; min-height: 36px; display: inline-flex; gap: 6px; align-items: center; }
+
+.days { flex: 1; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.days::-webkit-scrollbar { display: none; }
+.daypage { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; padding: 4px 14px 170px; display: grid; gap: 12px; align-content: start; }
+.dtitle { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; }
+.dtitle h3 { font-size: 20px; }
+.dtitle span { font-size: 13px; color: var(--muted-foreground); }
+.pslot { display: grid; gap: 6px; }
+.pslot > .label { padding-left: 4px; }
+.phone .entry { padding: 12px 14px; min-height: 64px; cursor: pointer; }
+.phone .entry .nm { font-size: 16px; }
+.phone .empty { min-height: 56px; grid-auto-flow: column; gap: 14px; }
+.phone .empty button, .phone .marker button { border: 0; background: none; font-weight: 700; font-size: 13px; display: inline-flex; gap: 4px; align-items: center; min-height: 44px; padding: 0 6px; }
+.phone .empty .add { color: var(--primary); }
+.phone .empty .ask { opacity: 1; color: var(--agent); }
+.dayagent { display: flex; gap: 8px; align-items: center; padding: 8px 8px 8px 12px; border-radius: var(--radius-control); background: var(--agent-surface); border: 2px dashed var(--agent); font-size: 13px; }
+.dayagent .txt { flex: 1; }
+.dayagent b { color: var(--agent); }
+.daysum { border-top: 1px dashed var(--border); padding: 10px 4px 0; font-size: 13px; color: var(--muted-foreground); display: flex; gap: 6px; align-items: center; font-variant-numeric: tabular-nums; }
+.daysum strong { color: var(--foreground); }
+.daysum.part { color: var(--warning); }
+
+.target { border: 2px dashed var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); border-radius: 10px; min-height: 56px; font-weight: 800; display: flex; gap: 6px; align-items: center; justify-content: center; width: 100%; }
+.placing { position: absolute; left: 12px; right: 12px; bottom: 90px; z-index: 6; display: flex; gap: 10px; align-items: center; padding: 10px 10px 10px 14px; border-radius: var(--radius-card); background: var(--primary); color: var(--primary-foreground); border: 2px solid var(--outline); box-shadow: var(--shadow-card); font-size: 14px; }
+.placing .txt { flex: 1; }
+.placing .btn { background: var(--card); color: var(--foreground); }
+
+.fab { position: absolute; right: 16px; bottom: 92px; z-index: 5; min-height: 56px; padding: 0 20px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-card); background: var(--primary); color: var(--primary-foreground); font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.fab:active { translate: 1px 1px; box-shadow: none; }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; height: 76px; padding-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border-top: 2px solid var(--outline); }
+.tabbar a { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-decoration: none; }
+.tabbar a.on { color: var(--primary); }
+
+.scrim { position: absolute; inset: 0; z-index: 8; background: rgb(20 12 22 / .45); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; max-height: 78%; display: flex; flex-direction: column; background: var(--card); border-top: 2px solid var(--outline); border-radius: 24px 24px 0 0; padding: 8px 16px 24px; gap: 12px; animation: up .18s ease-out; }
+@keyframes up { from { translate: 0 30px; opacity: 0; } }
+.sheet .handle { width: 44px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 4px; flex: none; }
+.sheet .scroll { overflow-y: auto; display: grid; gap: 10px; align-content: start; }
+.sheet .dish { cursor: pointer; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.sheet .dish > svg { color: var(--primary); }
+
+.notes { display: grid; gap: 16px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; min-width: 0; }
+.notes h3 { font-size: 22px; }
+.notes .lg { display: grid; gap: 8px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.notes li { max-width: 68ch; }
+.notes p { margin: 0; color: var(--muted-foreground); }
+.samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.samples .entry, .samples .empty { min-height: 84px; }
+
+@media (max-width: 900px) { .duo { grid-template-columns: minmax(0, 1fr); } .phone { margin: 0 auto; } }
+@media (max-width: 440px) { .phone { border-width: 6px; border-radius: 32px; height: 760px; } }
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pagebar">
+    <div>
+      <div class="eyebrow">PAN-13 · Spiżarnia</div>
+      <h1>Planer posiłków</h1>
+    </div>
+    <div class="switches">
+      <div class="ctl"><span class="label">Posiłki w ciągu dnia</span><div class="seg" data-key="slots">
+        <button data-v="3">3</button><button data-v="5">5</button>
+      </div></div>
+      <div class="ctl"><span class="label">Motyw</span><div class="seg" data-key="theme">
+        <button data-v="system">System</button><button data-v="light">Jasny</button><button data-v="dark">Ciemny</button>
+      </div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="label frame-label">Tydzień · komputer — przeciągaj dania z szuflady, między polami i z powrotem do szuflady</div>
+    <div class="scroller">
+      <div class="desk" id="desk">
+        <aside class="side">
+          <div class="brand" title="Spiżarnia"><span class="mark" data-icon="jar"></span></div>
+          <nav class="nav">
+            <a href="#" class="on"><span data-icon="cal"></span>Plan</a>
+            <a href="#"><span data-icon="book"></span>Przepisy</a>
+            <a href="#"><span data-icon="cart"></span>Zakupy</a>
+            <a href="#"><span data-icon="home"></span>Dom</a>
+          </nav>
+          <div class="sync" title="Online · wszystko zapisane"><span class="dot"></span>Online</div>
+        </aside>
+        <div class="main">
+          <div class="mainhead">
+            <div><h2>9–15 listopada</h2><div class="sub">2,3 porcji domowych · <span id="slotcount"></span></div></div>
+            <div class="weeknav">
+              <button class="btn icon" aria-label="Poprzedni tydzień"><span data-icon="left"></span></button>
+              <button class="btn">Dziś</button>
+              <button class="btn icon" aria-label="Następny tydzień"><span data-icon="right"></span></button>
+              <button class="btn primary"><span data-icon="cart"></span>Lista zakupów</button>
+            </div>
+          </div>
+          <div class="agentbar" id="agentbar">
+            <span data-icon="spark"></span>
+            <div class="txt" id="agenttxt"></div>
+            <button class="btn sm" data-act="reject-all">Odrzuć wszystkie</button>
+            <button class="btn sm agent" data-act="accept-all"><span data-icon="check"></span>Akceptuj wszystkie</button>
+          </div>
+          <div class="weeksum" id="weeksum"></div>
+          <div class="grid" id="grid"></div>
+        </div>
+        <aside class="tray" id="tray">
+          <h3>Szuflada dań</h3>
+          <label class="search"><span data-icon="search"></span><input id="q" type="search" placeholder="Szukaj przepisu…" aria-label="Szukaj przepisu"></label>
+          <div class="tabs" id="traytabs">
+            <button data-tab="fav">Ulubione</button><button data-tab="recent">Ostatnio</button><button data-tab="all">Wszystkie</button>
+          </div>
+          <div class="dishes" id="dishes"></div>
+          <div class="trayhint">Przeciągnij danie na pole w kalendarzu. Danie z kalendarza upuszczone tutaj znika z planu.</div>
+          <div class="trash"><span data-icon="trash"></span>Upuść, żeby usunąć z planu</div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="duo">
+    <div>
+      <div class="label frame-label">Dzień · telefon — przesuń w bok, żeby zmienić dzień</div>
+      <div class="phone" id="phone">
+        <div class="statusbar"><span>12:40</span><span>78%</span></div>
+        <div class="phead">
+          <div class="top"><h2>Plan</h2><span id="weekbtn"></span></div>
+          <div class="strip" id="strip"></div>
+        </div>
+        <div class="days" id="days"></div>
+        <div id="placing"></div>
+        <button class="fab" data-act="open-tray" id="fab"><span data-icon="plus"></span>Dodaj danie</button>
+        <nav class="tabbar">
+          <a href="#" class="on"><span data-icon="cal"></span>Plan</a>
+          <a href="#"><span data-icon="book"></span>Przepisy</a>
+          <a href="#"><span data-icon="cart"></span>Zakupy</a>
+          <a href="#"><span data-icon="home"></span>Dom</a>
+        </nav>
+        <div id="sheet"></div>
+      </div>
+    </div>
+    <div class="notes">
+      <div>
+        <h3>Jak to działa</h3>
+        <p>Komputer i telefon pokazują ten sam plan. Zmiana w jednym widoku od razu widać w drugim.</p>
+      </div>
+      <div class="lg">
+        <div class="label">Telefon: przesunięcie a przeciąganie</div>
+        <ul>
+          <li>Na telefonie nie ma przeciągania. Przesunięcie w bok zawsze zmienia dzień, a w pionie przewijasz posiłki, więc gesty się nie gryzą.</li>
+          <li>Dodawanie: <b>Dodaj danie</b> otwiera szufladę od dołu. Stuknij danie, potem stuknij posiłek. W trakcie możesz przejść do innego dnia przesunięciem albo paskiem dni.</li>
+          <li>Przenoszenie: stuknij pozycję, wybierz <b>Przenieś</b> i stuknij nowe miejsce.</li>
+          <li>Szuflada jako arkusz od dołu zostawia kciukowi cały ekran, a pasek z wybranym daniem przypomina, co wstawiasz.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Komputer</div>
+        <ul>
+          <li>Przeciąganie: z szuflady na pole, z pola na pole (zajęte pola się zamieniają), z pola do szuflady, żeby usunąć.</li>
+          <li>Wszystko, co da się przeciągnąć, jest też w okienku po kliknięciu pozycji, więc klawiatura nie zostaje w tyle.</li>
+          <li>Puste pole po najechaniu pokazuje <b>Poproś agenta</b>: wstawia znacznik pustego pola, który agent wypełni przy planowaniu.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Porcje i kalorie</div>
+        <ul>
+          <li>Pozycja bierze porcje domowe (2,3). Zmiana porcji dotyczy tylko tej pozycji i widać ją na znaczku, np. gotowanie na dwa dni.</li>
+          <li>Kalorie i białko liczymy na osobę i tylko z przepisów, które mają dane. Jeśli czegoś brakuje, dzień jest oznaczony jako niepełny.</li>
+          <li>Odrzucona propozycja zostaje znacznikiem dla agenta. Znacznik możesz usunąć, jeśli pole ma zostać puste.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Stany pozycji</div>
+        <div class="samples" id="samples"></div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="pop" id="pop" hidden></div>
+
+<script>
+const ICONS = {
+  jar: '<path d="M7 3h10M8 3v3l-2 3v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M6 12h12"/>',
+  cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  left: '<path d="M15 18l-6-6 6-6"/>', right: '<path d="M9 18l6-6-6-6"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  grip: '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+  repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>',
+  flame: '<path d="M12 22a7 7 0 0 0 7-7c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-3 3-5 5-5 8a7 7 0 0 0 7 7z"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  move: '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>',
+  undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>'
+};
+const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const hydrateIcons = root => root.querySelectorAll('[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon, el.classList.contains('sm') ? 'sm' : ''); });
+
+const HOUSEHOLD = 2.3;
+const fmt = n => n.toLocaleString('pl-PL', { maximumFractionDigits: 1 });
+const SLOT_SETS = { 3: ['breakfast', 'lunch', 'dinner'], 5: ['breakfast', 'second', 'lunch', 'snack', 'dinner'] };
+const SLOT_NAMES = { breakfast: 'Śniadanie', second: 'II śniadanie', lunch: 'Obiad', snack: 'Podwieczorek', dinner: 'Kolacja' };
+const DAYS = [['Pn', 'Poniedziałek', 9], ['Wt', 'Wtorek', 10], ['Śr', 'Środa', 11], ['Cz', 'Czwartek', 12], ['Pt', 'Piątek', 13], ['So', 'Sobota', 14], ['Nd', 'Niedziela', 15]];
+const TODAY = 0;
+
+const R = {
+  owsianka: { n: 'Owsianka z jabłkiem i cynamonem', t: '10 min', kcal: 380, p: 12, r: 4, last: 'wczoraj', fav: true, recent: 1 },
+  jajecznica: { n: 'Jajecznica ze szczypiorkiem', t: '10 min', kcal: 320, p: 21, r: 4, last: '3 dni temu', fav: true, recent: 3 },
+  pomidorowa: { n: 'Pomidorowa z ryżem', t: '35 min', kcal: 410, p: 14, r: 5, last: '2 tyg. temu', fav: true },
+  curry: { n: 'Kurczak curry z ryżem', t: '40 min', kcal: 640, p: 38, r: 5, last: 'miesiąc temu', fav: true },
+  hummus: { n: 'Kanapki z pastą z ciecierzycy', t: '10 min', kcal: 420, p: 15, r: 3, last: 'tydzień temu', recent: 7 },
+  twarozek: { n: 'Twarożek z rzodkiewką', t: '10 min', kcal: 290, p: 22, r: 4, last: '5 dni temu', recent: 5 },
+  leczo: { n: 'Leczo z cukinią', t: '30 min', kcal: 360, p: 16, r: 4, last: '2 mies. temu' },
+  nalesniki: { n: 'Naleśniki z twarogiem', t: '25 min', kcal: 520, p: 24, r: 5, last: '3 tyg. temu', fav: true },
+  dynia: { n: 'Zupa krem z dyni', t: '45 min', kcal: 310, p: 7, r: 4, last: '5 tyg. temu' },
+  losos: { n: 'Łosoś z pieczonymi ziemniakami', t: '45 min', kcal: 690, p: 42, r: 5, last: '2 tyg. temu', fav: true },
+  placki: { n: 'Placki ziemniaczane', t: '40 min', r: 4, last: '2 mies. temu' },
+  gulasz: { n: 'Gulasz wołowy', t: '2 h', kcal: 710, p: 45, r: 5, last: 'miesiąc temu' },
+  pierogi: { n: 'Pierogi ruskie', t: '1 h 30', r: 5, last: '3 tyg. temu', fav: true },
+  bolognese: { n: 'Spaghetti bolognese', t: '40 min', kcal: 720, p: 36, r: 5, last: '9 dni temu', fav: true, recent: 9, note: 'Przerwa jeszcze 5 dni', cool: true },
+  risotto: { n: 'Risotto z pieczarkami', t: '35 min', kcal: 560, p: 14, r: 4, last: 'miesiąc temu' },
+  tortilla: { n: 'Tortilla z fasolą i kukurydzą', t: '20 min', kcal: 540, p: 20, r: 4, last: '2 tyg. temu', recent: 14, note: 'Kolendra · unikamy' },
+  jogurt: { n: 'Jogurt z granolą', t: '5 min', kcal: 240, p: 10, r: 4, last: 'wczoraj', recent: 1 },
+  jablko: { n: 'Jabłko z masłem orzechowym', t: '5 min', kcal: 210, p: 6, r: 3, last: '2 dni temu', recent: 2 },
+  kanapki: { n: 'Kanapki z serem i ogórkiem', t: '10 min', kcal: 350, p: 16, r: 3, last: 'wczoraj', recent: 1 }
+};
+
+const A = r => ({ s: 'accepted', r });
+const P = r => ({ s: 'proposed', r });
+const M = () => ({ s: 'marker' });
+let plan = [
+  { breakfast: { s: 'eaten', r: 'owsianka' }, second: { s: 'eaten', r: 'jogurt' }, lunch: A('pomidorowa'), snack: null, dinner: A('hummus') },
+  { breakfast: A('jajecznica'), second: A('kanapki'), lunch: { s: 'accepted', r: 'curry', srv: 4.6 }, snack: A('jablko'), dinner: A('twarozek') },
+  { breakfast: A('owsianka'), second: null, lunch: { s: 'leftover', r: 'curry', from: 'z wtorku' }, snack: null, dinner: P('leczo') },
+  { breakfast: P('nalesniki'), second: null, lunch: P('dynia'), snack: null, dinner: M() },
+  { breakfast: A('jajecznica'), second: A('jogurt'), lunch: A('losos'), snack: null, dinner: null },
+  { breakfast: P('placki'), second: null, lunch: A('gulasz'), snack: null, dinner: M() },
+  { breakfast: null, second: null, lunch: A('pierogi'), snack: null, dinner: M() }
+];
+
+const state = { slots: 3, theme: 'system', tab: 'fav', q: '', day: TODAY, sheet: null, placing: null, pop: null };
+let drag = null;
+
+const slots = () => SLOT_SETS[state.slots];
+const isDish = e => e && e.r && e.s !== 'marker';
+const servings = e => e.srv ?? HOUSEHOLD;
+const plural = (n, one, few, many) => n === 1 ? one : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? few : many);
+
+function dayNutrition(d) {
+  const dishes = slots().map(s => plan[d][s]).filter(isDish);
+  if (!dishes.length) return null;
+  const known = dishes.filter(e => R[e.r].kcal);
+  return {
+    kcal: known.reduce((a, e) => a + R[e.r].kcal, 0),
+    p: known.reduce((a, e) => a + R[e.r].p, 0),
+    partial: known.length < dishes.length
+  };
+}
+
+function proposals(d) { return slots().filter(s => plan[d][s]?.s === 'proposed').length; }
+function markers(d) { return slots().filter(s => plan[d][s]?.s === 'marker').length; }
+
+function entryHtml(e, d, s, where) {
+  const attrs = `data-d="${d}" data-s="${s}"`;
+  if (!e) {
+    if (where === 'sample') return `<div class="empty">${icon('plus', 'sm')}Puste pole</div>`;
+    if (where === 'phone') return `<div class="empty"><button class="add" data-act="tray-for" ${attrs}>${icon('plus', 'sm')}Dodaj</button><button class="ask" data-act="ask" ${attrs}>${icon('spark', 'sm')}Poproś agenta</button></div>`;
+    return `<div class="empty">${icon('plus', 'sm')}<span>Upuść danie</span><button class="ask" data-act="ask" ${attrs}>${icon('spark', 'sm')}Poproś agenta</button></div>`;
+  }
+  if (e.s === 'marker') {
+    const clear = where === 'sample' ? '' : `<button class="linkbtn" data-act="clear" ${attrs}>Zostaw puste</button>`;
+    return `<div class="entry marker">${icon('spark')}<span>Czeka na agenta</span>${clear}</div>`;
+  }
+  const rec = R[e.r];
+  const drag = where === 'desk' ? 'draggable="true"' : '';
+  const open = where === 'sample' ? '' : `data-act="open" ${attrs} tabindex="0" role="button" aria-haspopup="dialog"`;
+  const time = rec.t ? `<span>${icon('clock', 'sm')}${rec.t}</span>` : '';
+  const srv = e.srv ? `<span class="srv">${icon('users', 'sm')}${fmt(e.srv)} porcji</span>` : '';
+  if (e.s === 'proposed') {
+    const acts = where === 'sample'
+      ? ''
+      : `<span class="acts"><button aria-label="Odrzuć ${rec.n}" data-act="reject" ${attrs}>${icon('x', 'sm')}</button><button class="yes" aria-label="Akceptuj ${rec.n}" data-act="accept" ${attrs}>${icon('check', 'sm')}</button></span>`;
+    return `<div class="entry proposed" ${drag} ${open}><span class="tag">${icon('spark', 'sm')}Propozycja</span><div class="nm">${rec.n}</div><div class="meta">${time}${srv}${acts}</div></div>`;
+  }
+  if (e.s === 'eaten') return `<div class="entry eaten" ${open}><span class="tag">${icon('check', 'sm')}Zjedzone</span><div class="nm">${rec.n}</div><div class="meta">${time}${srv}</div></div>`;
+  if (e.s === 'leftover') return `<div class="entry leftover" ${drag} ${open}><span class="tag">${icon('repeat', 'sm')}Resztki ${e.from}</span><div class="nm">${rec.n}</div><div class="meta"><span>Bez zakupów</span></div></div>`;
+  return `<div class="entry" ${drag} ${open}><div class="nm">${rec.n}</div><div class="meta">${time}${srv}</div></div>`;
+}
+
+function kcalHtml(n, cls) {
+  if (!n) return `<div class="${cls}">Brak dań</div>`;
+  if (n.partial) return `<div class="${cls} part">${icon('alert', 'sm')}${n.kcal ? `~${fmt(n.kcal)} kcal · ` : ''}niepełne</div>`;
+  return `<div class="${cls}">${icon('flame', 'sm')}<strong>${fmt(n.kcal)}</strong>&nbsp;kcal · ${n.p} g białka</div>`;
+}
+
+function renderDesk() {
+  const ss = slots();
+  let html = '<div></div>' + DAYS.map(([dn, , dd], i) => `<div class="dayhead${i === TODAY ? ' today' : ''}"><span class="dn">${dn}${i === TODAY ? ' · dziś' : ''}</span><span class="dd">${dd}</span></div>`).join('');
+  ss.forEach(s => {
+    html += `<div class="slotlabel">${SLOT_NAMES[s]}</div>`;
+    DAYS.forEach((_, d) => { html += `<div class="cell" data-cell data-d="${d}" data-s="${s}">${entryHtml(plan[d][s], d, s, 'desk')}</div>`; });
+  });
+  html += '<div class="kcal">Na osobę</div>' + DAYS.map((_, d) => {
+    const n = dayNutrition(d);
+    if (!n) return '<div class="kcal">—</div>';
+    return n.partial
+      ? `<div class="kcal part">${icon('alert', 'sm')}niepełne</div>`
+      : `<div class="kcal">${icon('flame', 'sm')}${fmt(n.kcal)} kcal</div>`;
+  }).join('');
+  document.getElementById('grid').innerHTML = html;
+  document.getElementById('slotcount').textContent = `${state.slots} ${plural(state.slots, 'posiłek', 'posiłki', 'posiłków')} dziennie`;
+
+  const p = DAYS.reduce((a, _, d) => a + proposals(d), 0);
+  const m = DAYS.reduce((a, _, d) => a + markers(d), 0);
+  const bar = document.getElementById('agentbar');
+  bar.hidden = p === 0 && m === 0;
+  bar.querySelectorAll('button').forEach(b => b.hidden = p === 0);
+  document.getElementById('agenttxt').innerHTML = (p ? `<b>${p} ${plural(p, 'propozycja', 'propozycje', 'propozycji')}</b> od agenta ${plural(p, 'czeka', 'czekają', 'czeka')} na Twoją decyzję. ` : '')
+    + (m ? `${m} ${plural(m, 'pole czeka', 'pola czekają', 'pól czeka')} na agenta przy następnym planowaniu.` : '');
+
+  const days = DAYS.map((_, d) => dayNutrition(d)).filter(Boolean);
+  const full = days.filter(n => !n.partial);
+  const partial = days.length - full.length;
+  document.getElementById('weeksum').innerHTML = full.length
+    ? `<span>${icon('flame', 'sm')} Średnio <strong>${fmt(Math.round(full.reduce((a, n) => a + n.kcal, 0) / full.length))} kcal</strong> i <strong>${Math.round(full.reduce((a, n) => a + n.p, 0) / full.length)} g białka</strong> na osobę dziennie</span>`
+      + (partial ? `<span class="part">${icon('alert', 'sm')}${partial} ${plural(partial, 'dzień', 'dni', 'dni')} bez pełnych danych</span>` : '')
+    : '<span>Brak danych o kaloriach w tym tygodniu</span>';
+}
+
+function trayList() {
+  const q = state.q.trim().toLowerCase();
+  let list = Object.entries(R);
+  if (q) return list.filter(([, x]) => x.n.toLowerCase().includes(q));
+  if (state.tab === 'fav') list = list.filter(([, x]) => x.fav);
+  if (state.tab === 'recent') list = list.filter(([, x]) => x.recent).sort((a, b) => a[1].recent - b[1].recent);
+  return list;
+}
+
+function dishHtml(id, x, where) {
+  const meta = `<div class="meta"><span class="stars" aria-label="Ocena ${x.r} na 5">${'★'.repeat(x.r)}${'☆'.repeat(5 - x.r)}</span><span>${x.t}</span><span>${x.last}</span>${x.note ? `<span class="note">${x.note}</span>` : ''}</div>`;
+  if (where === 'sheet') return `<button class="dish${x.cool ? ' cool' : ''}" data-act="pick" data-r="${id}"><div><div class="nm">${x.n}</div>${meta}</div>${icon('plus')}</button>`;
+  return `<div class="dish${x.cool ? ' cool' : ''}" draggable="true" data-r="${id}"><span class="grip">${icon('grip', 'sm')}</span><div><div class="nm">${x.n}</div>${meta}</div></div>`;
+}
+
+function renderTray() {
+  document.querySelectorAll('#traytabs button').forEach(b => b.setAttribute('aria-pressed', String(!state.q && b.dataset.tab === state.tab)));
+  const list = trayList();
+  document.getElementById('dishes').innerHTML = list.length ? list.map(([id, x]) => dishHtml(id, x, 'desk')).join('') : '<div class="sub">Nic nie pasuje.</div>';
+}
+
+function renderPhone() {
+  const days = document.getElementById('days');
+  const left = days.scrollLeft;
+  const total = DAYS.reduce((a, _, d) => a + proposals(d), 0);
+  document.getElementById('weekbtn').innerHTML = total
+    ? `<button class="weekbtn" data-act="accept-all">${icon('check', 'sm')}Akceptuj ${total} w tygodniu</button>` : '';
+  document.getElementById('strip').innerHTML = DAYS.map(([dn, , dd], d) =>
+    `<button data-act="goto" data-d="${d}" class="${d === TODAY ? 'today' : ''}" aria-current="${d === state.day}" aria-label="${DAYS[d][1]} ${dd}">${proposals(d) ? '<span class="pdot"></span>' : ''}<span class="dn">${dn}</span><span class="dd">${dd}</span></button>`).join('');
+  days.innerHTML = DAYS.map(([, name, dd], d) => {
+    const p = proposals(d);
+    const agent = p ? `<div class="dayagent">${icon('spark', 'sm')}<div class="txt"><b>${p} ${plural(p, 'propozycja', 'propozycje', 'propozycji')}</b> na ten dzień</div><button class="btn sm" data-act="reject-day" data-d="${d}">Odrzuć</button><button class="btn sm agent" data-act="accept-day" data-d="${d}">Akceptuj</button></div>` : '';
+    const body = slots().map(s => {
+      const content = state.placing
+        ? `<button class="target" data-act="place" data-d="${d}" data-s="${s}">${icon('plus', 'sm')}${isDish(plan[d][s]) ? 'Zastąp: ' + R[plan[d][s].r].n : 'Wstaw tutaj'}</button>`
+        : entryHtml(plan[d][s], d, s, 'phone');
+      return `<div class="pslot"><span class="label">${SLOT_NAMES[s]}</span>${content}</div>`;
+    }).join('');
+    return `<section class="daypage" aria-label="${name} ${dd} listopada"><div class="dtitle"><h3>${name}${d === TODAY ? ' · dziś' : ''}</h3><span>${dd} listopada</span></div>${agent}${body}${kcalHtml(dayNutrition(d), 'daysum')}</section>`;
+  }).join('');
+  days.scrollLeft = left;
+
+  const placing = document.getElementById('placing');
+  if (state.placing) {
+    const what = state.placing.r ? R[state.placing.r].n : R[plan[state.placing.from.d][state.placing.from.s].r].n;
+    placing.innerHTML = `<div class="placing"><div class="txt">${state.placing.from ? 'Przenosisz' : 'Wstawiasz'}: <b>${what}</b>. Stuknij posiłek.</div><button class="btn sm" data-act="cancel-place">Anuluj</button></div>`;
+  } else placing.innerHTML = '';
+  document.getElementById('fab').hidden = !!state.placing;
+  renderSheet();
+}
+
+function detailsHtml(d, s, where) {
+  const e = plan[d][s];
+  const rec = R[e.r];
+  const attrs = `data-d="${d}" data-s="${s}"`;
+  const changed = e.srv !== undefined && e.srv !== HOUSEHOLD;
+  const tag = { proposed: `<span class="tag" style="color:var(--agent)">${icon('spark', 'sm')}Propozycja agenta</span>`, eaten: `<span class="tag" style="color:var(--eaten)">${icon('check', 'sm')}Zjedzone</span>`, leftover: `<span class="tag">${icon('repeat', 'sm')}Resztki ${e.from}</span>` }[e.s] ?? '';
+  const nutrition = rec.kcal ? `<span>${icon('flame', 'sm')} ${rec.kcal} kcal · ${rec.p} g białka na osobę</span>` : '<span>Brak danych o kaloriach</span>';
+  let actions = '';
+  if (e.s === 'proposed') actions += `<button class="btn sm" data-act="reject" ${attrs}>${icon('x', 'sm')}Odrzuć</button><button class="btn sm agent" data-act="accept" ${attrs}>${icon('check', 'sm')}Akceptuj</button>`;
+  if (e.s === 'accepted') actions += `<button class="btn sm" data-act="eaten" ${attrs}>${icon('check', 'sm')}Zjedzone</button>`;
+  if (e.s === 'eaten') actions += `<button class="btn sm" data-act="uneaten" ${attrs}>${icon('undo', 'sm')}Cofnij</button>`;
+  if (where === 'sheet' && e.s !== 'eaten') actions += `<button class="btn sm" data-act="move" ${attrs}>${icon('move', 'sm')}Przenieś</button>`;
+  actions += `<button class="btn sm danger" data-act="remove" ${attrs}>${icon('trash', 'sm')}Usuń</button>`;
+  const stepper = e.s === 'leftover' ? '<div class="srvnote">Resztki nie dodają nic do listy zakupów.</div>' : `
+    <div class="stepper"><button class="btn icon" aria-label="Mniej porcji" data-act="srv-down" ${attrs}>${icon('minus')}</button><output aria-live="polite">${fmt(servings(e))}</output><button class="btn icon" aria-label="Więcej porcji" data-act="srv-up" ${attrs}>${icon('plus')}</button><span class="srvnote">porcji</span></div>
+    <div class="srvnote">${changed ? `<b>Zmienione dla tej pozycji.</b> Domyślnie ${fmt(HOUSEHOLD)}. <button class="linkbtn" data-act="srv-reset" ${attrs}>Przywróć</button>` : `Porcje domowe (${fmt(HOUSEHOLD)}).`}</div>`;
+  return `<div class="details">${tag}<h4>${rec.n}</h4><div class="meta"><span>${DAYS[d][1]} · ${SLOT_NAMES[s]}</span><span>${icon('clock', 'sm')} ${rec.t}</span>${nutrition}</div>${stepper}<div class="row">${actions}</div></div>`;
+}
+
+function renderSheet() {
+  const host = document.getElementById('sheet');
+  if (!state.sheet) { host.innerHTML = ''; return; }
+  let body;
+  if (state.sheet.kind === 'tray') {
+    const q = state.q;
+    const target = state.sheet.target ? `<div class="srvnote">Wstawiasz do: <b>${DAYS[state.sheet.target.d][1]} · ${SLOT_NAMES[state.sheet.target.s]}</b></div>` : '';
+    body = `<h3>Dodaj danie</h3>${target}<label class="search"><span>${icon('search')}</span><input id="pq" type="search" value="${q}" placeholder="Szukaj przepisu…" aria-label="Szukaj przepisu"></label>
+      <div class="tabs">${['fav', 'recent', 'all'].map(t => `<button data-act="tab" data-tab="${t}" aria-pressed="${!q && state.tab === t}">${{ fav: 'Ulubione', recent: 'Ostatnio', all: 'Wszystkie' }[t]}</button>`).join('')}</div>
+      <div class="scroll">${trayList().map(([id, x]) => dishHtml(id, x, 'sheet')).join('')}</div>`;
+  } else {
+    body = `<div class="scroll">${detailsHtml(state.sheet.d, state.sheet.s, 'sheet')}</div>`;
+  }
+  host.innerHTML = `<div class="scrim" data-act="close-sheet"></div><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${body}</div>`;
+}
+
+function renderPop() {
+  const pop = document.getElementById('pop');
+  if (!state.pop || !plan[state.pop.d][state.pop.s] || !isDish(plan[state.pop.d][state.pop.s])) { pop.hidden = true; state.pop = null; return; }
+  pop.innerHTML = detailsHtml(state.pop.d, state.pop.s, 'pop');
+  pop.hidden = false;
+  const anchor = document.querySelector(`#grid [data-cell][data-d="${state.pop.d}"][data-s="${state.pop.s}"]`);
+  if (!anchor) return;
+  const r = anchor.getBoundingClientRect();
+  const left = r.right + 8 + 300 > window.innerWidth ? r.left - 308 : r.right + 8;
+  pop.style.left = `${Math.max(8, left + window.scrollX)}px`;
+  pop.style.top = `${r.top + window.scrollY}px`;
+}
+
+function renderSamples() {
+  const samples = [
+    { s: 'proposed', r: 'leczo' }, { s: 'accepted', r: 'gulasz' }, { s: 'accepted', r: 'curry', srv: 4.6 },
+    { s: 'eaten', r: 'owsianka' }, { s: 'leftover', r: 'curry', from: 'z wtorku' }, { s: 'marker' }, null
+  ];
+  document.getElementById('samples').innerHTML = samples.map(e => entryHtml(e, 0, 'x', 'sample')).join('');
+}
+
+function render() { renderDesk(); renderTray(); renderPhone(); renderPop(); }
+
+function set(d, s, e) { plan[d][s] = e; }
+function act(name, d, s, el) {
+  const e = d !== undefined ? plan[d]?.[s] : undefined;
+  switch (name) {
+    case 'accept': set(d, s, { ...e, s: 'accepted' }); break;
+    case 'reject': set(d, s, M()); break;
+    case 'accept-all': plan = plan.map(day => Object.fromEntries(Object.entries(day).map(([k, v]) => [k, v?.s === 'proposed' && slots().includes(k) ? { ...v, s: 'accepted' } : v]))); break;
+    case 'reject-all': plan = plan.map(day => Object.fromEntries(Object.entries(day).map(([k, v]) => [k, v?.s === 'proposed' && slots().includes(k) ? M() : v]))); break;
+    case 'accept-day': slots().forEach(k => { if (plan[d][k]?.s === 'proposed') plan[d][k] = { ...plan[d][k], s: 'accepted' }; }); break;
+    case 'reject-day': slots().forEach(k => { if (plan[d][k]?.s === 'proposed') plan[d][k] = M(); }); break;
+    case 'ask': set(d, s, M()); break;
+    case 'clear': set(d, s, null); break;
+    case 'eaten': set(d, s, { ...e, s: 'eaten' }); break;
+    case 'uneaten': set(d, s, { ...e, s: 'accepted' }); break;
+    case 'remove': set(d, s, null); state.pop = null; state.sheet = null; break;
+    case 'srv-up': set(d, s, { ...e, srv: Math.round((servings(e) + 0.5) * 10) / 10 }); break;
+    case 'srv-down': set(d, s, { ...e, srv: Math.max(0.5, Math.round((servings(e) - 0.5) * 10) / 10) }); break;
+    case 'srv-reset': { const { srv, ...rest } = e; set(d, s, rest); break; }
+    case 'open':
+      if (el.closest('#phone')) state.sheet = { kind: 'entry', d, s };
+      else state.pop = state.pop && state.pop.d === d && state.pop.s === s ? null : { d, s };
+      break;
+    case 'open-tray': state.sheet = { kind: 'tray' }; break;
+    case 'tray-for': state.sheet = { kind: 'tray', target: { d, s } }; break;
+    case 'close-sheet': state.sheet = null; break;
+    case 'tab': state.tab = el.dataset.tab; state.q = ''; break;
+    case 'pick': {
+      const target = state.sheet?.target;
+      state.sheet = null;
+      if (target) set(target.d, target.s, A(el.dataset.r));
+      else state.placing = { r: el.dataset.r };
+      break;
+    }
+    case 'move': state.sheet = null; state.placing = { from: { d, s } }; break;
+    case 'place': {
+      if (state.placing.r) set(d, s, A(state.placing.r));
+      else { const f = state.placing.from; const moved = plan[f.d][f.s]; set(f.d, f.s, plan[d][s]); set(d, s, moved); }
+      state.placing = null;
+      break;
+    }
+    case 'cancel-place': state.placing = null; break;
+    case 'goto': goTo(d); return;
+    default: return;
+  }
+  render();
+}
+
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]');
+  if (!el) {
+    if (state.pop && !ev.target.closest('#pop')) { state.pop = null; renderPop(); }
+    return;
+  }
+  const d = el.dataset.d !== undefined ? Number(el.dataset.d) : undefined;
+  act(el.dataset.act, d, el.dataset.s, el);
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') { state.pop = null; state.sheet = null; state.placing = null; render(); }
+  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('.entry[data-act="open"]')) { ev.preventDefault(); ev.target.click(); }
+});
+window.addEventListener('resize', () => renderPop());
+
+document.getElementById('traytabs').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-tab]');
+  if (!b) return;
+  state.tab = b.dataset.tab; state.q = ''; document.getElementById('q').value = ''; renderTray();
+});
+document.getElementById('q').addEventListener('input', ev => { state.q = ev.target.value; renderTray(); });
+document.getElementById('sheet').addEventListener('input', ev => {
+  if (ev.target.id !== 'pq') return;
+  state.q = ev.target.value;
+  renderSheet();
+  const input = document.getElementById('pq');
+  input.focus(); input.setSelectionRange(input.value.length, input.value.length);
+});
+
+const daysEl = document.getElementById('days');
+function goTo(d) { daysEl.scrollTo({ left: d * daysEl.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+daysEl.addEventListener('scroll', () => {
+  const d = Math.round(daysEl.scrollLeft / daysEl.clientWidth);
+  if (d !== state.day) {
+    state.day = d;
+    document.querySelectorAll('#strip button').forEach((b, i) => b.setAttribute('aria-current', String(i === d)));
+  }
+});
+
+const desk = document.getElementById('desk');
+const tray = document.getElementById('tray');
+desk.addEventListener('dragstart', ev => {
+  const dish = ev.target.closest('.dish[data-r]');
+  const entry = ev.target.closest('.entry[draggable]');
+  if (dish) drag = { r: dish.dataset.r };
+  else if (entry) {
+    const cell = entry.closest('[data-cell]');
+    drag = { from: { d: Number(cell.dataset.d), s: cell.dataset.s } };
+    entry.classList.add('dragging');
+    tray.classList.add('removing');
+  } else return;
+  state.pop = null; renderPop();
+  ev.dataTransfer.effectAllowed = 'move';
+  ev.dataTransfer.setData('text/plain', drag.r ?? 'entry');
+});
+desk.addEventListener('dragend', () => {
+  drag = null;
+  tray.classList.remove('removing', 'over');
+  desk.querySelectorAll('.over, .dragging').forEach(x => x.classList.remove('over', 'dragging'));
+});
+desk.addEventListener('dragover', ev => {
+  if (!drag) return;
+  const cell = ev.target.closest('[data-cell]');
+  const overTray = drag.from && ev.target.closest('#tray');
+  if (!cell && !overTray) return;
+  ev.preventDefault();
+  desk.querySelectorAll('.over').forEach(x => { if (x !== cell) x.classList.remove('over'); });
+  if (cell) cell.classList.add('over');
+  tray.classList.toggle('over', !!overTray);
+});
+desk.addEventListener('drop', ev => {
+  if (!drag) return;
+  ev.preventDefault();
+  const cell = ev.target.closest('[data-cell]');
+  if (drag.from && ev.target.closest('#tray')) set(drag.from.d, drag.from.s, null);
+  else if (cell) {
+    const d = Number(cell.dataset.d), s = cell.dataset.s;
+    if (drag.r) set(d, s, A(drag.r));
+    else { const f = drag.from; const moved = plan[f.d][f.s]; set(f.d, f.s, plan[d][s]); set(d, s, moved); }
+  }
+  drag = null;
+  render();
+});
+
+function setSeg(key, v) { document.querySelectorAll(`.seg[data-key="${key}"] button`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === String(v)))); }
+document.querySelectorAll('.seg[data-key]').forEach(seg => seg.addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-v]');
+  if (!b) return;
+  const key = seg.dataset.key;
+  if (key === 'theme') {
+    state.theme = b.dataset.v;
+    if (state.theme === 'system') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', state.theme);
+  } else {
+    state.slots = Number(b.dataset.v);
+    state.pop = null;
+    render();
+  }
+  setSeg(key, b.dataset.v);
+}));
+
+hydrateIcons(document);
+setSeg('slots', state.slots);
+setSeg('theme', state.theme);
+renderSamples();
+render();
+</script>
+</body>
+</html>
