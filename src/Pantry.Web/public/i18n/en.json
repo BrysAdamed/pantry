@@ -1,0 +1,18 @@
+{
+  "app": {
+    "name": "Pantry",
+    "tagline": "Scaffold is running. Features arrive epic by epic."
+  },
+  "health": {
+    "label": "API",
+    "ok": "ok",
+    "unhealthy": "unhealthy",
+    "unreachable": "unreachable",
+    "checking": "checking..."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "pl": "Polski"
+  }
+}

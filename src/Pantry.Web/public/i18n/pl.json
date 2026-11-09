@@ -1,0 +1,18 @@
+{
+  "app": {
+    "name": "Spiżarnia",
+    "tagline": "Szkielet aplikacji działa. Funkcje pojawią się z kolejnymi epikami."
+  },
+  "health": {
+    "label": "API",
+    "ok": "działa",
+    "unhealthy": "niesprawne",
+    "unreachable": "niedostępne",
+    "checking": "sprawdzanie..."
+  },
+  "language": {
+    "label": "Język",
+    "en": "English",
+    "pl": "Polski"
+  }
+}
