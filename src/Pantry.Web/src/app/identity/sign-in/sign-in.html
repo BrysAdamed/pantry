@@ -4,39 +4,22 @@
     <h1 class="text-3xl">{{ t('title') }}</h1>
     <p class="text-sm text-muted-foreground">{{ t('intro') }}</p>
 
-    @if (autofill()) {
-      <label class="grid w-full gap-1.5 text-left">
-        <span class="text-sm font-bold">{{ t('accountLabel') }}</span>
-        <input
-          class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 py-2 disabled:opacity-45"
-          name="username"
-          autocomplete="username webauthn"
-          data-testid="sign-in-autofill"
-          [placeholder]="t('accountPlaceholder')"
-          [disabled]="state() === 'signingIn'"
-          (keydown.enter)="signIn()"
-        />
-      </label>
-    }
-
     @if (expired()) {
       <p role="status" data-testid="sign-in-expired" class="w-full rounded-control border-2 border-outline bg-card px-3 py-2.5 text-left text-sm">
         {{ t('expired') }}
       </p>
     }
 
-    @if (showsError()) {
+    @if (error(); as error) {
       <div
         role="alert"
         data-testid="sign-in-error"
         class="flex w-full items-start gap-2 rounded-control border-2 border-danger bg-danger-surface px-3 py-2.5 text-left text-sm"
       >
-        <p><b>{{ t(state() + '.title') }}</b> {{ t(state() + '.body') }}</p>
+        <p><b>{{ t(error + '.title') }}</b> {{ t(error + '.body') }}</p>
       </div>
     }
-  </section>
 
-  <footer class="grid gap-2.5">
     <button hlmBtn size="lg" class="w-full" data-testid="sign-in-passkey" [disabled]="!canSignIn()" (click)="signIn()">
       @switch (state()) {
         @case ('signingIn') { {{ t('signingIn') }} }
@@ -46,6 +29,47 @@
         @default { {{ t('signIn') }} }
       }
     </button>
+
+    <p class="flex w-full items-center gap-3 text-xs text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
+      {{ t('or') }}
+    </p>
+
+    <form class="grid w-full gap-3 text-left" data-testid="sign-in-password-form" (submit)="signInWithPassword($event)">
+      <label class="grid gap-1.5">
+        <span class="text-sm font-bold">{{ t('userNameLabel') }}</span>
+        <input
+          class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 py-2 disabled:opacity-45"
+          name="username"
+          autocapitalize="none"
+          spellcheck="false"
+          data-testid="sign-in-user-name"
+          [attr.autocomplete]="autofill() ? 'username webauthn' : 'username'"
+          [placeholder]="autofill() ? t('userNamePlaceholder') : ''"
+          [maxLength]="userNameMaxLength"
+          [disabled]="busy()"
+          (input)="userName.set($any($event.target).value)"
+        />
+      </label>
+      <label class="grid gap-1.5">
+        <span class="text-sm font-bold">{{ t('passwordLabel') }}</span>
+        <input
+          class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 py-2 disabled:opacity-45"
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          data-testid="sign-in-password"
+          [maxLength]="passwordMaxLength"
+          [disabled]="busy()"
+          (input)="password.set($any($event.target).value)"
+        />
+      </label>
+      <button hlmBtn variant="outline" size="lg" type="submit" class="w-full" data-testid="sign-in-with-password" [disabled]="!canSignInWithPassword()">
+        {{ passwordState() === 'signingIn' ? t('password.signingIn') : t('password.signIn') }}
+      </button>
+    </form>
+  </section>
+
+  <footer class="grid gap-2.5">
     <p class="text-center text-xs text-muted-foreground">{{ t('hint') }}</p>
   </footer>
 </main>

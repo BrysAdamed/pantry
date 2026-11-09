@@ -9,7 +9,7 @@ const destinations: { name: string; path: string | RegExp; heading?: string }[] 
 
 test.beforeEach(async ({ page }) => {
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
-  const me = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' };
+  const me = { id: '1', displayName: 'Alex', role: 'admin', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
   await page.route('/api/me', (route) => route.fulfill({ json: me }));
   await page.route(/\/api\/me\/(ui-language|theme)$/, (route) => {
     Object.assign(me, route.request().postDataJSON());

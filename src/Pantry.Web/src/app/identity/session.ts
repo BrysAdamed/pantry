@@ -59,6 +59,13 @@ export class Session {
     this.current.set(user);
   }
 
+  /** The API answered a change of the signed-in user (for example a new password) with the user as they are now. */
+  changed(user: CurrentUser): void {
+    if (this.current()?.id === user.id) {
+      this.current.set(user);
+    }
+  }
+
   /** The API said the session is gone (expired or signed out elsewhere). */
   ended(): void {
     this.current.set(null);

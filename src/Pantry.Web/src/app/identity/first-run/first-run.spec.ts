@@ -7,16 +7,17 @@ import { PasskeyCancelledError, Passkeys } from '../passkeys';
 import { SetupStatusService } from '../setup-status';
 import { provideTranslocoTesting } from '../../testing/transloco-testing';
 
-const admin: CurrentUser = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' };
+const admin: CurrentUser = { id: '1', displayName: 'Alex', role: 'admin', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
 
 describe('FirstRun', () => {
-  let api: { firstRunPasskeyOptions: ReturnType<typeof vi.fn>; completeFirstRun: ReturnType<typeof vi.fn> };
+  let api: Record<'firstRunPasskeyOptions' | 'completeFirstRun' | 'completeFirstRunWithPassword', ReturnType<typeof vi.fn>>;
   let passkeys: { isSupported: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     api = {
       firstRunPasskeyOptions: vi.fn().mockResolvedValue({ challenge: 'abc' }),
       completeFirstRun: vi.fn().mockResolvedValue(admin),
+      completeFirstRunWithPassword: vi.fn().mockResolvedValue(admin),
     };
     passkeys = { isSupported: vi.fn().mockReturnValue(true), create: vi.fn().mockResolvedValue({ id: 'cred' }) };
     await TestBed.configureTestingModule({
@@ -35,10 +36,16 @@ describe('FirstRun', () => {
     await fixture.whenStable();
     const page = fixture.nativeElement as HTMLElement;
     const button = () => page.querySelector<HTMLButtonElement>('[data-testid="first-run-create"]')!;
-    const type = async (value: string) => {
-      const input = page.querySelector('input')!;
+    const type = (value: string) => typeInto('first-run-name', value);
+    const typeInto = async (id: string, value: string) => {
+      const input = page.querySelector<HTMLInputElement>(`[data-testid="${id}"]`)!;
       input.value = value;
       input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
+      await fixture.whenStable();
+    };
+    const choose = async (method: 'passkey' | 'password') => {
+      page.querySelector<HTMLButtonElement>(`[data-testid="method-${method}"]`)!.click();
       await fixture.whenStable();
     };
     const create = async () => {
@@ -47,7 +54,7 @@ describe('FirstRun', () => {
       await new Promise((resolve) => setTimeout(resolve));
       await fixture.whenStable();
     };
-    return { page, button, type, create };
+    return { page, button, type, typeInto, choose, create };
   }
 
   it('enables passkey creation only after a name is typed', async () => {
@@ -93,12 +100,50 @@ describe('FirstRun', () => {
     expect(page.querySelector('[data-testid="first-run-already-done"]')).not.toBeNull();
   });
 
-  it('explains when the browser cannot create passkeys', async () => {
+  it('picks a password where the browser cannot create passkeys, and explains why', async () => {
     passkeys.isSupported.mockReturnValue(false);
-    const { page, button } = await render();
+    const { page, button, type, choose } = await render();
+    await type('Alex');
+
+    expect(page.querySelector('[data-testid="method-password"]')?.getAttribute('aria-pressed')).toBe('true');
+    expect(page.querySelector('[data-testid="new-password"]')).not.toBeNull();
+    await choose('passkey');
 
     expect(page.querySelector('[data-testid="first-run-error"]')?.textContent).toContain('Passkeys do not work here.');
     expect(button().disabled).toBe(true);
+  });
+
+  it('creates the admin with a username and password instead of a passkey', async () => {
+    const { page, button, type, typeInto, choose, create } = await render();
+    await type(' Alex ');
+    await choose('password');
+    expect(button().textContent?.trim()).toBe('Create the account');
+    await typeInto('new-user-name', 'alex');
+    await typeInto('new-password', 'pantry shelf 2026');
+    expect(button().disabled).toBe(true);
+    await typeInto('new-password-confirmation', 'pantry shelf 2026');
+
+    await create();
+
+    expect(passkeys.create).not.toHaveBeenCalled();
+    expect(api.completeFirstRunWithPassword).toHaveBeenCalledWith('Alex', { userName: 'alex', password: 'pantry shelf 2026' }, 'en');
+    expect(page.querySelector('[data-testid="first-run-done"]')?.textContent).toContain('Welcome home!');
+    expect(page.textContent).toContain('Next time sign in with your username and password.');
+  });
+
+  it('offers to try again when the account cannot be created with a password', async () => {
+    api.completeFirstRunWithPassword.mockRejectedValueOnce(new HttpErrorResponse({ status: 500 }));
+    const { page, button, type, typeInto, choose, create } = await render();
+    await type('Alex');
+    await choose('password');
+    await typeInto('new-user-name', 'alex');
+    await typeInto('new-password', 'pantry shelf 2026');
+    await typeInto('new-password-confirmation', 'pantry shelf 2026');
+
+    await create();
+
+    expect(page.querySelector('[data-testid="first-run-error"]')?.textContent).toContain('The account could not be created.');
+    expect(button().textContent?.trim()).toBe('Try again');
   });
 
   it('opens the app after the first run', async () => {

@@ -20,9 +20,18 @@ interface Passkey {
 /** The API of one signed-in user, shared by every device (page) that uses it. */
 function account() {
   return {
-    me: { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: 'en' as string | null, theme: 'system' },
+    me: {
+      id: '1',
+      displayName: 'Alex',
+      role: 'admin',
+      userName: null as string | null,
+      uiLanguage: 'en' as string | null,
+      theme: 'system',
+      signInMethods: ['passkey'],
+    },
     passkeys: [{ id: 'cGhvbmU', name: 'Phone', createdAt: '2026-11-08T10:00:00Z', lastUsedAt: '2026-11-09T08:00:00Z' }] as Passkey[],
     signedOutOthers: 0,
+    password: null as string | null,
   };
 }
 
@@ -38,6 +47,23 @@ async function mockAccount(page: Page, state: Account, deviceLanguage = 'en') {
   await page.route('/api/me/sign-out-others', (route) => {
     state.signedOutOthers++;
     return route.fulfill({ status: 204 });
+  });
+  await page.route('/api/me/password', (route) => {
+    const request = route.request();
+    if (request.method() === 'POST') {
+      state.me.userName ??= request.postDataJSON().userName;
+      state.password = request.postDataJSON().password;
+    } else if (request.method() === 'PUT') {
+      if (request.postDataJSON().currentPassword !== state.password) {
+        return route.fulfill({ status: 400, json: { errors: { CurrentPassword: ['The current password is wrong.'] } } });
+      }
+      state.password = request.postDataJSON().newPassword;
+    } else {
+      state.password = null;
+    }
+    state.signedOutOthers++;
+    state.me.signInMethods = state.password ? ['passkey', 'password'] : ['passkey'];
+    return route.fulfill({ json: state.me });
   });
   await page.route('/api/me/passkeys**', (route) => {
     const request = route.request();
@@ -160,4 +186,52 @@ test('opens My account from the avatar menu', async ({ page }) => {
   await expect(page).toHaveURL('/household/account');
   await expect(page.getByRole('heading', { level: 2, name: 'My account' })).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('sets, changes and removes the password, signing out other devices each time', async ({ page }) => {
+  const state = account();
+  await mockAccount(page, state);
+  await page.goto('/household/account');
+  const section = page.getByTestId('account-password');
+  await expect(section.getByTestId('account-user-name')).toHaveText('none yet');
+
+  await section.getByTestId('password-set').click();
+  await section.getByLabel('Username').fill('alex');
+  await section.getByLabel('Password', { exact: true }).fill('pantry shelf 2026');
+  await section.getByLabel('Repeat the password').fill('pantry shelf 2026');
+  await section.getByTestId('password-save').click();
+  await expect(section.getByRole('status')).toHaveText('Password saved. Other devices are signed out.');
+  await expect(section.getByTestId('account-user-name')).toHaveText('alex');
+  expect(state.password).toBe('pantry shelf 2026');
+
+  await section.getByTestId('password-change').click();
+  await expect(section.getByLabel('Username')).toHaveValue('alex');
+  await section.getByLabel('Current password').fill('not the password');
+  await section.getByLabel('Password', { exact: true }).fill('a brand new password');
+  await section.getByLabel('Repeat the password').fill('a brand new password');
+  await section.getByTestId('password-save').click();
+  await expect(section.getByRole('alert')).toHaveText('The current password is wrong.');
+  await section.getByLabel('Current password').fill('pantry shelf 2026');
+  await section.getByTestId('password-save').click();
+  await expect(section.getByRole('status')).toBeVisible();
+  expect(state.password).toBe('a brand new password');
+
+  await section.getByTestId('password-remove').click();
+  await section.getByTestId('password-remove-confirm').click();
+  await expect(section.getByRole('status')).toHaveText('Password removed. Other devices are signed out.');
+  await expect(section.getByTestId('password-set')).toBeVisible();
+  expect(state.password).toBeNull();
+  expect(state.signedOutOthers).toBe(3);
+});
+
+test('lets the last passkey go once a password is set', async ({ page }) => {
+  const state = account();
+  state.me.userName = 'alex';
+  state.me.signInMethods = ['passkey', 'password'];
+  state.password = 'pantry shelf 2026';
+  await mockAccount(page, state);
+  await page.goto('/household/account');
+
+  await expect(page.getByTestId('passkey-remove')).toBeEnabled();
+  await expect(page.getByTestId('passkey-only-one')).toHaveCount(0);
 });

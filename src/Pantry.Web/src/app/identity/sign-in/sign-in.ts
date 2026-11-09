@@ -3,12 +3,15 @@ import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { IdentityApi } from '../identity-api';
+import { CurrentUser, IdentityApi } from '../identity-api';
 import { PasskeyCancelledError, Passkeys, PasskeyUnsupportedError } from '../passkeys';
+import { PASSWORD_MAX_LENGTH, USER_NAME_MAX_LENGTH } from '../password/password-rules';
 import { safeReturnUrl, Session } from '../session';
 
 export type SignInState = 'ready' | 'signingIn' | 'cancelled' | 'rejected' | 'failed' | 'unsupported';
+export type PasswordSignInState = 'ready' | 'signingIn' | 'rejected' | 'failed';
 
+/** Sign-in with a passkey (the button or the username field's autofill) or with a username and password. */
 @Component({
   selector: 'app-sign-in',
   imports: [TranslocoDirective, HlmButton],
@@ -26,12 +29,29 @@ export class SignIn implements OnInit {
   /** Bound from the query string: `expired` when a request found the session gone. */
   readonly reason = input<string>();
 
+  protected readonly userNameMaxLength = USER_NAME_MAX_LENGTH;
+  protected readonly passwordMaxLength = PASSWORD_MAX_LENGTH;
+
   protected readonly state = signal<SignInState>(this.passkeys.isSupported() ? 'ready' : 'unsupported');
+  protected readonly passwordState = signal<PasswordSignInState>('ready');
+  protected readonly userName = signal('');
+  protected readonly password = signal('');
   protected readonly autofill = signal(false);
+  protected readonly busy = computed(() => this.state() === 'signingIn' || this.passwordState() === 'signingIn');
   protected readonly isRetryable = computed(() => ['cancelled', 'rejected', 'failed'].includes(this.state()));
-  protected readonly showsError = computed(() => this.isRetryable() || this.state() === 'unsupported');
-  protected readonly canSignIn = computed(() => this.state() === 'ready' || this.isRetryable());
-  protected readonly expired = computed(() => this.reason() === 'expired' && !this.showsError());
+  protected readonly canSignIn = computed(() => !this.busy() && (this.state() === 'ready' || this.isRetryable()));
+  protected readonly canSignInWithPassword = computed(
+    () => !this.busy() && this.userName().trim().length > 0 && this.password().length > 0,
+  );
+  /** One message at a time: the latest password attempt's, else the passkey's. */
+  protected readonly error = computed(() => {
+    const password = this.passwordState();
+    if (password === 'rejected' || password === 'failed') {
+      return `password.${password}`;
+    }
+    return this.isRetryable() || this.state() === 'unsupported' ? this.state() : null;
+  });
+  protected readonly expired = computed(() => this.reason() === 'expired' && !this.error());
 
   private autofillRequest?: AbortController;
   private autofillOptions?: Promise<PublicKeyCredentialRequestOptionsJSON>;
@@ -52,19 +72,39 @@ export class SignIn implements OnInit {
       return;
     }
     this.autofillRequest?.abort();
+    this.passwordState.set('ready');
     this.state.set('signingIn');
     try {
       await this.autofillOptions?.catch(() => undefined);
-      await this.complete(await this.passkeys.get(await this.requestOptions()));
+      await this.complete(await this.api.signIn(await this.passkeys.get(await this.requestOptions())));
     } catch (error) {
       this.state.set(stateFor(error));
-      if (this.autofill()) {
-        void this.offerAutofill();
-      }
+      this.reofferAutofill();
     }
   }
 
-  /** Conditional mediation: the browser offers the saved passkeys in the field's autofill while the screen is open. */
+  protected async signInWithPassword(event: Event): Promise<void> {
+    event.preventDefault();
+    if (!this.canSignInWithPassword()) {
+      return;
+    }
+    this.autofillRequest?.abort();
+    if (this.isRetryable()) {
+      this.state.set('ready');
+    }
+    this.passwordState.set('signingIn');
+    try {
+      await this.api.refreshAntiforgeryToken();
+      await this.complete(await this.api.signInWithPassword(this.userName().trim(), this.password()));
+    } catch (error) {
+      this.passwordState.set(
+        error instanceof HttpErrorResponse && error.status === HttpStatusCode.Unauthorized ? 'rejected' : 'failed',
+      );
+      this.reofferAutofill();
+    }
+  }
+
+  /** Conditional mediation: the browser offers the saved passkeys in the username field's autofill while the screen is open. */
   private async offerAutofill(): Promise<void> {
     const request = new AbortController();
     this.autofillRequest = request;
@@ -75,11 +115,18 @@ export class SignIn implements OnInit {
     } catch {
       return;
     }
+    this.passwordState.set('ready');
     this.state.set('signingIn');
     try {
-      await this.complete(credential);
+      await this.complete(await this.api.signIn(credential));
     } catch (error) {
       this.state.set(stateFor(error));
+    }
+  }
+
+  private reofferAutofill(): void {
+    if (this.autofill()) {
+      void this.offerAutofill();
     }
   }
 
@@ -88,8 +135,8 @@ export class SignIn implements OnInit {
     return this.api.signInPasskeyOptions();
   }
 
-  private async complete(credential: PublicKeyCredentialJSON): Promise<void> {
-    this.session.signedIn(await this.api.signIn(credential));
+  private async complete(user: CurrentUser): Promise<void> {
+    this.session.signedIn(user);
     await this.router.navigateByUrl(safeReturnUrl(this.returnUrl()), { replaceUrl: true });
   }
 }

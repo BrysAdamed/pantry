@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { SignInMethod } from '../identity/identity-api';
 
 export const MEMBERS_URL = '/api/household/members';
 
@@ -14,6 +15,8 @@ export interface Member {
   position: number;
   account: 'admin' | 'user' | null;
   userId: string | null;
+  /** How the linked user signs in; null without an account. */
+  signInMethods: SignInMethod[] | null;
 }
 
 export interface MembersResponse {

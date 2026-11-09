@@ -10,12 +10,15 @@ const creationOptions = {
   attestation: 'none',
 };
 
-const admin = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' };
+const admin = { id: '1', displayName: 'Alex', role: 'admin', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
 
 async function mockSetup(page: Page, completeStatus = 200) {
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: true } }));
   await page.route('/api/me', (route) => route.fulfill({ status: 401 }));
   await page.route('/api/setup/passkey-options', (route) => route.fulfill({ json: creationOptions }));
+  await page.route('/api/setup/complete-with-password', (route) =>
+    route.fulfill({ json: { ...admin, userName: route.request().postDataJSON().userName, signInMethods: ['password'] } }),
+  );
   await page.route('/api/setup/complete', (route) =>
     completeStatus === 200
       ? route.fulfill({ json: admin })
@@ -115,4 +118,39 @@ test('skips the first run once an admin exists and asks to sign in', async ({ pa
   await page.goto('/first-run');
 
   await expect(page).toHaveURL(/\/sign-in(\?|$)/);
+});
+
+test('sets up the admin with a username and password, without a passkey', async ({ page }) => {
+  await mockSetup(page);
+  const completed = page.waitForRequest('/api/setup/complete-with-password');
+  await page.goto('/first-run');
+
+  await page.getByLabel('What is your name?').fill('Alex');
+  await page.getByTestId('method-password').click();
+  await page.getByLabel('Username').fill('alex');
+  await page.getByLabel('Password', { exact: true }).fill('pantry shelf 2026');
+  await page.getByLabel('Repeat the password').fill('pantry shelf 2027');
+  await page.getByLabel('Username').focus();
+  await expect(page.getByText('The passwords do not match.')).toBeVisible();
+  await expect(page.getByTestId('first-run-create')).toBeDisabled();
+  await page.getByLabel('Repeat the password').fill('pantry shelf 2026');
+  await page.getByTestId('first-run-create').click();
+
+  expect((await completed).postDataJSON()).toEqual({ displayName: 'Alex', userName: 'alex', password: 'pantry shelf 2026', uiLanguage: 'en' });
+  await expect(page.getByTestId('first-run-done')).toHaveText('Welcome home!');
+  await expect(page.getByText('Next time sign in with your username and password.')).toBeVisible();
+  await page.getByTestId('first-run-open-app').click();
+  await expect(page).toHaveURL('/planner');
+});
+
+test('offers a password where the browser cannot create passkeys', async ({ page }) => {
+  await mockSetup(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'PublicKeyCredential', { value: undefined, configurable: true });
+  });
+
+  await page.goto('/first-run');
+
+  await expect(page.getByTestId('method-password')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('first-run-create')).toHaveText('Create the account');
 });

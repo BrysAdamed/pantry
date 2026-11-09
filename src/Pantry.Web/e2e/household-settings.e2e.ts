@@ -7,6 +7,7 @@ interface Member {
   position: number;
   account: 'admin' | 'user' | null;
   userId: string | null;
+  signInMethods: ('passkey' | 'password')[] | null;
 }
 
 interface MealSlot {
@@ -27,8 +28,8 @@ const sections = ['Members', 'Meals', "We don't eat", 'Planning rules', 'Content
 
 async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'admin' | 'user' = 'admin') {
   const members: Member[] = [
-    { id: 'a', name: 'Alex', portionFactor: 1, position: 0, account: 'admin', userId: '1' },
-    { id: 't', name: 'Toddler', portionFactor: 0.3, position: 1, account: null, userId: null },
+    { id: 'a', name: 'Alex', portionFactor: 1, position: 0, account: 'admin', userId: '1', signInMethods: ['passkey'] },
+    { id: 't', name: 'Toddler', portionFactor: 0.3, position: 1, account: null, userId: null, signInMethods: null },
   ];
   const links: object[] = [];
   await page.route('/api/passkey-links', (route) =>
@@ -42,7 +43,7 @@ async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'ad
   });
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
   await page.route('/api/me', (route) =>
-    route.fulfill({ json: { id: '1', displayName: 'Alex', role, uiLanguage: null, theme: 'system' } }),
+    route.fulfill({ json: { id: '1', displayName: 'Alex', role, userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] } }),
   );
   await page.route('/api/household/members**', async (route) => {
     const request = route.request();
@@ -51,7 +52,7 @@ async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'ad
       return route.fulfill({ json: { members, householdServing: members.reduce((s, m) => s + m.portionFactor, 0) } });
     }
     if (request.method() === 'POST') {
-      const member: Member = { id: `m${members.length}`, position: members.length, account: null, userId: null, ...request.postDataJSON() };
+      const member: Member = { id: `m${members.length}`, position: members.length, account: null, userId: null, signInMethods: null, ...request.postDataJSON() };
       members.push(member);
       return route.fulfill({ status: 201, json: member });
     }

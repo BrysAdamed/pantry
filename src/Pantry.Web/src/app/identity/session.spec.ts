@@ -8,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { CurrentUser, IdentityApi } from './identity-api';
 import { authInterceptor, requireSignedIn, requireSignedOut, safeReturnUrl, Session } from './session';
 
-const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' };
+const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'admin', userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] };
 
 @Component({ template: '<p>screen</p>' })
 class Screen {}

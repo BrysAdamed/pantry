@@ -1,6 +1,6 @@
 # 0004 ASP.NET Identity with passkeys
 
-**Status:** Accepted, 2026-11-08
+**Status:** Accepted, 2026-11-08. Amended by [0018](0018-password-sign-in.md): a password is an alternative to a passkey.
 
 ## Context
 Two users on Android and iPhone. No identity provider exists in the homelab. Passwords are a chore on phones.

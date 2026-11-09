@@ -2,13 +2,24 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { registerUiLocales } from '../core/i18n/provide-i18n';
+import { CurrentUser } from '../identity/identity-api';
 import { PasskeyCancelledError, Passkeys } from '../identity/passkeys';
+import { Session } from '../identity/session';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { Passkey, PASSKEYS_URL } from './account-api';
 import { AccountSection } from './account-section';
 
 const phone: Passkey = { id: 'cGhvbmU', name: 'Phone', createdAt: '2026-11-08T10:00:00Z', lastUsedAt: '2026-11-09T08:00:00Z' };
 const laptop: Passkey = { id: 'bGFwdG9w', name: null, createdAt: '2026-11-09T10:00:00Z', lastUsedAt: null };
+const withPassword: CurrentUser = {
+  id: '1',
+  displayName: 'Alex',
+  userName: 'alex',
+  role: 'user',
+  uiLanguage: null,
+  theme: 'system',
+  signInMethods: ['passkey', 'password'],
+};
 
 describe('AccountSection', () => {
   let http: HttpTestingController;
@@ -58,7 +69,22 @@ describe('AccountSection', () => {
     const { testIds } = await render([phone]);
 
     expect((testIds('passkey-remove')[0] as HTMLButtonElement).disabled).toBe(true);
-    expect(testIds('passkey-only-one')[0].textContent).toContain('This is your only passkey.');
+    expect(testIds('passkey-only-one')[0].textContent).toContain('This is your only way to sign in.');
+  });
+
+  it('lets the only passkey go when the user has a password', async () => {
+    TestBed.inject(Session).signedIn(withPassword);
+    const { testIds } = await render([phone]);
+
+    expect((testIds('passkey-remove')[0] as HTMLButtonElement).disabled).toBe(false);
+    expect(testIds('passkey-only-one')).toHaveLength(0);
+  });
+
+  it('says when there is no passkey', async () => {
+    TestBed.inject(Session).signedIn(withPassword);
+    const { testIds } = await render([]);
+
+    expect(testIds('passkeys-none')[0].textContent).toContain('No passkeys.');
   });
 
   it('adds a passkey created by the browser', async () => {
@@ -135,7 +161,7 @@ describe('AccountSection', () => {
     http.expectOne(PASSKEYS_URL).flush([phone]);
     await settle();
 
-    expect(alert()).toContain('The last passkey has to stay.');
+    expect(alert()).toContain('The last way to sign in has to stay.');
   });
 
   it('signs out other devices', async () => {

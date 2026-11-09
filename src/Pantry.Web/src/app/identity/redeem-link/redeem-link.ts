@@ -6,8 +6,10 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { UiLanguageService } from '../../core/i18n/ui-language.service';
 import { DISPLAY_NAME_MAX_LENGTH } from '../first-run/first-run';
-import { IdentityApi, RedeemableLink } from '../identity-api';
+import { CurrentUser, IdentityApi, NewCredentials, RedeemableLink, SignInMethod } from '../identity-api';
 import { PasskeyCancelledError, Passkeys, PasskeyUnsupportedError } from '../passkeys';
+import { NewPasswordFields } from '../password/new-password-fields';
+import { SignInMethodChoice } from '../password/sign-in-method-choice';
 import { Session, SIGN_IN_PATH } from '../session';
 
 export type DeadLinkState = 'expired' | 'used' | 'revoked' | 'notFound';
@@ -18,17 +20,22 @@ export type RedeemLinkState =
   | 'creating'
   | 'cancelled'
   | 'failed'
-  | 'unsupported'
+  | 'passwordFailed'
+  | 'userNameTaken'
   | 'done'
   | DeadLinkState;
 
 const DEAD_STATES: readonly RedeemLinkState[] = ['expired', 'used', 'revoked', 'notFound'];
+const RETRYABLE_STATES: readonly RedeemLinkState[] = ['cancelled', 'failed', 'passwordFailed', 'userNameTaken'];
 export const EXPIRY_FORMAT = 'd MMM, HH:mm';
 
-/** Opens an invite or a recovery link: creates a passkey for the new or existing user and signs them in. */
+/**
+ * Opens an invite or a recovery link: creates the new user, or signs the existing user back in, with a new passkey or a
+ * new password, and signs them in.
+ */
 @Component({
   selector: 'app-redeem-link',
-  imports: [TranslocoDirective, HlmButton, DatePipe],
+  imports: [TranslocoDirective, HlmButton, DatePipe, SignInMethodChoice, NewPasswordFields],
   templateUrl: './redeem-link.html',
 })
 export class RedeemLink implements OnInit {
@@ -45,16 +52,22 @@ export class RedeemLink implements OnInit {
   protected readonly maxLength = DISPLAY_NAME_MAX_LENGTH;
   protected readonly link = signal<RedeemableLink | null>(null);
   protected readonly displayName = signal('');
+  protected readonly passkeysWork = signal(this.passkeys.isSupported());
+  protected readonly method = signal<SignInMethod>(this.passkeysWork() ? 'passkey' : 'password');
+  protected readonly credentials = signal<NewCredentials | null>(null);
   protected readonly state = signal<RedeemLinkState>('loading');
   protected readonly isInvite = computed(() => this.link()?.kind === 'invite');
-  protected readonly isRetryable = computed(() => this.state() === 'cancelled' || this.state() === 'failed');
+  protected readonly isRetryable = computed(() => RETRYABLE_STATES.includes(this.state()));
   protected readonly isDead = computed(() => DEAD_STATES.includes(this.state()));
   protected readonly showsForm = computed(() => !!this.link() && !this.isDead() && this.state() !== 'done');
+  protected readonly passkeyUnavailable = computed(() => this.method() === 'passkey' && !this.passkeysWork());
   protected readonly canCreate = computed(
     () =>
       (this.state() === 'form' || this.isRetryable()) &&
-      (!this.isInvite() || isValidDisplayName(this.displayName())),
+      (!this.isInvite() || isValidDisplayName(this.displayName())) &&
+      (this.method() === 'passkey' ? !this.passkeyUnavailable() : this.credentials() !== null),
   );
+  protected readonly error = computed(() => (this.passkeyUnavailable() ? 'unsupported' : this.isRetryable() ? this.state() : null));
 
   async ngOnInit(): Promise<void> {
     await this.load();
@@ -66,26 +79,37 @@ export class RedeemLink implements OnInit {
       const link = await this.api.redeemableLink(this.token());
       this.link.set(link);
       this.displayName.set(link.kind === 'invite' ? link.name : '');
-      this.state.set(this.passkeys.isSupported() ? 'form' : 'unsupported');
+      this.state.set('form');
     } catch (error) {
-      const state = stateFor(error);
-      this.state.set(state === 'failed' ? 'loadFailed' : state);
+      const state = stateFor(error, this.method());
+      this.state.set(DEAD_STATES.includes(state) ? state : 'loadFailed');
     }
   }
 
-  protected async createPasskey(): Promise<void> {
+  protected chooseMethod(method: SignInMethod): void {
+    this.method.set(method);
+    if (this.isRetryable()) {
+      this.state.set('form');
+    }
+  }
+
+  protected async create(): Promise<void> {
     if (!this.canCreate()) {
       return;
     }
+    const method = this.method();
     this.state.set('creating');
     try {
       await this.api.refreshAntiforgeryToken();
-      const options = await this.api.redeemPasskeyOptions(this.token(), this.displayName().trim());
-      const credential = await this.passkeys.create(options);
-      this.session.signedIn(await this.api.completeRedeem(this.token(), credential, this.language()));
+      this.session.signedIn(method === 'passkey' ? await this.createPasskey() : await this.setPassword());
       this.state.set('done');
     } catch (error) {
-      this.state.set(stateFor(error));
+      if (error instanceof PasskeyUnsupportedError) {
+        this.passkeysWork.set(false);
+        this.state.set('form');
+      } else {
+        this.state.set(stateFor(error, method));
+      }
     }
   }
 
@@ -96,6 +120,16 @@ export class RedeemLink implements OnInit {
   protected goToSignIn(): void {
     void this.router.navigateByUrl(`/${SIGN_IN_PATH}`, { replaceUrl: true });
   }
+
+  private async createPasskey(): Promise<CurrentUser> {
+    const options = await this.api.redeemPasskeyOptions(this.token(), this.displayName().trim());
+    const credential = await this.passkeys.create(options);
+    return this.api.completeRedeem(this.token(), credential, this.language());
+  }
+
+  private setPassword(): Promise<CurrentUser> {
+    return this.api.completeRedeemWithPassword(this.token(), this.displayName().trim(), this.credentials()!, this.language());
+  }
 }
 
 function isValidDisplayName(value: string): boolean {
@@ -103,12 +137,9 @@ function isValidDisplayName(value: string): boolean {
   return name.length > 0 && name.length <= DISPLAY_NAME_MAX_LENGTH;
 }
 
-function stateFor(error: unknown): RedeemLinkState {
+function stateFor(error: unknown, method: SignInMethod): RedeemLinkState {
   if (error instanceof PasskeyCancelledError) {
     return 'cancelled';
-  }
-  if (error instanceof PasskeyUnsupportedError) {
-    return 'unsupported';
   }
   if (error instanceof HttpErrorResponse) {
     if (error.status === HttpStatusCode.NotFound) {
@@ -118,6 +149,9 @@ function stateFor(error: unknown): RedeemLinkState {
       const state = error.error?.state;
       return state === 'expired' || state === 'used' ? state : 'revoked';
     }
+    if (error.status === HttpStatusCode.BadRequest && error.error?.errors?.UserName) {
+      return 'userNameTaken';
+    }
   }
-  return 'failed';
+  return method === 'password' ? 'passwordFailed' : 'failed';
 }

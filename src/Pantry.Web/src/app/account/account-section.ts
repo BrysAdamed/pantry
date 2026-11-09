@@ -5,9 +5,11 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { UiLanguageService } from '../core/i18n/ui-language.service';
 import { PasskeyCancelledError, Passkeys, PasskeyUnsupportedError } from '../identity/passkeys';
+import { Session } from '../identity/session';
 import { Icon } from '../shared/icon/icon';
 import { AccountApi, Passkey, PASSKEY_NAME_MAX_LENGTH, PASSKEYS_URL } from './account-api';
 import { LanguageSwitcher } from './language-switcher';
+import { PasswordSection } from './password-section';
 import { ThemeSwitcher } from './theme-switcher';
 import { UserPreferences } from './user-preferences';
 
@@ -15,10 +17,10 @@ export const PASSKEY_DATE_FORMAT = 'd MMM y';
 
 export type AddPasskeyState = 'idle' | 'adding' | 'cancelled' | 'failed' | 'unsupported';
 
-/** *My account*: the signed-in user's UI language, theme and passkeys, and signing out other devices. */
+/** *My account*: the signed-in user's UI language, theme, passkeys and password, and signing out other devices. */
 @Component({
   selector: 'app-account-section',
-  imports: [TranslocoDirective, HlmButton, Icon, DatePipe, LanguageSwitcher, ThemeSwitcher],
+  imports: [TranslocoDirective, HlmButton, Icon, DatePipe, LanguageSwitcher, ThemeSwitcher, PasswordSection],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'grid content-start gap-4.5' },
   templateUrl: './account-section.html',
@@ -26,6 +28,7 @@ export type AddPasskeyState = 'idle' | 'adding' | 'cancelled' | 'failed' | 'unsu
 export class AccountSection {
   private readonly api = inject(AccountApi);
   private readonly passkeySupport = inject(Passkeys);
+  private readonly session = inject(Session);
 
   protected readonly language = inject(UiLanguageService).current;
   protected readonly preferences = inject(UserPreferences);
@@ -34,7 +37,9 @@ export class AccountSection {
 
   protected readonly passkeyList = httpResource<Passkey[]>(() => PASSKEYS_URL);
   protected readonly passkeys = linkedSignal<Passkey[]>(() => this.passkeyList.value() ?? []);
-  protected readonly onlyOne = computed(() => this.passkeys().length === 1);
+  protected readonly hasPassword = computed(() => this.session.user()?.signInMethods.includes('password') ?? false);
+  /** The only passkey of a user without a password: their last sign-in method, which has to stay. */
+  protected readonly lastMethod = computed(() => this.passkeys().length === 1 && !this.hasPassword());
 
   protected readonly addState = signal<AddPasskeyState>('idle');
   protected readonly editingId = signal<string | null>(null);
@@ -94,6 +99,7 @@ export class AccountSection {
       if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.Conflict) {
         this.lastPasskey.set(true);
         this.passkeyList.reload();
+        void this.session.refresh();
       } else {
         this.failAndReload();
       }

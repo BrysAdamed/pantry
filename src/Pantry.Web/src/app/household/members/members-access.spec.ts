@@ -8,9 +8,9 @@ import { provideTranslocoTesting } from '../../testing/transloco-testing';
 import { Member, MEMBERS_URL } from '../household-api';
 import { MembersSection } from './members-section';
 
-const admin: Member = { id: 'a', name: 'Alex', portionFactor: 1, position: 0, account: 'admin', userId: 'u-a' };
-const toddler: Member = { id: 't', name: 'Toddler', portionFactor: 0.3, position: 1, account: null, userId: null };
-const partner: Member = { id: 'p', name: 'Sam', portionFactor: 1, position: 2, account: 'user', userId: 'u-p' };
+const admin: Member = { id: 'a', name: 'Alex', portionFactor: 1, position: 0, account: 'admin', userId: 'u-a', signInMethods: ['passkey'] };
+const toddler: Member = { id: 't', name: 'Toddler', portionFactor: 0.3, position: 1, account: null, userId: null, signInMethods: null };
+const partner: Member = { id: 'p', name: 'Sam', portionFactor: 1, position: 2, account: 'user', userId: 'u-p', signInMethods: ['passkey', 'password'] };
 
 const invite: OpenPasskeyLink = {
   id: 'l1',
@@ -36,7 +36,7 @@ describe('MembersSection account administration', () => {
   afterEach(() => http.verify());
 
   async function render(role: 'admin' | 'user', links: OpenPasskeyLink[] = []) {
-    TestBed.inject(Session).signedIn({ id: 'u-a', displayName: 'Alex', role, uiLanguage: null, theme: 'system' });
+    TestBed.inject(Session).signedIn({ id: 'u-a', displayName: 'Alex', role, userName: null, uiLanguage: null, theme: 'system', signInMethods: ['passkey'] });
     const fixture = TestBed.createComponent(MembersSection);
     fixture.detectChanges();
     http.expectOne(MEMBERS_URL).flush({ members: [admin, toddler, partner], householdServing: 2.3 });
@@ -65,6 +65,19 @@ describe('MembersSection account administration', () => {
     expect(page.textContent).not.toContain('Invite');
     expect(page.textContent).not.toContain('Recover access');
     expect(page.textContent).not.toContain('Remove account');
+  });
+
+  it('shows admins how each user signs in', async () => {
+    const { page } = await render('admin');
+
+    const methods = [...page.querySelectorAll('[data-testid="member-sign-in-methods"]')].map((m) => [...m.children].map((c) => c.textContent?.trim()));
+    expect(methods).toEqual([['passkey'], ['passkey', 'password']]);
+  });
+
+  it('does not show sign-in methods to other users', async () => {
+    const { page } = await render('user');
+
+    expect(page.querySelector('[data-testid="member-sign-in-methods"]')).toBeNull();
   });
 
   it('offers an invite for members without an account and account actions for other users, not for oneself', async () => {

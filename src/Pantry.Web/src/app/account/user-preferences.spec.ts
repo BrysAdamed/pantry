@@ -8,7 +8,7 @@ import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { AccountApi } from './account-api';
 import { UserPreferences } from './user-preferences';
 
-const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'user', uiLanguage: 'pl', theme: 'dark' };
+const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'user', userName: null, uiLanguage: 'pl', theme: 'dark', signInMethods: ['passkey'] };
 
 describe('UserPreferences', () => {
   let api: { changeUiLanguage: ReturnType<typeof vi.fn>; changeTheme: ReturnType<typeof vi.fn> };
