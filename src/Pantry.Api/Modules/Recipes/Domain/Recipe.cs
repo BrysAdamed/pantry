@@ -1,3 +1,5 @@
+using Pantry.Api.Infrastructure.Text;
+
 namespace Pantry.Api.Modules.Recipes.Domain;
 
 /// <summary>
@@ -6,6 +8,8 @@ namespace Pantry.Api.Modules.Recipes.Domain;
 /// </summary>
 public sealed class Recipe
 {
+    public const char SearchKeySeparator = '\n';
+
     private readonly List<RecipeTag> _tags = [];
     private readonly List<RecipeStep> _steps = [];
     private readonly List<RecipeIngredientLine> _lines = [];
@@ -31,6 +35,12 @@ public sealed class Recipe
 
     /// <summary>Days before the recipe should be planned again, overriding the household default; null to use the default.</summary>
     public int? CooldownDays { get; private set; }
+
+    /// <summary>
+    /// The name and the tags in comparison form (<see cref="TextKey"/>), one per line, so the library can search them
+    /// ignoring letter case and diacritics. A key never holds a line break, so a search cannot match across two.
+    /// </summary>
+    public string SearchKey { get; private set; } = string.Empty;
 
     public DateTimeOffset CreatedAt { get; private init; }
 
@@ -77,6 +87,7 @@ public sealed class Recipe
         SetTags(content.Tags);
         SetSteps(content.Steps);
         SetLines(content.Lines);
+        SearchKey = string.Join(SearchKeySeparator, TagValues().Prepend(Name).Select(TextKey.Of));
         UpdatedAt = now;
     }
 

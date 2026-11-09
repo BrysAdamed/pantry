@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Pantry.Api.Infrastructure.Text;
 using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
@@ -7,7 +8,12 @@ using Pantry.Api.Modules.Recipes.Persistence;
 
 namespace Pantry.Api.Modules.Recipes.Features.Recipes;
 
-/// <summary>A page of the recipe library in name order: recipes that are not archived, or with <c>archived=true</c> only the archived ones.</summary>
+/// <summary>
+/// A page of the recipe library: recipes that are not archived, or with <c>archived=true</c> only the archived ones.
+/// <c>search</c> matches part of the name, a tag or the name or an alias of an ingredient, ignoring letter case and
+/// diacritics; every <c>tag</c> given must be on the recipe; <c>withoutNever</c> leaves out recipes with a <i>never</i>
+/// ingredient. <c>sort</c> is a <see cref="RecipeSort"/> code, name order by default.
+/// </summary>
 public static class GetRecipes
 {
     public const int DefaultPageSize = 50;
@@ -20,11 +26,28 @@ public static class GetRecipes
         ICatalogModule catalog,
         IHouseholdModule household,
         CancellationToken cancellationToken,
+        string? search = null,
+        string[]? tag = null,
+        bool withoutNever = false,
         bool archived = false,
+        string? sort = null,
         int page = 1,
         int pageSize = DefaultPageSize)
     {
         var errors = new Dictionary<string, string[]>();
+        var order = RecipeSort.Name;
+        if (sort is not null)
+        {
+            if (CatalogCode.TryParse<RecipeSort>(sort, out var parsed))
+            {
+                order = parsed.Value;
+            }
+            else
+            {
+                errors[nameof(sort)] = [$"Sort must be one of: {string.Join(", ", Enum.GetValues<RecipeSort>().Select(CatalogCode.Of))}."];
+            }
+        }
+
         if (page < 1)
         {
             errors[nameof(page)] = ["Page starts at 1."];
@@ -40,16 +63,56 @@ public static class GetRecipes
             return TypedResults.ValidationProblem(errors);
         }
 
+        var warnings = await DislikeWarnings.LoadAsync(household, cancellationToken);
         var query = db.Recipes.AsNoTracking().Where(r => (r.ArchivedAt != null) == archived);
+
+        var key = TextKey.Of(search ?? string.Empty);
+        if (key.Length > 0)
+        {
+            var ingredientIds = await catalog.SearchIngredientIdsAsync(key, cancellationToken);
+            query = query.Where(r => r.SearchKey.Contains(key) || r.Lines.Any(l => ingredientIds.Contains(l.IngredientId)));
+        }
+
+        foreach (var wanted in (tag ?? []).Select(RecipeTag.Normalize).Where(t => t.Length > 0).Distinct())
+        {
+            query = query.Where(r => r.Tags.Any(t => t.Value == wanted));
+        }
+
+        if (withoutNever)
+        {
+            var neverIds = warnings.NeverIngredientIds();
+            query = query.Where(r => !r.Lines.Any(l => neverIds.Contains(l.IngredientId)));
+        }
+
         var total = await query.CountAsync(cancellationToken);
-        var items = await query
-            .OrderBy(r => r.Name.ToLower()).ThenBy(r => r.Id)
+        var keyed = query.Select(r => new
+        {
+            r.Id,
+            Name = r.Name.ToLower(),
+            r.PrepTimeMinutes,
+            AverageRating = db.HistoryEntries.Where(h => h.RecipeId == r.Id && h.Rating != null).Average(h => (double?)h.Rating),
+            RatingCount = db.HistoryEntries.Count(h => h.RecipeId == r.Id && h.Rating != null),
+            LastEaten = db.HistoryEntries.Where(h => h.RecipeId == r.Id).Max(h => (DateOnly?)h.Date),
+        });
+        var ordered = order switch
+        {
+            RecipeSort.Rating => keyed.OrderBy(k => k.AverageRating == null).ThenByDescending(k => k.AverageRating).ThenByDescending(k => k.RatingCount),
+            RecipeSort.RecentlyEaten => keyed.OrderBy(k => k.LastEaten == null).ThenByDescending(k => k.LastEaten),
+            RecipeSort.NotEatenLately => keyed.OrderBy(k => k.LastEaten != null).ThenBy(k => k.LastEaten),
+            RecipeSort.PrepTime => keyed.OrderBy(k => k.PrepTimeMinutes == null).ThenBy(k => k.PrepTimeMinutes),
+            _ => keyed.OrderBy(k => k.Name),
+        };
+        var ids = await ordered.ThenBy(k => k.Name).ThenBy(k => k.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .AsSplitQuery()
+            .Select(k => k.Id)
             .ToListAsync(cancellationToken);
+        var loaded = await db.Recipes.AsNoTracking()
+            .Where(r => ids.Contains(r.Id))
+            .AsSplitQuery()
+            .ToDictionaryAsync(r => r.Id, cancellationToken);
+        var items = ids.Select(id => loaded[id]).ToList();
 
-        var warnings = await DislikeWarnings.LoadAsync(household, cancellationToken);
         var dislikes = items.ToDictionary(r => r.Id, warnings.Of);
         var dislikedIds = dislikes.Values.SelectMany(d => d).Select(d => d.IngredientId).Distinct().ToList();
         var names = (await catalog.GetIngredientsAsync(dislikedIds, cancellationToken)).ToDictionary(i => i.Id, i => i.Name);

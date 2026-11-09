@@ -17,6 +17,9 @@ internal sealed class DislikeWarnings
     public static async Task<DislikeWarnings> LoadAsync(IHouseholdModule household, CancellationToken cancellationToken) =>
         new(await household.GetDislikesAsync(cancellationToken));
 
+    public IReadOnlyList<Guid> NeverIngredientIds() =>
+        _byIngredient.Values.Where(d => d.Kind == DislikeKind.Never).Select(d => d.IngredientId).ToList();
+
     public IReadOnlyList<HouseholdDislike> Of(Recipe recipe) =>
         recipe.OrderedLines()
             .Select(line => line.IngredientId)
