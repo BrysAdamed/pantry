@@ -133,5 +133,32 @@
       "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
       "action": "Go to the plan"
     }
+  },
+  "signIn": {
+    "title": "Pantry",
+    "intro": "Meal plan and shopping for the whole household.",
+    "accountLabel": "Account",
+    "accountPlaceholder": "Pick your passkey",
+    "signIn": "Sign in with a passkey",
+    "signingIn": "Waiting for the passkey…",
+    "retry": "Try again",
+    "hint": "No account? Ask someone in the household for an invite.",
+    "expired": "Your session has expired. Sign in again.",
+    "cancelled": {
+      "title": "Sign-in interrupted.",
+      "body": "The passkey window was closed or the passkey does not match this address. Try again or ask the admin for a new link."
+    },
+    "rejected": {
+      "title": "This passkey is not known here.",
+      "body": "It may have been removed. Ask the admin for a new link."
+    },
+    "failed": {
+      "title": "Could not sign in.",
+      "body": "Check the connection and try again."
+    },
+    "unsupported": {
+      "title": "Passkeys do not work here.",
+      "body": "Open the app over HTTPS in an up-to-date browser."
+    }
   }
 }

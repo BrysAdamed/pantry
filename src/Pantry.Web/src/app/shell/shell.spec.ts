@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
@@ -16,6 +18,8 @@ describe('Shell', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTranslocoTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([
           {
             path: '',

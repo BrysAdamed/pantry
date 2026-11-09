@@ -14,6 +14,7 @@ const admin = { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, t
 
 async function mockSetup(page: Page, completeStatus = 200) {
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: true } }));
+  await page.route('/api/me', (route) => route.fulfill({ status: 401 }));
   await page.route('/api/setup/passkey-options', (route) => route.fulfill({ json: creationOptions }));
   await page.route('/api/setup/complete', (route) =>
     completeStatus === 200
@@ -67,6 +68,9 @@ test('creates the admin passkey and welcomes them home', async ({ page }) => {
   expect(body.credential.type).toBe('public-key');
   expect(body.credential.response.attestationObject).toBeTruthy();
   await expect(page.getByTestId('first-run-done')).toHaveText('Welcome home!');
+
+  await page.getByTestId('first-run-open-app').click();
+  await expect(page).toHaveURL('/planner');
 });
 
 test('offers to try again when the passkey window is closed', async ({ page }) => {
@@ -103,11 +107,11 @@ test('shows the first run in Polish', async ({ page }) => {
   await expect(page.getByTestId('first-run-create')).toHaveText('Utwórz klucz dostępu');
 });
 
-test('skips the first run once an admin exists', async ({ page }) => {
+test('skips the first run once an admin exists and asks to sign in', async ({ page }) => {
   await mockSetup(page);
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
 
   await page.goto('/first-run');
 
-  await expect(page).toHaveURL('/planner');
+  await expect(page).toHaveURL(/\/sign-in(\?|$)/);
 });

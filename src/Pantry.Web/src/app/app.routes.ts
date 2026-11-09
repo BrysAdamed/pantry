@@ -1,12 +1,13 @@
 import { Routes } from '@angular/router';
 import { FIRST_RUN_PATH, requireFirstRunNeeded, requireSetupDone } from './identity/setup-status';
+import { requireSignedIn, requireSignedOut, SIGN_IN_PATH } from './identity/session';
 import { Shell } from './shell/shell';
 
 export const routes: Routes = [
   {
     path: '',
     component: Shell,
-    canActivate: [requireSetupDone],
+    canActivate: [requireSetupDone, requireSignedIn],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'planner' },
       { path: 'planner', loadChildren: () => import('./planner/planner.routes').then((m) => m.plannerRoutes) },
@@ -19,6 +20,11 @@ export const routes: Routes = [
     path: FIRST_RUN_PATH,
     canActivate: [requireFirstRunNeeded],
     loadComponent: () => import('./identity/first-run/first-run').then((m) => m.FirstRun),
+  },
+  {
+    path: SIGN_IN_PATH,
+    canActivate: [requireSetupDone, requireSignedOut],
+    loadComponent: () => import('./identity/sign-in/sign-in').then((m) => m.SignIn),
   },
   {
     path: 'design-system',

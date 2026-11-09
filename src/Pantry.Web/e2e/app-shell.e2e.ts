@@ -9,6 +9,9 @@ const destinations = [
 
 test.beforeEach(async ({ page }) => {
   await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
+  await page.route('/api/me', (route) =>
+    route.fulfill({ json: { id: '1', displayName: 'Alex', role: 'admin', uiLanguage: null, theme: 'system' } }),
+  );
   await page.addInitScript(() => {
     if (!sessionStorage.getItem('e2e.seeded')) {
       localStorage.setItem('pantry.uiLanguage', 'en');

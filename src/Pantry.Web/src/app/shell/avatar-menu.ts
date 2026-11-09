@@ -1,10 +1,12 @@
 import { A11yModule } from '@angular/cdk/a11y';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { LanguageSwitcher } from '../core/i18n/language-switcher';
 import { ThemeSwitcher } from '../core/theme/theme-switcher';
+import { Session, SIGN_IN_PATH } from '../identity/session';
 import { Icon } from '../shared/icon/icon';
 
 const POSITIONS: Record<'side' | 'below', ConnectedPosition[]> = {
@@ -61,8 +63,16 @@ let nextId = 0;
             <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground" aria-hidden="true">{{ t('theme.label') }}</span>
             <app-theme-switcher />
           </div>
-          <!-- TODO(PAN-20): wire sign-out once passkey sign-in exists. -->
-          <button hlmBtn variant="ghost" size="sm" type="button" class="justify-self-start text-danger" disabled>
+          <button
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            type="button"
+            class="min-h-tap justify-self-start text-danger"
+            data-testid="sign-out"
+            [disabled]="signingOut()"
+            (click)="signOut()"
+          >
             <app-icon name="signOut" class="size-4" />
             {{ t('shell.signOut') }}
           </button>
@@ -72,11 +82,26 @@ let nextId = 0;
   `,
 })
 export class AvatarMenu {
+  private readonly session = inject(Session);
+  private readonly router = inject(Router);
+
   readonly placement = input<'side' | 'below'>('side');
 
   protected readonly open = signal(false);
   protected readonly positions = computed(() => POSITIONS[this.placement()]);
   protected readonly panelId = `avatar-menu-${nextId++}`;
+  protected readonly signingOut = signal(false);
+
+  protected async signOut(): Promise<void> {
+    this.signingOut.set(true);
+    try {
+      await this.session.signOut();
+      this.open.set(false);
+      await this.router.navigateByUrl(`/${SIGN_IN_PATH}`, { replaceUrl: true });
+    } finally {
+      this.signingOut.set(false);
+    }
+  }
 
   protected closeUnlessOrigin(event: MouseEvent, origin: HTMLElement): void {
     if (!origin.contains(event.target as Node)) {

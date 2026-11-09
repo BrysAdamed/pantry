@@ -8,7 +8,7 @@
   </a>
 
   <div class="min-h-dvh md:grid md:grid-cols-[84px_minmax(0,1fr)]">
-    <aside
+    <div
       class="sticky top-0 hidden h-dvh flex-col items-center gap-5.5 border-r-2 border-outline bg-card px-2 pt-4.5 pb-3.5 md:flex"
       data-testid="rail"
     >
@@ -24,7 +24,7 @@
             [routerLink]="['/', destination]"
             routerLinkActive="!border-outline bg-accent !text-accent-foreground"
             ariaCurrentWhenActive="page"
-            class="grid min-h-14 w-16 justify-items-center gap-1 rounded-control border-2 border-transparent px-1 py-2 text-[11px] font-bold text-muted-foreground hover:text-foreground"
+            class="grid min-h-tap w-16 justify-items-center gap-1 rounded-control border-2 border-transparent px-1 py-2 text-[11px] font-bold text-muted-foreground hover:text-foreground"
           >
             <app-icon [name]="icons[destination]" class="size-6" />
             {{ t('nav.' + destination) }}
@@ -35,7 +35,7 @@
         <app-sync-indicator variant="rail" />
         <app-avatar-menu placement="side" />
       </div>
-    </aside>
+    </div>
 
     <div class="flex min-w-0 flex-col">
       <header class="flex items-center gap-2 px-3.5 pt-3 pb-2.5 md:sr-only">

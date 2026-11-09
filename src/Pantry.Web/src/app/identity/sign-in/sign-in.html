@@ -1,0 +1,51 @@
+<main *transloco="let t; prefix: 'signIn'" class="mx-auto flex min-h-dvh w-full max-w-sm flex-col gap-5 px-5 pt-8 pb-8">
+  <section class="grid flex-1 content-center justify-items-center gap-4 text-center" aria-live="polite">
+    <img src="icons/icon.svg" alt="" class="size-16" />
+    <h1 class="text-3xl">{{ t('title') }}</h1>
+    <p class="text-sm text-muted-foreground">{{ t('intro') }}</p>
+
+    @if (autofill()) {
+      <label class="grid w-full gap-1.5 text-left">
+        <span class="text-sm font-bold">{{ t('accountLabel') }}</span>
+        <input
+          class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 py-2 disabled:opacity-45"
+          name="username"
+          autocomplete="username webauthn"
+          data-testid="sign-in-autofill"
+          [placeholder]="t('accountPlaceholder')"
+          [disabled]="state() === 'signingIn'"
+          (keydown.enter)="signIn()"
+        />
+      </label>
+    }
+
+    @if (expired()) {
+      <p role="status" data-testid="sign-in-expired" class="w-full rounded-control border-2 border-outline bg-card px-3 py-2.5 text-left text-sm">
+        {{ t('expired') }}
+      </p>
+    }
+
+    @if (showsError()) {
+      <div
+        role="alert"
+        data-testid="sign-in-error"
+        class="flex w-full items-start gap-2 rounded-control border-2 border-danger bg-danger-surface px-3 py-2.5 text-left text-sm"
+      >
+        <p><b>{{ t(state() + '.title') }}</b> {{ t(state() + '.body') }}</p>
+      </div>
+    }
+  </section>
+
+  <footer class="grid gap-2.5">
+    <button hlmBtn size="lg" class="w-full" data-testid="sign-in-passkey" [disabled]="!canSignIn()" (click)="signIn()">
+      @switch (state()) {
+        @case ('signingIn') { {{ t('signingIn') }} }
+        @case ('cancelled') { {{ t('retry') }} }
+        @case ('rejected') { {{ t('retry') }} }
+        @case ('failed') { {{ t('retry') }} }
+        @default { {{ t('signIn') }} }
+      }
+    </button>
+    <p class="text-center text-xs text-muted-foreground">{{ t('hint') }}</p>
+  </footer>
+</main>

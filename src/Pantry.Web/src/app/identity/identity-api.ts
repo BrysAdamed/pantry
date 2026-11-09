@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -14,7 +14,12 @@ export interface CurrentUser {
   theme: 'system' | 'light' | 'dark';
 }
 
-/** Calls of the Identity module (`/api/setup`, `/api/me`). */
+/** Marks a request whose 401 the caller handles itself, so the auth interceptor does not send the user to sign-in. */
+export const HANDLES_UNAUTHORIZED = new HttpContextToken<boolean>(() => false);
+
+const handlesUnauthorized = () => ({ context: new HttpContext().set(HANDLES_UNAUTHORIZED, true) });
+
+/** Calls of the Identity module (`/api/setup`, `/api/auth`, `/api/me`). */
 @Injectable({ providedIn: 'root' })
 export class IdentityApi {
   private readonly http = inject(HttpClient);
@@ -31,5 +36,29 @@ export class IdentityApi {
 
   completeFirstRun(credential: PublicKeyCredentialJSON): Promise<CurrentUser> {
     return firstValueFrom(this.http.post<CurrentUser>('/api/setup/complete', { credential }));
+  }
+
+  /** The signed-in user. Fails with 401 when there is no session. */
+  me(): Promise<CurrentUser> {
+    return firstValueFrom(this.http.get<CurrentUser>('/api/me', handlesUnauthorized()));
+  }
+
+  /** Refreshes the antiforgery token for whoever the browser is now; a token from an ended session would be rejected. */
+  async refreshAntiforgeryToken(): Promise<void> {
+    await firstValueFrom(this.http.get('/api/antiforgery', handlesUnauthorized()));
+  }
+
+  signInPasskeyOptions(): Promise<PublicKeyCredentialRequestOptionsJSON> {
+    return firstValueFrom(
+      this.http.post<PublicKeyCredentialRequestOptionsJSON>('/api/auth/passkey-options', null, handlesUnauthorized()),
+    );
+  }
+
+  signIn(credential: PublicKeyCredentialJSON): Promise<CurrentUser> {
+    return firstValueFrom(this.http.post<CurrentUser>('/api/auth/sign-in', { credential }, handlesUnauthorized()));
+  }
+
+  async signOut(): Promise<void> {
+    await firstValueFrom(this.http.post('/api/auth/sign-out', null, handlesUnauthorized()));
   }
 }

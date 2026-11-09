@@ -133,5 +133,32 @@
       "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
       "action": "Przejdź do planu"
     }
+  },
+  "signIn": {
+    "title": "Spiżarnia",
+    "intro": "Plan posiłków i zakupy dla całego domu.",
+    "accountLabel": "Konto",
+    "accountPlaceholder": "Wybierz klucz dostępu",
+    "signIn": "Zaloguj się kluczem dostępu",
+    "signingIn": "Czekam na klucz dostępu…",
+    "retry": "Spróbuj ponownie",
+    "hint": "Nie masz konta? Poproś domownika o zaproszenie.",
+    "expired": "Sesja wygasła. Zaloguj się ponownie.",
+    "cancelled": {
+      "title": "Logowanie przerwane.",
+      "body": "Okno klucza zostało zamknięte albo klucz nie pasuje do tego adresu. Spróbuj jeszcze raz albo poproś administratora o nowy link."
+    },
+    "rejected": {
+      "title": "Nie znamy tego klucza dostępu.",
+      "body": "Mógł zostać usunięty. Poproś administratora o nowy link."
+    },
+    "failed": {
+      "title": "Nie udało się zalogować.",
+      "body": "Sprawdź połączenie i spróbuj ponownie."
+    },
+    "unsupported": {
+      "title": "Klucze dostępu tu nie działają.",
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+    }
   }
 }
