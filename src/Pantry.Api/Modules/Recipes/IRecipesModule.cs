@@ -63,6 +63,29 @@ public interface IRecipesModule
     /// </summary>
     Task<IReadOnlyList<RecipeDislikeWarning>> GetDislikeWarningsAsync(
         IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Makes <paramref name="image"/> (JPEG, PNG or WebP, at most <c>Recipes:Photos:MaxBytes</c>) the photo of a recipe,
+    /// archived or not, in place of the one it had; for an agent that attaches the picture from the recipe's source page.
+    /// The picture is resized and loses its metadata (ADR 0025).
+    /// </summary>
+    Task<RecipePhotoResult> SetPhotoAsync(Guid recipeId, Stream image, CancellationToken cancellationToken = default);
+
+    /// <summary>Removes the photo of a recipe, if it has one; false when the recipe does not exist.</summary>
+    Task<bool> RemovePhotoAsync(Guid recipeId, CancellationToken cancellationToken = default);
+}
+
+/// <summary>What became of a recipe photo upload.</summary>
+public enum RecipePhotoResult
+{
+    Saved,
+    RecipeNotFound,
+
+    /// <summary>Larger than <c>Recipes:Photos:MaxBytes</c>.</summary>
+    TooLarge,
+
+    /// <summary>Not a JPEG, PNG or WebP picture that could be read, or one with too many pixels.</summary>
+    NotAPhoto,
 }
 
 /// <summary>A household dislike of an ingredient of a recipe; only a <see cref="DislikeKind.Never"/> one can have a reason.</summary>
@@ -96,7 +119,8 @@ public sealed record RecipeSummary(
     Nutrition Nutrition,
     bool MakeAgain,
     int? CooldownDays,
-    bool IsArchived);
+    bool IsArchived,
+    bool HasPhoto);
 
 /// <summary>
 /// One ingredient line of a recipe for one serving. <c>Quantity</c> and <c>Unit</c> are both null for an ingredient

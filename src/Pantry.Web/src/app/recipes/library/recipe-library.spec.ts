@@ -25,6 +25,7 @@ function recipe(id: string, name: string, change: Partial<RecipeListItem> = {}):
     cooldown: { days: 21, isHouseholdDefault: true, lastEaten: null, availableFrom: null },
     isArchived: false,
     updatedAt: '2026-11-01T10:00:00Z',
+  photo: null,
     dislikes: [],
     ...change,
   };
@@ -52,7 +53,11 @@ describe('Recipe library', () => {
         ],
       }),
       recipe('salmon', 'Salmon with potatoes', { prepTimeMinutes: 75, tags: ['dinner', 'fish'], makeAgain: false }),
-      recipe('porridge', 'Porridge', { prepTimeMinutes: 10, tags: ['breakfast'] }),
+      recipe('porridge', 'Porridge', {
+        prepTimeMinutes: 10,
+        tags: ['breakfast'],
+        photo: { card: '/api/recipes/porridge/photos/p1/card', detail: '/api/recipes/porridge/photos/p1/detail' },
+      }),
     ];
     TestBed.configureTestingModule({
       providers: [
@@ -149,6 +154,10 @@ describe('Recipe library', () => {
     expect(texts('recipe-last-eaten', salmon)).toEqual(['not eaten yet']);
     expect(texts('badge-not-again', salmon)).toEqual(['not cooking again']);
     expect(texts('badge-too-soon', salmon)).toEqual([]);
+
+    const porridge = card('Porridge');
+    expect(porridge.querySelector('[data-testid="recipe-tile"]')).toBeNull();
+    expect(porridge.querySelector('[data-testid="recipe-photo"]')?.getAttribute('src')).toBe('/api/recipes/porridge/photos/p1/card');
   });
 
   it('searches after a pause', async () => {

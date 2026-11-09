@@ -104,6 +104,10 @@ namespace Pantry.Api.Modules.Recipes.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
+                    b.Property<Guid?>("PhotoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("photo_id");
+
                     b.Property<int?>("PrepTimeMinutes")
                         .HasColumnType("integer")
                         .HasColumnName("prep_time_minutes");

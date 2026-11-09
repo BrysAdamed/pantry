@@ -63,6 +63,8 @@ import {
   sameDraft,
   TagProblem,
 } from './recipe-draft';
+import { KEEP_PHOTO, PhotoChange } from './recipe-photo';
+import { RecipePhotoField } from './recipe-photo-field';
 
 export const TAG_SEARCH_DELAY_MS = 200;
 const TAG_SUGGESTIONS = 8;
@@ -76,12 +78,21 @@ export type LineHint =
 /**
  * The recipe editor for a new recipe (`/recipes/new`) and an existing one (`/recipes/:id/edit`): quantities typed for
  * the recipe servings, ingredient lines with the shared picker and optional sections, steps, tags with suggestions,
- * prep time, source, nutrition per serving, cooldown and make again. Lines with a *never* or *avoid* ingredient are
+ * prep time, source, photo, nutrition per serving, cooldown and make again. Lines with a *never* or *avoid* ingredient are
  * marked while typing. Leaving with unsaved changes asks first (`confirmDiscardRecipe`).
  */
 @Component({
   selector: 'app-recipe-editor',
-  imports: [TranslocoDirective, RouterLink, HlmButton, Icon, Switch, DialogFrame, IngredientPicker],
+  imports: [
+    TranslocoDirective,
+    RouterLink,
+    HlmButton,
+    Icon,
+    Switch,
+    DialogFrame,
+    IngredientPicker,
+    RecipePhotoField,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'grid content-start gap-4.5', '(window:beforeunload)': 'onBeforeUnload($event)' },
   templateUrl: './recipe-editor.html',
@@ -133,7 +144,7 @@ export class RecipeEditor {
   protected readonly dirty = computed(() => {
     const draft = this.draft();
     const initial = this.initial();
-    return !!draft && !!initial && !sameDraft(draft, initial);
+    return (!!draft && !!initial && !sameDraft(draft, initial)) || this.photoChange().kind !== 'keep';
   });
   protected readonly problems = computed(() => {
     const draft = this.draft();
@@ -143,6 +154,11 @@ export class RecipeEditor {
   protected readonly showProblems = linkedSignal<string | undefined, boolean>({
     source: this.id,
     computation: () => false,
+  });
+  /** Applied after the recipe itself saves, because a new recipe has no id before that. */
+  protected readonly photoChange = linkedSignal<string | undefined, PhotoChange>({
+    source: this.id,
+    computation: () => KEEP_PHOTO,
   });
   protected readonly saving = signal(false);
   protected readonly saveError = linkedSignal<string | undefined, SaveError | null>({
@@ -317,9 +333,17 @@ export class RecipeEditor {
       const saved = id
         ? await this.api.updateRecipe(id, change)
         : await this.api.createRecipe(change);
+      const photoSaved = await this.savePhoto(saved.id);
       this.toasts.show(
-        this.transloco.translate(id ? 'recipes.editor.toast.saved' : 'recipes.editor.toast.added'),
+        this.transloco.translate(
+          !photoSaved
+            ? 'recipes.editor.toast.photoFailed'
+            : id
+              ? 'recipes.editor.toast.saved'
+              : 'recipes.editor.toast.added',
+        ),
       );
+      this.photoChange.set(KEEP_PHOTO);
       this.recipe.set(saved);
       await this.leave(recipePath(saved.id), !id);
     } catch (error) {
@@ -354,6 +378,26 @@ export class RecipeEditor {
   protected onBeforeUnload(event: BeforeUnloadEvent): void {
     if (this.dirty()) {
       event.preventDefault();
+    }
+  }
+
+  protected setPhoto(change: PhotoChange): void {
+    this.photoChange.set(change);
+    this.saveError.set(null);
+  }
+
+  /** Uploads or removes the photo of the saved recipe; false when that failed, which leaves the recipe saved. */
+  private async savePhoto(id: string): Promise<boolean> {
+    const change = this.photoChange();
+    try {
+      if (change.kind === 'set') {
+        await this.api.setPhoto(id, change.file);
+      } else if (change.kind === 'remove') {
+        await this.api.removePhoto(id);
+      }
+      return true;
+    } catch {
+      return false;
     }
   }
 

@@ -48,6 +48,9 @@ public sealed class Recipe
 
     public DateTimeOffset? ArchivedAt { get; private set; }
 
+    /// <summary>The photo, a new id with every upload so its files never change; null for none. Archiving keeps it.</summary>
+    public Guid? PhotoId { get; private set; }
+
     public bool IsArchived => ArchivedAt is not null;
 
     public IReadOnlyCollection<RecipeTag> Tags => _tags;
@@ -101,6 +104,20 @@ public sealed class Recipe
 
         MakeAgain = makeAgain;
         UpdatedAt = now;
+    }
+
+    /// <summary>Puts <paramref name="photoId"/> in place of the current photo and returns the replaced one, whose files can go.</summary>
+    public Guid? SetPhoto(Guid? photoId, DateTimeOffset now)
+    {
+        var replaced = PhotoId;
+        if (replaced == photoId)
+        {
+            return null;
+        }
+
+        PhotoId = photoId;
+        UpdatedAt = now;
+        return replaced;
     }
 
     public void Archive(DateTimeOffset now)

@@ -9,7 +9,7 @@ import { Stars } from '../stars';
 import { hasDislike, isTooSoon, lastEatenText, recipeInitial, recipeTileColour } from './recipe-card-facts';
 
 /**
- * One recipe in the library: a coloured tile with the initial, the name, rating, prep time, when it was last eaten and
+ * One recipe in the library: its photo or else a coloured tile with the initial, the name, rating, prep time, when it was last eaten and
  * kcal, and the *never*, *avoid*, *not cooking again* and *too soon* badges.
  */
 @Component({
@@ -25,13 +25,23 @@ import { hasDislike, isTooSoon, lastEatenText, recipeInitial, recipeTileColour }
       [routerLink]="path()"
       [attr.aria-current]="current() || null"
     >
-      <span
-        class="grid size-14 place-items-center rounded-control border-2 border-outline font-display text-xl font-extrabold text-foreground"
-        [style.background]="colour()"
-        aria-hidden="true"
-        data-testid="recipe-tile"
-        >{{ initial() }}</span
-      >
+      @if (recipe().photo; as photo) {
+        <img
+          class="size-14 rounded-control border-2 border-outline bg-muted object-cover"
+          alt=""
+          loading="lazy"
+          data-testid="recipe-photo"
+          [src]="photo.card"
+        />
+      } @else {
+        <span
+          class="grid size-14 place-items-center rounded-control border-2 border-outline font-display text-xl font-extrabold text-foreground"
+          [style.background]="colour()"
+          aria-hidden="true"
+          data-testid="recipe-tile"
+          >{{ initial() }}</span
+        >
+      }
       <span class="grid min-w-0 content-start gap-0.75">
         <span class="text-[15px] leading-tight font-extrabold" data-testid="recipe-name">{{ recipe().name }}</span>
         <span class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted-foreground">

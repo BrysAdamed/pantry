@@ -886,6 +886,7 @@
     "detail": {
       "back": "Recipes",
       "edit": "Edit",
+      "photoAlt": "Photo of {{name}}",
       "addToPlan": "Add to plan",
       "time": {
         "minutes": "{{minutes}} min",
@@ -1010,6 +1011,23 @@
         "tooMany": "A recipe can have at most {{max}} tags."
       },
       "source": "Source",
+      "photo": {
+        "label": "Photo",
+        "drop": "Drop a photo or tap to choose",
+        "optional": "Optional. JPEG, PNG or WebP, up to 10 MB.",
+        "dropping": "Drop the photo here",
+        "replace": "Replace",
+        "remove": "Remove",
+        "alt": "Photo of {{name}}",
+        "newAlt": "New photo",
+        "pending": "Saved with the recipe.",
+        "removed": "The photo is removed when you save.",
+        "undo": "Keep the photo",
+        "problem": {
+          "type": "Choose a JPEG, PNG or WebP picture.",
+          "size": "The photo is larger than 10 MB. Choose a smaller one."
+        }
+      },
       "cooldown": "Break before planning it again",
       "cooldownDefault": "default",
       "days": "days",
@@ -1058,7 +1076,8 @@
       "retry": "Try again",
       "toast": {
         "added": "Recipe added",
-        "saved": "Recipe saved"
+        "saved": "Recipe saved",
+        "photoFailed": "The recipe was saved, but its photo was not. Try another picture."
       },
       "discard": {
         "title": "Discard changes?",

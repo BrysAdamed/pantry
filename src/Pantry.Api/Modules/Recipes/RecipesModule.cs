@@ -2,10 +2,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Recipes.Features.History;
+using Pantry.Api.Modules.Recipes.Features.Photos;
 using Pantry.Api.Modules.Recipes.Features.Ratings;
 using Pantry.Api.Modules.Recipes.Features.Recipes;
 using Pantry.Api.Modules.Recipes.Features.Tags;
 using Pantry.Api.Modules.Recipes.Persistence;
+using Pantry.Api.Modules.Recipes.Photos;
 
 namespace Pantry.Api.Modules.Recipes;
 
@@ -20,6 +22,12 @@ public static class RecipesModule
             .Bind(configuration.GetSection(ToRateSettings.Section))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+        services.AddOptions<RecipePhotoSettings>()
+            .Bind(configuration.GetSection(RecipePhotoSettings.Section))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.AddSingleton<RecipePhotoStore>();
+        services.AddScoped<RecipePhotos>();
         services.TryAddSingleton(TimeProvider.System);
         return services;
     }
@@ -37,6 +45,8 @@ public static class RecipesModule
         recipes.MapGetToRate();
         recipes.MapRateHistoryEntry();
         recipes.MapSetMakeAgain();
+        recipes.MapSetRecipePhoto();
+        recipes.MapGetRecipePhoto();
         return api;
     }
 }

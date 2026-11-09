@@ -54,6 +54,7 @@ const saved: Recipe = {
   archivedAt: null,
   createdAt: '2026-11-01T10:00:00Z',
   updatedAt: '2026-11-01T10:00:00Z',
+  photo: null,
   lines: [
     {
       ingredientId: 'salt',

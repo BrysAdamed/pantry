@@ -27,6 +27,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Tag** | A free-text label of a recipe (*Tag*, e.g. *obiad*, *szybkie*), stored trimmed and in lower case. |
 | **History entry** | A record that the household ate a recipe (*Historia*): the recipe, the date and the meal slot of an eaten plan entry. One per plan entry; un-eating the plan entry removes it. Leftovers have none. Kept in Recipes, written by the Planner. |
 | **Archived recipe** | A recipe hidden from the library, the tray and agents (*Zarchiwizowany przepis*). Recipes are never deleted: plan entries and history still show an archived recipe, and it can be restored. |
+| **Recipe photo** | The optional picture of a recipe (*Zdjęcie*), one at most, kept as a square *card* for tiles and a *detail* size. Without one the recipe shows a coloured tile with its initial. Archiving keeps it. |
 | **Ingredient** | A canonical catalog item (*Składnik*, e.g. *onion*): one name in the content language, aliases, a base unit, a category, a staple flag and optional unit conversions. Names and aliases are unique across the catalog regardless of letter case and diacritics. |
 | **Catalog** | All ingredients of the household (*Katalog składników*). Other modules keep only ingredient ids. |
 | **Alias** | Another name an ingredient is found by (*Alias*, e.g. *cebulka* for *cebula*). Used instead of translations: an ingredient has no per-language names. |

@@ -14,6 +14,9 @@ dist/
 src/Pantry.Api/wwwroot/*
 !src/Pantry.Api/wwwroot/.gitkeep
 
+# Recipe photos written in development (Recipes:Photos:Path)
+src/Pantry.Api/data/
+
 # Local config and secrets
 .env
 appsettings.*.local.json

@@ -32,8 +32,8 @@ await app.MigrateModulesAsync();
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
+app.UseApiCaching();
 app.UseAuthentication();
-app.UseApiNoStore();
 app.UseApiAntiforgeryTokens();
 app.UseAuthorization();
 app.UseApiAntiforgeryValidation();

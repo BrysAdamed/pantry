@@ -4,6 +4,7 @@ using Pantry.Api.Infrastructure.Text;
 using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
+using Pantry.Api.Modules.Recipes.Features.Photos;
 using Pantry.Api.Modules.Recipes.Persistence;
 
 namespace Pantry.Api.Modules.Recipes.Features.Recipes;
@@ -153,6 +154,7 @@ public sealed record RecipeListItem(
     RecipeCooldown Cooldown,
     bool IsArchived,
     DateTimeOffset UpdatedAt,
+    RecipePhotoResponse? Photo,
     IReadOnlyList<RecipeDislikeResponse> Dislikes)
 {
     public static RecipeListItem From(Recipe recipe, RecipeRating rating, RecipeCooldown cooldown, IReadOnlyList<RecipeDislikeResponse> dislikes) => new(
@@ -170,5 +172,6 @@ public sealed record RecipeListItem(
         cooldown,
         recipe.IsArchived,
         recipe.UpdatedAt,
+        RecipePhotoResponse.Of(recipe),
         dislikes);
 }

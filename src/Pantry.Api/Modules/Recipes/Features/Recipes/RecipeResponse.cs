@@ -1,6 +1,7 @@
 using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
+using Pantry.Api.Modules.Recipes.Features.Photos;
 using Pantry.Api.Modules.Recipes.Persistence;
 
 namespace Pantry.Api.Modules.Recipes.Features.Recipes;
@@ -29,6 +30,7 @@ public sealed record RecipeResponse(
     DateTimeOffset? ArchivedAt,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
+    RecipePhotoResponse? Photo,
     IReadOnlyList<RecipeLineResponse> Lines,
     IReadOnlyList<RecipeSectionResponse> Sections,
     IReadOnlyList<RecipeDislikeResponse> Dislikes)
@@ -77,6 +79,7 @@ public sealed record RecipeResponse(
             recipe.ArchivedAt,
             recipe.CreatedAt,
             recipe.UpdatedAt,
+            RecipePhotoResponse.Of(recipe),
             lines.Where(l => l.Section is null).Select(ToResponse).ToList(),
             sections,
             dislikes.Select(d => RecipeDislikeResponse.From(d, ingredients.GetValueOrDefault(d.IngredientId)?.Name)).ToList());

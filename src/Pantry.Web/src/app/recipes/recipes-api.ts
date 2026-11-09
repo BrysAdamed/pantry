@@ -26,8 +26,24 @@ export const RECIPE_LIMITS = {
   maxNutrition: 100_000,
 } as const;
 
+/** What the API accepts as a recipe photo (ADR 0025); it recognises the picture by its content. */
+export const RECIPE_PHOTO_LIMITS = {
+  maxBytes: 10 * 1024 * 1024,
+  types: ['image/jpeg', 'image/png', 'image/webp'],
+} as const;
+
 export function recipeUrl(id: string): string {
   return `${RECIPES_URL}/${id}`;
+}
+
+export function recipePhotoUrl(id: string): string {
+  return `${recipeUrl(id)}/photo`;
+}
+
+/** Where the sizes of a recipe's photo are served: a square `card` and the whole picture for the `detail`. */
+export interface RecipePhoto {
+  card: string;
+  detail: string;
 }
 
 /** Per one serving; null when the source does not say. */
@@ -143,6 +159,7 @@ export interface Recipe {
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  photo: RecipePhoto | null;
   lines: RecipeLine[];
   sections: RecipeSection[];
   dislikes: RecipeDislike[];
@@ -193,6 +210,7 @@ export interface RecipeListItem {
   cooldown: RecipeCooldown;
   isArchived: boolean;
   updatedAt: string;
+  photo: RecipePhoto | null;
   dislikes: RecipeDislike[];
 }
 
@@ -266,6 +284,19 @@ export class RecipesApi {
 
   restoreRecipe(id: string): Promise<Recipe> {
     return firstValueFrom(this.http.post<Recipe>(`${recipeUrl(id)}/restore`, null));
+  }
+
+  /** Sends the picture itself as the body; 413 when it is too large, 415 when it is not a JPEG, PNG or WebP picture. */
+  setPhoto(id: string, photo: Blob): Promise<Recipe> {
+    return firstValueFrom(
+      this.http.put<Recipe>(recipePhotoUrl(id), photo, {
+        headers: { 'Content-Type': photo.type || 'application/octet-stream' },
+      }),
+    );
+  }
+
+  removePhoto(id: string): Promise<Recipe> {
+    return firstValueFrom(this.http.delete<Recipe>(recipePhotoUrl(id)));
   }
 
   /** Adds or changes the stars of a history entry; a `makeAgain` answer also sets the recipe's flag. */

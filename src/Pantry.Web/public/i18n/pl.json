@@ -886,6 +886,7 @@
     "detail": {
       "back": "Przepisy",
       "edit": "Edytuj",
+      "photoAlt": "Zdjęcie: {{name}}",
       "addToPlan": "Do planu",
       "time": {
         "minutes": "{{minutes}} min",
@@ -1010,6 +1011,23 @@
         "tooMany": "Przepis może mieć najwyżej {{max}} tagów."
       },
       "source": "Źródło",
+      "photo": {
+        "label": "Zdjęcie",
+        "drop": "Upuść zdjęcie albo stuknij, żeby wybrać",
+        "optional": "Opcjonalne. JPEG, PNG lub WebP, do 10 MB.",
+        "dropping": "Upuść zdjęcie tutaj",
+        "replace": "Zmień",
+        "remove": "Usuń",
+        "alt": "Zdjęcie: {{name}}",
+        "newAlt": "Nowe zdjęcie",
+        "pending": "Zapisze się razem z przepisem.",
+        "removed": "Zdjęcie zniknie po zapisaniu.",
+        "undo": "Zostaw zdjęcie",
+        "problem": {
+          "type": "Wybierz obraz JPEG, PNG lub WebP.",
+          "size": "Zdjęcie ma więcej niż 10 MB. Wybierz mniejsze."
+        }
+      },
       "cooldown": "Przerwa przed kolejnym planowaniem",
       "cooldownDefault": "domyślna",
       "days": "dni",
@@ -1058,7 +1076,8 @@
       "retry": "Spróbuj ponownie",
       "toast": {
         "added": "Dodano przepis",
-        "saved": "Zapisano przepis"
+        "saved": "Zapisano przepis",
+        "photoFailed": "Przepis zapisany, ale zdjęcie nie. Spróbuj z innym obrazem."
       },
       "discard": {
         "title": "Odrzucić zmiany?",

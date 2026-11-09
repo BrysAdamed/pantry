@@ -4,11 +4,13 @@ using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
 using Pantry.Api.Modules.Recipes.Persistence;
+using Pantry.Api.Modules.Recipes.Photos;
 
 namespace Pantry.Api.Modules.Recipes;
 
 internal sealed class RecipesModuleContract(
-    RecipesDbContext db, DbContextOptions<RecipesDbContext> options, IHouseholdModule household, TimeProvider time) : IRecipesModule
+    RecipesDbContext db, DbContextOptions<RecipesDbContext> options, IHouseholdModule household, RecipePhotos photos, TimeProvider time)
+    : IRecipesModule
 {
     public async Task<RecipeSummary?> GetRecipeAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -143,6 +145,12 @@ internal sealed class RecipesModuleContract(
             .ToList();
     }
 
+    public Task<RecipePhotoResult> SetPhotoAsync(Guid recipeId, Stream image, CancellationToken cancellationToken = default) =>
+        photos.SetAsync(recipeId, image, cancellationToken);
+
+    public Task<bool> RemovePhotoAsync(Guid recipeId, CancellationToken cancellationToken = default) =>
+        photos.RemoveAsync(recipeId, cancellationToken);
+
     internal static RecipeSummary ToSummary(Recipe recipe) => new(
         recipe.Id,
         recipe.Name,
@@ -152,7 +160,8 @@ internal sealed class RecipesModuleContract(
         recipe.Nutrition,
         recipe.MakeAgain,
         recipe.CooldownDays,
-        recipe.IsArchived);
+        recipe.IsArchived,
+        recipe.PhotoId is not null);
 
     private async Task<RecipesDbContext> JoinAsync(DbTransaction transaction, CancellationToken cancellationToken)
     {
