@@ -19,7 +19,13 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Proposed** | A plan entry created by an agent and not yet accepted by a user. |
 | **Leftover** | A plan entry that eats a dish cooked in an earlier entry. Adds nothing to the shopping list. |
 | **Tray** | The planner side panel (*Szuflada dań*) with favourite, recent and searched recipes to place in the plan. A bottom sheet on phones. |
-| **Recipe** | A dish with ingredient lines (quantity per one serving), steps, tags and optional nutrition. |
+| **Recipe** | A dish (*Przepis*) with ingredient lines (quantity per one serving), steps, tags, prep time, source URL and optional nutrition per serving. |
+| **Recipe servings** | How many servings a recipe's quantities were entered for (*Liczba porcji*, e.g. 4). Quantities are also stored per one serving, which is what the planner and the shopping list use. |
+| **Ingredient line** | One line of a recipe (*Składnik przepisu*): a catalog ingredient, a quantity and unit or *to taste*, an optional note (e.g. *drobno posiekana*), and its section. |
+| **Section** | A named group of ingredient lines in a recipe (*Sekcja*, e.g. *Sos*, *Ciasto*). Optional and ordered; lines outside any section come first. |
+| **To taste** | An ingredient line without a quantity or unit (*Do smaku*), like salt. It still names the ingredient, so the shopping list knows it is needed. |
+| **Tag** | A free-text label of a recipe (*Tag*, e.g. *obiad*, *szybkie*), stored trimmed and in lower case. |
+| **Archived recipe** | A recipe hidden from the library, the tray and agents (*Zarchiwizowany przepis*). Recipes are never deleted: plan entries and history still show an archived recipe, and it can be restored. |
 | **Ingredient** | A canonical catalog item (*Składnik*, e.g. *onion*): one name in the content language, aliases, a base unit, a category, a staple flag and optional unit conversions. Names and aliases are unique across the catalog regardless of letter case and diacritics. |
 | **Catalog** | All ingredients of the household (*Katalog składników*). Other modules keep only ingredient ids. |
 | **Alias** | Another name an ingredient is found by (*Alias*, e.g. *cebulka* for *cebula*). Used instead of translations: an ingredient has no per-language names. |
