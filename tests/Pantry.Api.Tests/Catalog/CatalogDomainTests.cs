@@ -102,6 +102,38 @@ public sealed class CatalogDomainTests
     public void Units_without_a_generic_conversion_into_the_base_unit_are_not_converted(Unit unit, Unit baseUnit) =>
         Assert.False(Units.TryConvertGeneric(1m, unit, baseUnit, out _));
 
+    [Theory]
+    [InlineData(Unit.G, Unit.G)]
+    [InlineData(Unit.Kg, Unit.G)]
+    [InlineData(Unit.Ml, Unit.Ml)]
+    [InlineData(Unit.L, Unit.Ml)]
+    [InlineData(Unit.Tbsp, Unit.Ml)]
+    [InlineData(Unit.Tsp, Unit.Ml)]
+    [InlineData(Unit.Piece, Unit.Piece)]
+    [InlineData(Unit.Clove, Unit.Piece)]
+    [InlineData(Unit.Can, Unit.Piece)]
+    [InlineData(Unit.Pinch, Unit.Piece)]
+    [InlineData(Unit.Glass, Unit.Piece)]
+    [InlineData(null, Unit.Piece)]
+    public void Base_unit_is_guessed_from_the_unit_used(Unit? unitUsed, Unit expected) =>
+        Assert.Equal(expected, Units.GuessBaseUnit(unitUsed));
+
+    [Fact]
+    public void Ingredient_from_an_unknown_name_needs_review_until_confirmed()
+    {
+        var ingredient = Ingredient.CreateFromUnknownName(" Imbir ", Unit.Kg);
+
+        Assert.Equal("Imbir", ingredient.Name);
+        Assert.Equal(Unit.G, ingredient.BaseUnit);
+        Assert.Equal(IngredientCategory.Other, ingredient.Category);
+        Assert.Empty(ingredient.Aliases);
+        Assert.True(ingredient.NeedsReview);
+
+        ingredient.Confirm();
+
+        Assert.False(ingredient.NeedsReview);
+    }
+
     [Fact]
     public void Base_units_are_g_ml_and_piece() =>
         Assert.Equal(["g", "ml", "piece"], Units.BaseUnits.Select(CatalogCode.Of));

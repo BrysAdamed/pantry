@@ -11,6 +11,7 @@ public static class CatalogModule
     {
         services.AddModuleDbContext<CatalogDbContext>(CatalogDbContext.Schema);
         services.AddScoped<ICatalogModule, CatalogModuleContract>();
+        services.AddScoped<IngredientReferences>();
         return services;
     }
 
@@ -24,6 +25,9 @@ public static class CatalogModule
         ingredients.MapGetIngredient();
         ingredients.MapCreateIngredient();
         ingredients.MapUpdateIngredient();
+        ingredients.MapResolveIngredient();
+        ingredients.MapConfirmIngredient();
+        ingredients.MapMergeIngredients();
         return api;
     }
 }

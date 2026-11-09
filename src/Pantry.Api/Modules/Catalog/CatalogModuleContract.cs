@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Pantry.Api.Modules.Catalog.Domain;
+using Pantry.Api.Modules.Catalog.Features.Ingredients;
 using Pantry.Api.Modules.Catalog.Persistence;
 
 namespace Pantry.Api.Modules.Catalog;
@@ -30,6 +31,25 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
         return ingredient is null ? null : ToContract(ingredient);
     }
 
+    public async Task<BaseQuantity?> ConvertToBaseUnitAsync(
+        Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default) =>
+        (await GetIngredientAsync(ingredientId, cancellationToken))?.ConvertToBaseUnit(quantity, unit);
+
+    public async Task<ResolvedIngredient> ResolveIngredientAsync(string name, Unit? unitUsed, CancellationToken cancellationToken = default)
+    {
+        var cleanName = IngredientName.Clean(name);
+        if (!Ingredient.IsValidName(cleanName))
+        {
+            throw new ArgumentException($"An ingredient name must have 1 to {Ingredient.NameMaxLength} characters.", nameof(name));
+        }
+
+        var (ingredient, created) = await ResolveIngredient.ResolveAsync(db, cleanName, unitUsed, cancellationToken);
+        return new ResolvedIngredient(ToContract(ingredient), created);
+    }
+
+    public async Task<CatalogIngredient?> ConfirmIngredientAsync(Guid id, CancellationToken cancellationToken = default) =>
+        await ConfirmIngredient.ConfirmAsync(db, id, cancellationToken) is { } ingredient ? ToContract(ingredient) : null;
+
     private static CatalogIngredient ToContract(Ingredient ingredient) => new(
         ingredient.Id,
         ingredient.Name,
@@ -37,5 +57,6 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
         ingredient.BaseUnit,
         ingredient.Category,
         ingredient.IsStaple,
-        ingredient.NeedsReview);
+        ingredient.NeedsReview,
+        ingredient.ConversionAmounts());
 }

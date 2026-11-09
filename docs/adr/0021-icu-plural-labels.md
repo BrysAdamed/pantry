@@ -1,4 +1,4 @@
-# 0020 ICU plural and select labels
+# 0021 ICU plural and select labels
 
 **Status:** Accepted, 2026-11-09
 

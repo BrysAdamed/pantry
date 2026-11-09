@@ -14,6 +14,13 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
 
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
 
+    /// <summary>
+    /// Locks the rows of the ingredients until the current transaction ends, always in the same order, so merges and
+    /// deletes of the same ingredients run one after another without deadlocking.
+    /// </summary>
+    public Task LockIngredientsAsync(Guid[] ids, CancellationToken cancellationToken) =>
+        Database.ExecuteSqlAsync($"SELECT 1 FROM catalog.ingredients WHERE id = ANY({ids}) ORDER BY id FOR UPDATE", cancellationToken);
+
     public static bool IsDuplicateName(DbUpdateException exception) =>
         exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: NameKeyIndex };
 
@@ -44,6 +51,17 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
                 name.HasIndex(n => n.Key).IsUnique().HasDatabaseName(NameKeyIndex);
             });
             ingredient.Navigation(i => i.Names).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            ingredient.OwnsMany(i => i.Conversions, conversion =>
+            {
+                conversion.ToTable("ingredient_conversions", table => table.HasCheckConstraint(
+                    "ck_ingredient_conversions_amount", "amount > 0"));
+                conversion.WithOwner().HasForeignKey("IngredientId");
+                conversion.HasKey("IngredientId", nameof(UnitConversion.Unit));
+                conversion.Property(c => c.Unit).HasConversion(new CodeConverter<Unit>()).HasMaxLength(CodeMaxLength);
+                conversion.Property(c => c.Amount).HasPrecision(18, UnitConversion.AmountScale);
+            });
+            ingredient.Navigation(i => i.Conversions).UsePropertyAccessMode(PropertyAccessMode.Field);
         });
     }
 

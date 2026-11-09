@@ -4,7 +4,11 @@ using Pantry.Api.Modules.Catalog.Persistence;
 
 namespace Pantry.Api.Modules.Catalog.Features.Ingredients;
 
-/// <summary>Renames an ingredient, replaces its aliases and sets its category and staple flag.</summary>
+/// <summary>
+/// Renames an ingredient, replaces its aliases, sets its category and staple flag and, when given, its base unit and
+/// unit conversions. A new base unit removes the conversions; the request's conversions are in the base unit it ends
+/// up with, and leaving them out keeps the current ones only while the base unit stays.
+/// </summary>
 public static class UpdateIngredient
 {
     public static RouteHandlerBuilder MapUpdateIngredient(this IEndpointRouteBuilder ingredients) => ingredients.MapPut("/{id:guid}", HandleAsync);
@@ -20,6 +24,12 @@ public static class UpdateIngredient
             return TypedResults.ValidationProblem(errors);
         }
 
+        if (request.BaseUnit is { } requestedBaseUnit && !Units.IsBaseUnit(requestedBaseUnit))
+        {
+            errors[nameof(request.BaseUnit)] = [$"Base unit must be one of: {string.Join(", ", Units.BaseUnits.Select(CatalogCode.Of))}."];
+            return TypedResults.ValidationProblem(errors);
+        }
+
         if (errors.Count > 0)
         {
             return TypedResults.ValidationProblem(errors);
@@ -31,9 +41,28 @@ public static class UpdateIngredient
             return TypedResults.NotFound();
         }
 
+        var baseUnit = request.BaseUnit ?? ingredient.BaseUnit;
+        IReadOnlyList<(Unit Unit, decimal Amount)>? conversions = null;
+        if (request.Conversions is not null)
+        {
+            IngredientValidation.ValidateConversions(baseUnit, request.Conversions, errors, out var valid);
+            if (errors.Count > 0)
+            {
+                return TypedResults.ValidationProblem(errors);
+            }
+
+            conversions = valid;
+        }
+
         ingredient.SetNames(name, aliases);
         ingredient.Category = category;
         ingredient.IsStaple = request.IsStaple;
+        ingredient.SetBaseUnit(baseUnit);
+        if (conversions is not null)
+        {
+            ingredient.SetConversions(conversions);
+        }
+
         if (await IngredientValidation.SaveAsync(db, ingredient, cancellationToken) is { } conflict)
         {
             return conflict;
@@ -47,4 +76,6 @@ public sealed record UpdateIngredientRequest(
     string? Name,
     IReadOnlyList<string?>? Aliases,
     IngredientCategory? Category,
-    bool IsStaple);
+    bool IsStaple,
+    Unit? BaseUnit = null,
+    IReadOnlyList<ConversionRequest?>? Conversions = null);
