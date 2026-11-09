@@ -20,9 +20,16 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Leftover** | A plan entry that eats a dish cooked in an earlier entry. Adds nothing to the shopping list. |
 | **Tray** | The planner side panel (*Szuflada dań*) with favourite, recent and searched recipes to place in the plan. A bottom sheet on phones. |
 | **Recipe** | A dish with ingredient lines (quantity per one serving), steps, tags and optional nutrition. |
-| **Ingredient** | A canonical catalog item (e.g. *onion*), with a base unit and optional conversions. |
+| **Ingredient** | A canonical catalog item (*Składnik*, e.g. *onion*): one name in the content language, aliases, a base unit, a category, a staple flag and optional unit conversions. Names and aliases are unique across the catalog regardless of letter case and diacritics. |
+| **Catalog** | All ingredients of the household (*Katalog składników*). Other modules keep only ingredient ids. |
+| **Alias** | Another name an ingredient is found by (*Alias*, e.g. *cebulka* for *cebula*). Used instead of translations: an ingredient has no per-language names. |
+| **Category** | The group an ingredient belongs to on a shopping list (*Kategoria*): one of a fixed, built-in set in a fixed order (vegetables and fruit, dairy and eggs, meat and fish, bakery, dry and canned, spices, frozen, drinks, other). Default *other*. |
+| **Unit** | A unit a quantity is written in (*Jednostka*), from a fixed vocabulary: `g`, `kg`, `ml`, `l`, `piece`, `clove`, `tbsp`, `tsp`, `pinch`, `can`, `jar`, `pack`, `slice`, `bunch`, `handful`, `glass`. |
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
-| **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Quantities without a conversion are not summed into the base unit. |
+| **Generic conversion** | A conversion that holds for every ingredient: `kg` to `g`, `l` to `ml`, `tbsp` = 15 ml, `tsp` = 5 ml. |
+| **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Takes precedence over a generic conversion. Quantities without a conversion are not summed into the base unit. |
+| **Needs review** | Flag on an ingredient created automatically from an unknown name (*Do sprawdzenia*). Cleared when a person or an agent confirms it, or when another ingredient is merged into it. |
+| **Merge** | Turning two ingredients into one (*Scal*): the source's names become aliases of the target, every module moves its references to the target, and the source is deleted. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |
 | **Dislike** | A household-wide ingredient preference: *never* (allergy, hard no) or *avoid*. |
 | **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |

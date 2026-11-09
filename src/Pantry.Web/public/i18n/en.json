@@ -490,5 +490,36 @@
       "action": "Go to the plan"
     },
     "signIn": "Go to sign-in"
+  },
+  "catalog": {
+    "category": {
+      "vegetablesAndFruit": "Vegetables and fruit",
+      "dairyAndEggs": "Dairy and eggs",
+      "meatAndFish": "Meat and fish",
+      "bakery": "Bakery",
+      "dryAndCanned": "Dry and canned",
+      "spices": "Spices",
+      "frozen": "Frozen",
+      "drinks": "Drinks",
+      "other": "Other"
+    },
+    "unit": {
+      "g": "g",
+      "kg": "kg",
+      "ml": "ml",
+      "l": "l",
+      "piece": "pc",
+      "clove": "clove",
+      "tbsp": "tbsp",
+      "tsp": "tsp",
+      "pinch": "pinch",
+      "can": "can",
+      "jar": "jar",
+      "pack": "pack",
+      "slice": "slice",
+      "bunch": "bunch",
+      "handful": "handful",
+      "glass": "glass"
+    }
   }
 }

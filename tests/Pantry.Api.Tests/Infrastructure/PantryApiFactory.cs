@@ -51,6 +51,16 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         await command.ExecuteNonQueryAsync();
     }
 
+    /// <summary>Empties the ingredient catalog.</summary>
+    public async Task DeleteAllIngredientsAsync()
+    {
+        _ = Services;
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("TRUNCATE catalog.ingredients CASCADE;", connection);
+        await command.ExecuteNonQueryAsync();
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");

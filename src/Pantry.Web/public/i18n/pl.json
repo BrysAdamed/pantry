@@ -490,5 +490,36 @@
       "action": "Przejdź do planu"
     },
     "signIn": "Przejdź do logowania"
+  },
+  "catalog": {
+    "category": {
+      "vegetablesAndFruit": "Warzywa i owoce",
+      "dairyAndEggs": "Nabiał i jajka",
+      "meatAndFish": "Mięso i ryby",
+      "bakery": "Pieczywo",
+      "dryAndCanned": "Produkty suche i konserwy",
+      "spices": "Przyprawy",
+      "frozen": "Mrożonki",
+      "drinks": "Napoje",
+      "other": "Inne"
+    },
+    "unit": {
+      "g": "g",
+      "kg": "kg",
+      "ml": "ml",
+      "l": "l",
+      "piece": "szt.",
+      "clove": "ząbek",
+      "tbsp": "łyżka",
+      "tsp": "łyżeczka",
+      "pinch": "szczypta",
+      "can": "puszka",
+      "jar": "słoik",
+      "pack": "opakowanie",
+      "slice": "plaster",
+      "bunch": "pęczek",
+      "handful": "garść",
+      "glass": "szklanka"
+    }
   }
 }

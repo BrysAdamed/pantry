@@ -5,6 +5,7 @@ using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Infrastructure.DataProtection;
 using Pantry.Api.Infrastructure.Health;
 using Pantry.Api.Infrastructure.Http;
+using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Identity;
 
@@ -19,6 +20,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddHouseholdModule();
+builder.Services.AddCatalogModule();
 
 var app = builder.Build();
 
@@ -40,6 +42,7 @@ api.MapHealthEndpoint();
 api.MapAntiforgeryTokenEndpoint();
 api.MapIdentityEndpoints();
 api.MapHouseholdEndpoints();
+api.MapCatalogEndpoints();
 
 // Unknown /api routes must return 404, everything else falls back to the SPA.
 api.MapFallback(() => Results.NotFound()).AllowAnonymous();

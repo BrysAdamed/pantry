@@ -28,7 +28,7 @@ docs/                    vision, architecture, glossary, ADRs
 
 ## Modules
 
-Modules, each owning its tables, endpoints and MCP tools. `Identity` and `Household` exist; the rest are planned:
+Modules, each owning its tables, endpoints and MCP tools. `Identity`, `Household` and `Catalog` exist; the rest are planned:
 
 | Module | Owns | Epic |
 |---|---|---|
@@ -57,6 +57,10 @@ Add a migration (the `dotnet-ef` tool is pinned in `dotnet-tools.json`, run `dot
 ```bash
 dotnet ef migrations add <Name> --project src/Pantry.Api --context CatalogDbContext --output-dir Modules/Catalog/Persistence/Migrations
 ```
+
+## Ingredient catalog
+
+See [ADR 0019](adr/0019-ingredient-catalog.md). Categories (`IngredientCategory`) and units (`Unit`) are enums in `Modules/Catalog/`; their camelCase name (`CatalogCode`) is the code in the API, the database and the SPA labels `catalog.category.<code>` / `catalog.unit.<code>`. `Units` holds the base units and the generic conversions. Names and aliases of every ingredient live in `catalog.ingredient_names` under one unique comparison key (`IngredientName.KeyOf`: lower case, no diacritics), so a duplicate name answers 409 with the ingredient that holds it. Other modules read ingredients through `ICatalogModule` and register an `IIngredientReferenceHandler` when they store ingredient ids, so delete and merge can count and move their references.
 
 ## Authentication
 
