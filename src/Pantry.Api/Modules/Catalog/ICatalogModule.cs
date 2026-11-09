@@ -37,6 +37,13 @@ public interface ICatalogModule
     Task<BaseQuantity?> ConvertToBaseUnitAsync(Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Sums the lines per ingredient with <see cref="QuantityCalculator"/>: the total in the base unit, the amounts that
+    /// cannot be converted per unit, and the category and staple flag. Throws <see cref="ArgumentException"/> for a line
+    /// with a quantity but no unit (or the reverse) or a quantity that is not greater than 0.
+    /// </summary>
+    Task<QuantityTotals> SumQuantitiesAsync(IReadOnlyCollection<QuantityLine> lines, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Pairs of ingredients with similar names or aliases, most similar first, leaving out pairs marked as not
     /// duplicates. <paramref name="ingredientId"/> limits them to the pairs of one ingredient.
     /// </summary>

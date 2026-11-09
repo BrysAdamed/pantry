@@ -204,6 +204,31 @@ public sealed class IngredientConversionsTests(PantryApiFactory factory) : IAsyn
     }
 
     [Fact]
+    public async Task Contract_sums_quantities_with_the_stored_conversions()
+    {
+        // Arrange
+        var garlic = await CreateAsync("Czosnek", "g", ("clove", 5m));
+        await using var scope = factory.Services.CreateAsyncScope();
+        var catalog = scope.ServiceProvider.GetRequiredService<ICatalogModule>();
+        var unknown = Guid.NewGuid();
+
+        // Act
+        var totals = await catalog.SumQuantitiesAsync(
+        [
+            QuantityLine.Of(garlic, 2m, Unit.Clove),
+            QuantityLine.Of(garlic, 0.01m, Unit.Kg),
+            QuantityLine.Of(garlic, 1m, Unit.Jar),
+            QuantityLine.ToTaste(unknown),
+        ]);
+
+        // Assert
+        var total = Assert.Single(totals.Ingredients);
+        Assert.Equal(20m, total.Total);
+        Assert.Equal([new UnitQuantity(Unit.Jar, 1m)], total.OtherUnits);
+        Assert.Equal([unknown], totals.UnknownIngredientIds);
+    }
+
+    [Fact]
     public async Task Merge_copies_the_conversions_the_target_lacks_when_base_units_match()
     {
         // Arrange
