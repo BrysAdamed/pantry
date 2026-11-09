@@ -133,5 +133,65 @@
       "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
       "action": "Przejdź do planu"
     }
+  },
+  "household": {
+    "title": "Dom",
+    "sectionsLabel": "Ustawienia domu",
+    "back": "Dom",
+    "notBuiltYet": "Ta część ustawień jeszcze powstaje.",
+    "sections": {
+      "members": {
+        "title": "Domownicy",
+        "description": "Kto je i ile"
+      },
+      "slots": {
+        "title": "Posiłki",
+        "description": "Pory posiłków w planie"
+      },
+      "dislikes": {
+        "title": "Nie jemy",
+        "description": "Nigdy i unikamy"
+      },
+      "rules": {
+        "title": "Zasady planowania",
+        "description": "Wskazówki dla agenta"
+      },
+      "language": {
+        "title": "Język treści",
+        "description": "W jakim języku pisze agent"
+      },
+      "tokens": {
+        "title": "Tokeny dostępu",
+        "description": "Dla agentów przez MCP"
+      },
+      "account": {
+        "title": "Moje konto",
+        "description": "Język, motyw, klucze dostępu"
+      }
+    },
+    "members": {
+      "intro": "Mnożnik porcji mówi, ile zjada każdy domownik. Z sumy liczymy porcję domową, a z niej zakupy.",
+      "householdServing": "Porcja domowa",
+      "portionFactor": "Mnożnik porcji: {{name}}",
+      "less": "Mniej dla: {{name}}",
+      "more": "Więcej dla: {{name}}",
+      "bounds": "Mnożnik porcji od {{min}} do {{max}}, co {{step}}.",
+      "account": {
+        "admin": "administrator",
+        "user": "ma konto",
+        "none": "bez konta"
+      },
+      "nameLabel": "Imię",
+      "rename": "Zmień imię: {{name}}",
+      "newName": "Imię nowego domownika",
+      "add": "Dodaj",
+      "delete": "Usuń: {{name}}",
+      "confirmDelete": "Usunąć: {{name}}?",
+      "cancel": "Anuluj",
+      "confirm": "Usuń",
+      "loadFailed": "Nie udało się wczytać domowników. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    }
   }
 }

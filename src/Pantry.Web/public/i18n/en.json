@@ -133,5 +133,65 @@
       "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
       "action": "Go to the plan"
     }
+  },
+  "household": {
+    "title": "Household",
+    "sectionsLabel": "Household settings",
+    "back": "Household",
+    "notBuiltYet": "This part of the settings is still being built.",
+    "sections": {
+      "members": {
+        "title": "Members",
+        "description": "Who eats and how much"
+      },
+      "slots": {
+        "title": "Meals",
+        "description": "Meal times in the plan"
+      },
+      "dislikes": {
+        "title": "We don't eat",
+        "description": "Never and avoid"
+      },
+      "rules": {
+        "title": "Planning rules",
+        "description": "Guidance for the agent"
+      },
+      "language": {
+        "title": "Content language",
+        "description": "The language the agent writes in"
+      },
+      "tokens": {
+        "title": "Access tokens",
+        "description": "For agents over MCP"
+      },
+      "account": {
+        "title": "My account",
+        "description": "Language, theme, passkeys"
+      }
+    },
+    "members": {
+      "intro": "The portion factor says how much each member eats. Their sum is the household serving, which sets the shopping quantities.",
+      "householdServing": "Household serving",
+      "portionFactor": "Portion factor: {{name}}",
+      "less": "Less for {{name}}",
+      "more": "More for {{name}}",
+      "bounds": "Portion factor from {{min}} to {{max}}, in steps of {{step}}.",
+      "account": {
+        "admin": "admin",
+        "user": "has an account",
+        "none": "no account"
+      },
+      "nameLabel": "Name",
+      "rename": "Rename {{name}}",
+      "newName": "New member's name",
+      "add": "Add",
+      "delete": "Remove {{name}}",
+      "confirmDelete": "Remove {{name}}?",
+      "cancel": "Cancel",
+      "confirm": "Remove",
+      "loadFailed": "Members could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    }
   }
 }

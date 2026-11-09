@@ -70,7 +70,7 @@ See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only
 - Feature folders mirror backend modules: `src/app/<feature>/`. App-wide services live in `src/app/core/`.
 - The shell (`src/app/shell/`) frames every screen: an icon rail from the `md` breakpoint (768px) up, a header with sync state and avatar plus bottom tabs below it. Each destination (`planner`, `recipes`, `shopping`, `household`) is a lazy route that loads `src/app/<feature>/<feature>.routes.ts`; until its epic lands, that file shows the feature's empty state.
 - Menus and popovers use Angular CDK overlays (ADR 0009) with a focus trap and Escape to close.
-- i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it).
+- i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it). Numbers and dates use Angular's locale pipes with the UI language as the locale (`number: '1.0-2' : language()`); locale data for `pl` is registered in `provideI18n`.
 - PWA: `@angular/service-worker`. Offline writes (shopping lists only) queue in IndexedDB.
 
 ## Development

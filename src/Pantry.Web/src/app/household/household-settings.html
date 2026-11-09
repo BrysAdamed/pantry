@@ -1,0 +1,51 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="md:grid md:grid-cols-[232px_minmax(0,1fr)] md:gap-7">
+    <nav
+      class="content-start gap-3.5 md:sticky md:top-6 md:grid md:gap-1 md:self-start"
+      [class.grid]="!section()"
+      [class.hidden]="section()"
+      [attr.aria-label]="t('sectionsLabel')"
+      data-testid="settings-sections"
+    >
+      <div class="hidden px-2 pb-3 font-display text-[26px] font-extrabold md:block" aria-hidden="true">{{ t('title') }}</div>
+      @for (group of groups; track $index; let last = $last) {
+        <ul
+          class="overflow-hidden rounded-card border-2 border-outline bg-card shadow-card md:grid md:gap-1 md:overflow-visible md:rounded-none md:border-0 md:bg-transparent md:shadow-none"
+        >
+          @for (id of group; track id) {
+            <li class="border-t border-border first:border-t-0 md:border-0">
+              <a
+                [routerLink]="id"
+                routerLinkActive="md:!border-outline md:bg-card md:!text-foreground md:shadow-control"
+                ariaCurrentWhenActive="page"
+                class="grid min-h-15 grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 md:min-h-tap md:grid-cols-[20px_minmax(0,1fr)] md:gap-2.5 md:rounded-control md:border-2 md:border-transparent md:px-2.5 md:py-2 md:font-bold md:text-muted-foreground md:hover:text-foreground"
+              >
+                <app-icon [name]="icons[id]" class="size-6 md:size-5" />
+                <span class="grid">
+                  <span class="font-extrabold md:font-bold">{{ t('sections.' + id + '.title') }}</span>
+                  <span class="text-xs text-muted-foreground md:sr-only">{{ t('sections.' + id + '.description') }}</span>
+                </span>
+                <app-icon name="chevronRight" class="size-4 md:hidden" />
+              </a>
+            </li>
+          }
+        </ul>
+        @if (!last) {
+          <div class="mx-1.5 my-2 hidden h-px bg-border md:block" aria-hidden="true"></div>
+        }
+      }
+    </nav>
+
+    <div class="min-w-0 md:block" [class.hidden]="!section()">
+      <a
+        routerLink="."
+        class="mb-3 inline-flex min-h-tap items-center gap-1.5 rounded-control pr-3 font-bold text-muted-foreground hover:text-foreground md:hidden"
+        data-testid="settings-back"
+      >
+        <app-icon name="chevronLeft" class="size-5" />
+        {{ t('back') }}
+      </a>
+      <router-outlet />
+    </div>
+  </div>
+</ng-container>
