@@ -1,0 +1,95 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.slots.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('slots.intro') }}</p>
+  </div>
+
+  @if (resource.error() && !resource.hasValue()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('slots.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="resource.reload()">{{ t('slots.retry') }}</button>
+    </div>
+  } @else if (resource.hasValue()) {
+    <div class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card">
+      <ol class="grid" data-testid="meal-slots">
+        @for (slot of slots(); track slot.id; let i = $index, first = $first, last = $last) {
+          <li
+            class="grid grid-cols-[28px_minmax(0,1fr)_auto_auto] items-center gap-2.5 border-t border-border py-2 first:border-t-0"
+            data-testid="meal-slot"
+            [attr.data-enabled]="slot.isEnabled"
+          >
+            <span class="text-center font-display font-extrabold text-muted-foreground" aria-hidden="true">{{ i + 1 }}</span>
+            <input
+              #nameInput
+              class="h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3"
+              [class.line-through]="!slot.isEnabled"
+              [class.text-muted-foreground]="!slot.isEnabled"
+              [value]="slot.name"
+              [maxLength]="nameMaxLength"
+              [attr.aria-label]="t('slots.nameLabel', { number: i + 1 })"
+              (keydown.enter)="nameInput.blur()"
+              (keydown.escape)="nameInput.value = slot.name; nameInput.blur()"
+              (blur)="rename(slot, nameInput)"
+            />
+            <span class="flex gap-1">
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon-sm"
+                type="button"
+                [disabled]="first"
+                [attr.aria-label]="t('slots.moveUp', { name: slot.name })"
+                (click)="move(slot.id, -1)"
+              >
+                <app-icon name="chevronUp" class="size-4" />
+              </button>
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon-sm"
+                type="button"
+                [disabled]="last"
+                [attr.aria-label]="t('slots.moveDown', { name: slot.name })"
+                (click)="move(slot.id, 1)"
+              >
+                <app-icon name="chevronDown" class="size-4" />
+              </button>
+            </span>
+            <app-switch
+              [checked]="slot.isEnabled"
+              [label]="t('slots.inPlan', { name: slot.name })"
+              [disabled]="slot.isEnabled && enabledCount() <= 1"
+              (toggled)="setEnabled(slot, $event)"
+            />
+          </li>
+        }
+      </ol>
+
+      <form class="flex gap-2" (submit)="add($event)">
+        <input
+          class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3"
+          [value]="newName()"
+          [maxLength]="nameMaxLength"
+          [placeholder]="t('slots.newNamePlaceholder')"
+          [attr.aria-label]="t('slots.newName')"
+          (input)="newName.set($any($event.target).value)"
+        />
+        <button hlmBtn variant="outline" type="submit" [disabled]="!canAdd() || adding()">
+          <app-icon name="plus" class="size-4" />
+          {{ t('slots.add') }}
+        </button>
+      </form>
+
+      <p class="text-xs text-muted-foreground" aria-live="polite" data-testid="meal-slots-note">
+        {{ t('slots.inPlanCount', { count: enabledCount() }) }}
+        @if (enabledCount() <= 1) {
+          {{ t('slots.lastEnabled') }}
+        }
+      </p>
+    </div>
+
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('slots.saveFailed') }}</p>
+    }
+  }
+</ng-container>

@@ -18,6 +18,8 @@ export type IconName =
   | 'close'
   | 'chevronLeft'
   | 'chevronRight'
+  | 'chevronUp'
+  | 'chevronDown'
   | 'signOut';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
@@ -99,6 +101,12 @@ export type IconName =
         }
         @case ('chevronRight') {
           <path d="M9 18l6-6-6-6" />
+        }
+        @case ('chevronUp') {
+          <path d="M18 15l-6-6-6 6" />
+        }
+        @case ('chevronDown') {
+          <path d="M6 9l6 6 6-6" />
         }
         @case ('signOut') {
           <path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />

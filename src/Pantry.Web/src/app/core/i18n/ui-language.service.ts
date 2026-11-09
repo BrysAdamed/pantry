@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { TranslocoService } from '@jsverse/transloco';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { DEFAULT_UI_LANGUAGE, isUiLanguage, UiLanguage } from './ui-language';
 
 const STORAGE_KEY = 'pantry.uiLanguage';
@@ -15,7 +15,7 @@ export class UiLanguageService {
   private readonly document = inject(DOCUMENT);
   private readonly title = inject(Title);
 
-  readonly current = toSignal(this.transloco.langChanges$, {
+  readonly current = toSignal(this.transloco.langChanges$ as Observable<UiLanguage>, {
     initialValue: this.transloco.getActiveLang() as UiLanguage,
   });
 

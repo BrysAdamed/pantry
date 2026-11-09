@@ -3,11 +3,12 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { EmptyState, EmptyStateIllustration } from '../shared/empty-state/empty-state';
 import { Destination } from './destinations';
 
-const PLACEHOLDERS: Record<Destination, { illustration: EmptyStateIllustration; agentHint: boolean }> = {
+export type PlaceholderDestination = Exclude<Destination, 'household'>;
+
+const PLACEHOLDERS: Record<PlaceholderDestination, { illustration: EmptyStateIllustration; agentHint: boolean }> = {
   planner: { illustration: 'planner', agentHint: true },
   recipes: { illustration: 'recipes', agentHint: true },
   shopping: { illustration: 'lists', agentHint: false },
-  household: { illustration: 'household', agentHint: false },
 };
 
 /** Stands in for a destination until its epic lands. Set the destination as the `placeholder` route data. */
@@ -27,7 +28,7 @@ const PLACEHOLDERS: Record<Destination, { illustration: EmptyStateIllustration; 
   `,
 })
 export class FeaturePlaceholder {
-  readonly placeholder = input.required<Destination>();
+  readonly placeholder = input.required<PlaceholderDestination>();
 
   protected readonly config = computed(() => PLACEHOLDERS[this.placeholder()]);
 }

@@ -67,7 +67,7 @@ describe('FirstRun', () => {
 
     expect(api.firstRunPasskeyOptions).toHaveBeenCalledWith('Alex');
     expect(passkeys.create).toHaveBeenCalledWith({ challenge: 'abc' });
-    expect(api.completeFirstRun).toHaveBeenCalledWith({ id: 'cred' });
+    expect(api.completeFirstRun).toHaveBeenCalledWith({ id: 'cred' }, 'en');
     expect(page.querySelector('[data-testid="first-run-done"]')?.textContent).toContain('Welcome home!');
   });
 

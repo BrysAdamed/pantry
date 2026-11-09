@@ -54,6 +54,11 @@ export class MembersSection {
     effect(() => this.nameInput()?.nativeElement.focus());
   }
 
+  /** The first character of the name, kept whole when it is a surrogate pair (an emoji or a rare letter). */
+  protected initial(name: string): string {
+    return [...name][0] ?? '';
+  }
+
   protected step(id: string, direction: 1 | -1): void {
     const member = this.members().find((m) => m.id === id);
     if (!member) {

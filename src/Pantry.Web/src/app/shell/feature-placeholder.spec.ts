@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
-import { Destination } from './destinations';
-import { FeaturePlaceholder } from './feature-placeholder';
+import { FeaturePlaceholder, PlaceholderDestination } from './feature-placeholder';
 
 describe('FeaturePlaceholder', () => {
-  function render(placeholder: Destination): HTMLElement {
+  function render(placeholder: PlaceholderDestination): HTMLElement {
     TestBed.configureTestingModule({ providers: [provideTranslocoTesting()] });
     const fixture = TestBed.createComponent(FeaturePlaceholder);
     fixture.componentRef.setInput('placeholder', placeholder);
@@ -21,9 +20,9 @@ describe('FeaturePlaceholder', () => {
   });
 
   it('leaves the agent hint out where the agent has nothing to do', () => {
-    const page = render('household');
+    const page = render('shopping');
 
-    expect(page.querySelector('h2')?.textContent).toContain('Set up your household');
+    expect(page.querySelector('h2')?.textContent).toContain('Everything is in the cart');
     expect(page.textContent).not.toContain('Ask Claude');
   });
 });

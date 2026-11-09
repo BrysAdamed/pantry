@@ -20,6 +20,16 @@ export interface MembersResponse {
   householdServing: number;
 }
 
+export const MEAL_SLOTS_URL = '/api/household/meal-slots';
+export const MEAL_SLOT_NAME_MAX_LENGTH = 50;
+
+export interface MealSlot {
+  id: string;
+  name: string;
+  position: number;
+  isEnabled: boolean;
+}
+
 export interface MemberChange {
   name: string;
   portionFactor: number;
@@ -40,6 +50,23 @@ export class HouseholdApi {
 
   deleteMember(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${MEMBERS_URL}/${id}`));
+  }
+
+  addMealSlot(name: string): Promise<MealSlot> {
+    return firstValueFrom(this.http.post<MealSlot>(MEAL_SLOTS_URL, { name }));
+  }
+
+  renameMealSlot(id: string, name: string): Promise<MealSlot> {
+    return firstValueFrom(this.http.put<MealSlot>(`${MEAL_SLOTS_URL}/${id}/name`, { name }));
+  }
+
+  setMealSlotEnabled(id: string, isEnabled: boolean): Promise<MealSlot> {
+    return firstValueFrom(this.http.put<MealSlot>(`${MEAL_SLOTS_URL}/${id}/enabled`, { isEnabled }));
+  }
+
+  /** Lists every meal slot id, disabled ones included, in the new order. */
+  reorderMealSlots(mealSlotIds: string[]): Promise<void> {
+    return firstValueFrom(this.http.put<void>(`${MEAL_SLOTS_URL}/order`, { mealSlotIds }));
   }
 }
 

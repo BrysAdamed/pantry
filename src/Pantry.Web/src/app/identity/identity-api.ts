@@ -1,6 +1,7 @@
 import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { UiLanguage } from '../core/i18n/ui-language';
 
 export interface SetupStatus {
   firstRunNeeded: boolean;
@@ -34,8 +35,9 @@ export class IdentityApi {
     );
   }
 
-  completeFirstRun(credential: PublicKeyCredentialJSON): Promise<CurrentUser> {
-    return firstValueFrom(this.http.post<CurrentUser>('/api/setup/complete', { credential }));
+  /** Creates the admin. The UI language names the household's default meal slots. */
+  completeFirstRun(credential: PublicKeyCredentialJSON, uiLanguage: UiLanguage): Promise<CurrentUser> {
+    return firstValueFrom(this.http.post<CurrentUser>('/api/setup/complete', { credential, uiLanguage }));
   }
 
   /** The signed-in user. Fails with 401 when there is no session. */

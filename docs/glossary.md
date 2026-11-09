@@ -11,7 +11,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **First run** | The setup on a fresh deployment (*Pierwsze uruchomienie*): while no user exists, the app asks for a name and creates the admin with a passkey. |
 | **Portion factor** | How much of a standard serving a member eats (e.g. adult 1.0, toddler 0.3). Configurable. |
 | **Household serving** | Sum of portion factors of members eating a meal. Drives shopping quantities. |
-| **Meal slot** | A configured meal of the day (e.g. breakfast, second breakfast, lunch, snack, dinner), with an order. |
+| **Meal slot** | A configured meal of the day (e.g. breakfast, second breakfast, lunch, snack, dinner), with an order. A row of the planner. Never deleted: a disabled slot leaves the planner but keeps its plan history; at least one stays enabled. |
 | **Plan entry** | A recipe placed in a meal slot on a date. Can be *proposed*, *accepted* or *eaten*. |
 | **Empty slot marker** | A plan entry with no recipe that asks an agent to fill it. |
 | **Proposed** | A plan entry created by an agent and not yet accepted by a user. |
