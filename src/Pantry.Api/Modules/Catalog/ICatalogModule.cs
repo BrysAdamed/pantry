@@ -17,7 +17,21 @@ public interface ICatalogModule
     /// extra whitespace; null when there is none.
     /// </summary>
     Task<CatalogIngredient?> FindIngredientAsync(string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The ingredient that has <paramref name="name"/> as its name or an alias (as <see cref="FindIngredientAsync"/>), or
+    /// a new one created and committed right away: base unit guessed from <paramref name="unitUsed"/>, category
+    /// <c>other</c>, needs review. Parallel calls with the same new name create one ingredient. Throws
+    /// <see cref="ArgumentException"/> for a name that is empty or longer than 100 characters.
+    /// </summary>
+    Task<ResolvedIngredient> ResolveIngredientAsync(string name, Unit? unitUsed, CancellationToken cancellationToken = default);
+
+    /// <summary>Clears <c>needs review</c> of the ingredient; null when it does not exist.</summary>
+    Task<CatalogIngredient?> ConfirmIngredientAsync(Guid id, CancellationToken cancellationToken = default);
 }
+
+/// <summary>The result of <see cref="ICatalogModule.ResolveIngredientAsync"/>; <c>Created</c> is true for a new ingredient.</summary>
+public sealed record ResolvedIngredient(CatalogIngredient Ingredient, bool Created);
 
 /// <summary>An ingredient as other modules see it. <c>Aliases</c> are sorted; <c>BaseUnit</c> is <c>g</c>, <c>ml</c> or <c>piece</c>.</summary>
 public sealed record CatalogIngredient(
