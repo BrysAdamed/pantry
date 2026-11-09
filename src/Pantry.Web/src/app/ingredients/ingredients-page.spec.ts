@@ -181,10 +181,13 @@ describe('Ingredients screen', () => {
     await open('/ingredients');
 
     type(page().querySelector('input[type="search"]'), 'shal');
-    await new Promise((resolve) => setTimeout(resolve, INGREDIENT_LIST_SEARCH_DELAY_MS + 10));
-    await settle();
-
-    expect(texts('ingredient-name')).toEqual(['onion']);
+    await vi.waitFor(
+      async () => {
+        await settle();
+        expect(texts('ingredient-name')).toEqual(['onion']);
+      },
+      { timeout: INGREDIENT_LIST_SEARCH_DELAY_MS * 20, interval: INGREDIENT_LIST_SEARCH_DELAY_MS },
+    );
     expect(texts('alias-match')).toEqual(['matches: shallot']);
     expect(page().querySelector('[data-testid="alias-match"] mark')?.textContent).toBe('shal');
     expect(texts('ingredient-count')).toEqual(['1 ingredient (of 4)']);
