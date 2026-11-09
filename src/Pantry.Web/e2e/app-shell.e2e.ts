@@ -22,3 +22,19 @@ test('remembers the chosen UI language', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Spiżarnia');
   await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
 });
+
+test('follows the system theme until a theme is chosen', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  await page.getByTestId('theme-light').click();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('shows the design tokens page', async ({ page }) => {
+  await page.goto('/design-system');
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Design tokens');
+});

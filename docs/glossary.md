@@ -31,4 +31,5 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Product memory** | Which shop product was used for an ingredient last time. Shop-agnostic text and URL. |
 | **Content language** | Household setting telling agents which language to write recipes and items in. |
 | **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
+| **Theme** | Light or dark look of the app (*Motyw*). Follows the system unless the user picks one. |
 | **Access token** | Personal token an MCP client uses to call the app. Revocable. |

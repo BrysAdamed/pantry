@@ -1,11 +1,11 @@
 <main *transloco="let t" class="min-h-dvh grid place-items-center p-4">
   <div class="text-center space-y-4">
-    <h1 class="text-3xl font-semibold text-brand">{{ t('app.name') }}</h1>
+    <h1 class="text-4xl text-primary">{{ t('app.name') }}</h1>
     <p class="text-muted-foreground">{{ t('app.tagline') }}</p>
     <p class="text-sm" data-testid="api-status">
       {{ t('health.label') }}: {{ t('health.' + apiStatus()) }}@if (health.hasValue()) { ({{ health.value().version }})}
     </p>
     <app-language-switcher class="flex justify-center" />
+    <app-theme-switcher class="flex justify-center" />
   </div>
 </main>
-<router-outlet />

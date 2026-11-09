@@ -14,5 +14,62 @@
     "label": "Language",
     "en": "English",
     "pl": "Polski"
+  },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "designSystem": {
+    "title": "Design tokens",
+    "intro": "Colours, type, buttons and states used across the app.",
+    "colours": "Colours",
+    "typography": "Typography",
+    "typographySample": "Sunday soup, fresh bread and a full pantry",
+    "buttons": "Buttons",
+    "states": "States",
+    "planEntry": "Plan entry",
+    "listItem": "List item",
+    "cartRunReport": "Cart run report",
+    "dislike": "Dislike",
+    "sync": "Sync"
+  },
+  "planEntry": {
+    "state": {
+      "proposed": "Proposed",
+      "accepted": "Accepted",
+      "eaten": "Eaten"
+    },
+    "leftover": "Leftover",
+    "emptySlotMarker": "Empty slot"
+  },
+  "listItem": {
+    "state": {
+      "open": "To buy",
+      "haveAtHome": "Have at home",
+      "bought": "Bought"
+    }
+  },
+  "cartRunReport": {
+    "result": {
+      "added": "Added",
+      "quantityChanged": "Quantity changed",
+      "substituted": "Substituted",
+      "missing": "Missing"
+    }
+  },
+  "dislike": {
+    "level": {
+      "never": "Never",
+      "avoid": "Avoid"
+    }
+  },
+  "sync": {
+    "state": {
+      "online": "Online",
+      "offline": "Offline",
+      "pending": "Waiting to sync"
+    }
   }
 }

@@ -16,3 +16,4 @@ Short records of decisions that shape the project. Format: context, decision, co
 | [0010](0010-languages.md) | English code and docs, PL/EN UI, household content language | Accepted |
 | [0011](0011-runtime-i18n.md) | Runtime UI translations with Transloco | Accepted |
 | [0012](0012-module-persistence.md) | Schema per module, migrations on startup | Accepted |
+| [0013](0013-visual-direction-and-tokens.md) | Konfitura visual direction, `light-dark()` tokens, system theme with override | Accepted |

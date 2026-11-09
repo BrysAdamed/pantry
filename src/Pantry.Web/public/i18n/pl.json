@@ -14,5 +14,62 @@
     "label": "Język",
     "en": "English",
     "pl": "Polski"
+  },
+  "theme": {
+    "label": "Motyw",
+    "system": "Systemowy",
+    "light": "Jasny",
+    "dark": "Ciemny"
+  },
+  "designSystem": {
+    "title": "Tokeny wyglądu",
+    "intro": "Kolory, pismo, przyciski i stany używane w całej aplikacji.",
+    "colours": "Kolory",
+    "typography": "Pismo",
+    "typographySample": "Żurek w niedzielę, świeży chleb i pełna spiżarnia",
+    "buttons": "Przyciski",
+    "states": "Stany",
+    "planEntry": "Pozycja planu",
+    "listItem": "Pozycja listy",
+    "cartRunReport": "Raport z koszyka",
+    "dislike": "Niechęć",
+    "sync": "Synchronizacja"
+  },
+  "planEntry": {
+    "state": {
+      "proposed": "Propozycja",
+      "accepted": "Zaakceptowane",
+      "eaten": "Zjedzone"
+    },
+    "leftover": "Resztki",
+    "emptySlotMarker": "Puste miejsce"
+  },
+  "listItem": {
+    "state": {
+      "open": "Do kupienia",
+      "haveAtHome": "Mam w domu",
+      "bought": "Kupione"
+    }
+  },
+  "cartRunReport": {
+    "result": {
+      "added": "Dodane",
+      "quantityChanged": "Zmieniona ilość",
+      "substituted": "Zamiennik",
+      "missing": "Brak"
+    }
+  },
+  "dislike": {
+    "level": {
+      "never": "Nigdy",
+      "avoid": "Unikaj"
+    }
+  },
+  "sync": {
+    "state": {
+      "online": "Online",
+      "offline": "Offline",
+      "pending": "Czeka na synchronizację"
+    }
   }
 }

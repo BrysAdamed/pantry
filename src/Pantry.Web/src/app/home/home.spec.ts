@@ -3,19 +3,19 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
-import { App } from './app';
-import { provideTranslocoTesting } from './testing/transloco-testing';
+import { Home } from './home';
+import { provideTranslocoTesting } from '../testing/transloco-testing';
 
-describe('App', () => {
+describe('Home', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [Home],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideTranslocoTesting()],
     }).compileComponents();
   });
 
   async function render(health: { body: object; status?: number }) {
-    const fixture = TestBed.createComponent(App);
+    const fixture = TestBed.createComponent(Home);
     fixture.detectChanges();
     TestBed.inject(HttpTestingController)
       .expectOne('/api/health')
