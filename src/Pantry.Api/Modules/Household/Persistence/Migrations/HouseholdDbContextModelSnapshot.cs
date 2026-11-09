@@ -29,6 +29,11 @@ namespace Pantry.Api.Modules.Household.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<string>("ContentLanguage")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("content_language");
+
                     b.HasKey("Id")
                         .HasName("pk_households");
 
@@ -106,6 +111,32 @@ namespace Pantry.Api.Modules.Household.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_members_portion_factor", "portion_factor >= 0.05 AND portion_factor <= 2.00");
                         });
+                });
+
+            modelBuilder.Entity("Pantry.Api.Modules.Household.Domain.PlanningRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("text");
+
+                    b.HasKey("Id")
+                        .HasName("pk_planning_rules");
+
+                    b.ToTable("planning_rules", "household");
                 });
 #pragma warning restore 612, 618
         }

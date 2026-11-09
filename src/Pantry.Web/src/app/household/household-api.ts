@@ -31,6 +31,27 @@ export interface MealSlot {
   isEnabled: boolean;
 }
 
+export const PLANNING_RULES_URL = '/api/household/planning-rules';
+export const PLANNING_RULE_TEXT_MAX_LENGTH = 200;
+
+export interface PlanningRule {
+  id: string;
+  text: string;
+  position: number;
+  isEnabled: boolean;
+}
+
+export const CONTENT_LANGUAGE_URL = '/api/household/content-language';
+
+/** BCP 47 codes the API accepts, in the order the picker shows them. */
+export const CONTENT_LANGUAGES = ['pl', 'en', 'de', 'fr', 'es', 'it', 'cs', 'uk'] as const;
+
+export type ContentLanguage = (typeof CONTENT_LANGUAGES)[number];
+
+export interface ContentLanguageSetting {
+  contentLanguage: ContentLanguage;
+}
+
 export interface MemberChange {
   name: string;
   portionFactor: number;
@@ -68,6 +89,31 @@ export class HouseholdApi {
   /** Lists every meal slot id, disabled ones included, in the new order. */
   reorderMealSlots(mealSlotIds: string[]): Promise<void> {
     return firstValueFrom(this.http.put<void>(`${MEAL_SLOTS_URL}/order`, { mealSlotIds }));
+  }
+
+  addPlanningRule(text: string): Promise<PlanningRule> {
+    return firstValueFrom(this.http.post<PlanningRule>(PLANNING_RULES_URL, { text }));
+  }
+
+  editPlanningRule(id: string, text: string): Promise<PlanningRule> {
+    return firstValueFrom(this.http.put<PlanningRule>(`${PLANNING_RULES_URL}/${id}/text`, { text }));
+  }
+
+  setPlanningRuleEnabled(id: string, isEnabled: boolean): Promise<PlanningRule> {
+    return firstValueFrom(this.http.put<PlanningRule>(`${PLANNING_RULES_URL}/${id}/enabled`, { isEnabled }));
+  }
+
+  /** Lists every planning rule id, disabled ones included, in the new order. */
+  reorderPlanningRules(planningRuleIds: string[]): Promise<void> {
+    return firstValueFrom(this.http.put<void>(`${PLANNING_RULES_URL}/order`, { planningRuleIds }));
+  }
+
+  deletePlanningRule(id: string): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${PLANNING_RULES_URL}/${id}`));
+  }
+
+  setContentLanguage(contentLanguage: ContentLanguage): Promise<ContentLanguageSetting> {
+    return firstValueFrom(this.http.put<ContentLanguageSetting>(CONTENT_LANGUAGE_URL, { contentLanguage }));
   }
 }
 

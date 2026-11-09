@@ -230,6 +230,42 @@
       "loadFailed": "Meals could not be loaded. Check the connection.",
       "retry": "Try again",
       "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "rules": {
+      "intro": "Short sentences the agent reads before planning. A disabled rule stays for later.",
+      "textLabel": "Rule {{number}}",
+      "moveUp": "Move rule {{number}} up",
+      "moveDown": "Move rule {{number}} down",
+      "enabled": "Rule {{number}} on",
+      "delete": "Remove rule {{number}}",
+      "confirmDelete": "Remove rule {{number}}?",
+      "cancel": "Cancel",
+      "confirm": "Remove",
+      "newText": "New rule",
+      "newTextPlaceholder": "e.g. Sweet breakfast only at the weekend",
+      "add": "Add",
+      "empty": "No rules yet. The agent plans without extra guidance.",
+      "agentReads": "Rules the agent reads: {{count}}.",
+      "loadFailed": "Rules could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "language": {
+      "intro": "The agent writes recipes, list items and notes in this language. Everyone picks the language of buttons and menus in their own account.",
+      "note": "Changing it does not translate existing recipes. The agent can do that if you ask.",
+      "options": {
+        "pl": { "name": "Polski", "description": "Recipes and lists in Polish" },
+        "en": { "name": "English", "description": "Recipes and lists in English" },
+        "de": { "name": "Deutsch", "description": "Recipes and lists in German" },
+        "fr": { "name": "Français", "description": "Recipes and lists in French" },
+        "es": { "name": "Español", "description": "Recipes and lists in Spanish" },
+        "it": { "name": "Italiano", "description": "Recipes and lists in Italian" },
+        "cs": { "name": "Čeština", "description": "Recipes and lists in Czech" },
+        "uk": { "name": "Українська", "description": "Recipes and lists in Ukrainian" }
+      },
+      "loadFailed": "The content language could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
     }
   },
   "signIn": {

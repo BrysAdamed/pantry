@@ -1,0 +1,42 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.language.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('language.intro') }}</p>
+  </div>
+
+  @if (resource.error() && !resource.hasValue()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('language.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="resource.reload()">{{ t('language.retry') }}</button>
+    </div>
+  } @else if (resource.hasValue()) {
+    <div class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card">
+      <fieldset class="grid gap-2 sm:grid-cols-2" data-testid="content-languages">
+        <legend class="sr-only">{{ t('sections.language.title') }}</legend>
+        @for (language of languages; track language) {
+          <label
+            class="grid min-h-13 cursor-pointer grid-cols-[22px_minmax(0,1fr)] items-center gap-2.5 rounded-control border-2 border-border bg-card px-3 py-2.5 has-checked:border-outline has-checked:shadow-control has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+          >
+            <input
+              type="radio"
+              name="content-language"
+              class="size-5 accent-primary"
+              [value]="language"
+              [checked]="selected() === language"
+              (change)="select(language)"
+            />
+            <span class="grid">
+              <b [attr.lang]="language">{{ t('language.options.' + language + '.name') }}</b>
+              <span class="text-xs text-muted-foreground">{{ t('language.options.' + language + '.description') }}</span>
+            </span>
+          </label>
+        }
+      </fieldset>
+      <p class="text-xs text-muted-foreground">{{ t('language.note') }}</p>
+    </div>
+
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('language.saveFailed') }}</p>
+    }
+  }
+</ng-container>

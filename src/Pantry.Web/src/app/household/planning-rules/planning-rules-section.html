@@ -1,0 +1,106 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.rules.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('rules.intro') }}</p>
+  </div>
+
+  @if (resource.error() && !resource.hasValue()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('rules.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="resource.reload()">{{ t('rules.retry') }}</button>
+    </div>
+  } @else if (resource.hasValue()) {
+    <div class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card">
+      @if (rules().length === 0) {
+        <p class="text-sm text-muted-foreground" data-testid="planning-rules-empty">{{ t('rules.empty') }}</p>
+      } @else {
+        <ol class="grid" data-testid="planning-rules">
+          @for (rule of rules(); track rule.id; let i = $index, first = $first, last = $last) {
+            <li class="grid gap-2 border-t border-border py-2 first:border-t-0" data-testid="planning-rule" [attr.data-enabled]="rule.isEnabled">
+              <div class="flex flex-wrap items-center gap-1.5 md:flex-nowrap md:gap-2.5">
+                <textarea
+                  #textInput
+                  rows="1"
+                  class="field-sizing-content min-h-tap min-w-0 basis-full resize-none rounded-control border-2 border-outline bg-card px-3 py-2 md:flex-1 md:basis-auto"
+                  [class.line-through]="!rule.isEnabled"
+                  [class.text-muted-foreground]="!rule.isEnabled"
+                  [value]="rule.text"
+                  [maxLength]="textMaxLength"
+                  [attr.aria-label]="t('rules.textLabel', { number: i + 1 })"
+                  (keydown.enter)="$event.preventDefault(); textInput.blur()"
+                  (keydown.escape)="textInput.value = rule.text; textInput.blur()"
+                  (blur)="edit(rule, textInput)"
+                ></textarea>
+                <span class="ml-auto flex md:ml-0">
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [disabled]="first"
+                    [attr.aria-label]="t('rules.moveUp', { number: i + 1 })"
+                    (click)="move(rule.id, -1)"
+                  >
+                    <app-icon name="chevronUp" class="size-4" />
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [disabled]="last"
+                    [attr.aria-label]="t('rules.moveDown', { number: i + 1 })"
+                    (click)="move(rule.id, 1)"
+                  >
+                    <app-icon name="chevronDown" class="size-4" />
+                  </button>
+                </span>
+                <app-switch [checked]="rule.isEnabled" [label]="t('rules.enabled', { number: i + 1 })" (toggled)="setEnabled(rule, $event)" />
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  [attr.aria-label]="t('rules.delete', { number: i + 1 })"
+                  (click)="deletingId.set(rule.id)"
+                >
+                  <app-icon name="close" class="size-4" />
+                </button>
+              </div>
+              @if (deletingId() === rule.id) {
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                  <span class="mr-auto text-sm font-bold">{{ t('rules.confirmDelete', { number: i + 1 }) }}</span>
+                  <button hlmBtn variant="ghost" size="sm" type="button" (click)="deletingId.set(null)">{{ t('rules.cancel') }}</button>
+                  <button hlmBtn variant="destructive" size="sm" type="button" (click)="delete(rule)">{{ t('rules.confirm') }}</button>
+                </div>
+              }
+            </li>
+          }
+        </ol>
+      }
+
+      <form class="flex gap-2" (submit)="add($event)">
+        <input
+          class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3"
+          [value]="newText()"
+          [maxLength]="textMaxLength"
+          [placeholder]="t('rules.newTextPlaceholder')"
+          [attr.aria-label]="t('rules.newText')"
+          (input)="newText.set($any($event.target).value)"
+        />
+        <button hlmBtn variant="outline" type="submit" [disabled]="!canAdd() || adding()">
+          <app-icon name="plus" class="size-4" />
+          {{ t('rules.add') }}
+        </button>
+      </form>
+
+      <p class="text-xs text-muted-foreground" aria-live="polite" data-testid="planning-rules-note">
+        {{ t('rules.agentReads', { count: enabledCount() }) }}
+      </p>
+    </div>
+
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('rules.saveFailed') }}</p>
+    }
+  }
+</ng-container>
