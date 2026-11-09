@@ -1,17 +1,9 @@
 {
   "app": {
-    "name": "Spiżarnia",
-    "tagline": "Szkielet aplikacji działa. Funkcje pojawią się z kolejnymi epikami."
-  },
-  "health": {
-    "label": "API",
-    "ok": "działa",
-    "unhealthy": "niesprawne",
-    "unreachable": "niedostępne",
-    "checking": "sprawdzanie..."
+    "name": "Spiżarnia"
   },
   "language": {
-    "label": "Język",
+    "label": "Język interfejsu",
     "en": "English",
     "pl": "Polski"
   },
@@ -70,6 +62,335 @@
       "online": "Zapisane",
       "offline": "Offline",
       "pending": "Czeka na wysłanie"
+    },
+    "detail": {
+      "online": "Online · wszystko zapisane",
+      "offline": "Offline · zmiany czekają",
+      "pending": "Online · wysyłanie zmian"
     }
+  },
+  "shell": {
+    "skipToContent": "Przejdź do treści",
+    "mainNavigation": "Nawigacja główna",
+    "account": "Konto",
+    "myAccount": "Moje konto",
+    "signOut": "Wyloguj się"
+  },
+  "nav": {
+    "planner": "Plan",
+    "recipes": "Przepisy",
+    "shopping": "Zakupy",
+    "household": "Dom"
+  },
+  "emptyState": {
+    "planner": {
+      "title": "Zaplanuj ten tydzień",
+      "description": "Przeciągnij dania z szuflady albo poproś agenta o propozycje. Zaakceptujesz je jednym kliknięciem.",
+      "agentHint": "Napisz do Claude: „Zaplanuj obiady na przyszły tydzień w Spiżarni”."
+    },
+    "recipes": {
+      "title": "Dodaj pierwszy przepis",
+      "description": "Wpisz go ręcznie albo daj agentowi link do przepisu ze strony, a on go przepisze i dopasuje składniki.",
+      "agentHint": "Napisz do Claude: „Dodaj do Spiżarni przepis z tego linku”."
+    },
+    "shopping": {
+      "title": "Wszystko w koszyku",
+      "description": "Na listach nie ma nic do kupienia. Nowa lista powstanie z planu, kiedy będzie potrzebna."
+    }
+  },
+  "firstRun": {
+    "label": "Pierwsze uruchomienie",
+    "title": "Załóżmy Spiżarnię",
+    "intro": "To konto będzie kontem administratora. Potem zaprosisz resztę domowników.",
+    "nameLabel": "Jak masz na imię?",
+    "namePlaceholder": "np. Ania",
+    "create": "Utwórz klucz dostępu",
+    "creating": "Czekam na klucz dostępu…",
+    "retry": "Spróbuj ponownie",
+    "hint": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+    "cancelled": {
+      "title": "Tworzenie klucza przerwane.",
+      "body": "Okno klucza zostało zamknięte. Spróbuj jeszcze raz."
+    },
+    "failed": {
+      "title": "Nie udało się zapisać klucza.",
+      "body": "Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "unsupported": {
+      "title": "Klucze dostępu tu nie działają.",
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+    },
+    "alreadyDone": {
+      "title": "Spiżarnia jest już założona",
+      "body": "Ktoś inny zakończył pierwsze uruchomienie. Poproś tę osobę o zaproszenie.",
+      "action": "Przejdź do aplikacji"
+    },
+    "done": {
+      "title": "Witaj w domu!",
+      "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "action": "Przejdź do planu"
+    }
+  },
+  "household": {
+    "title": "Dom",
+    "sectionsLabel": "Ustawienia domu",
+    "back": "Dom",
+    "notBuiltYet": "Ta część ustawień jeszcze powstaje.",
+    "sections": {
+      "members": {
+        "title": "Domownicy",
+        "description": "Kto je i ile"
+      },
+      "slots": {
+        "title": "Posiłki",
+        "description": "Pory posiłków w planie"
+      },
+      "dislikes": {
+        "title": "Nie jemy",
+        "description": "Nigdy i unikamy"
+      },
+      "rules": {
+        "title": "Zasady planowania",
+        "description": "Wskazówki dla agenta"
+      },
+      "language": {
+        "title": "Język treści",
+        "description": "W jakim języku pisze agent"
+      },
+      "tokens": {
+        "title": "Tokeny dostępu",
+        "description": "Dla agentów przez MCP"
+      },
+      "account": {
+        "title": "Moje konto",
+        "description": "Język, motyw, klucze dostępu"
+      }
+    },
+    "members": {
+      "intro": "Mnożnik porcji mówi, ile zjada każdy domownik. Z sumy liczymy porcję domową, a z niej zakupy.",
+      "householdServing": "Porcja domowa",
+      "portionFactor": "Mnożnik porcji: {{name}}",
+      "less": "Mniej dla: {{name}}",
+      "more": "Więcej dla: {{name}}",
+      "bounds": "Mnożnik porcji od {{min}} do {{max}}, co {{step}}.",
+      "account": {
+        "admin": "administrator",
+        "user": "ma konto",
+        "none": "bez konta",
+        "invited": "zaproszenie wysłane",
+        "recoveryLinkSent": "link odzyskania wysłany"
+      },
+      "nameLabel": "Imię",
+      "rename": "Zmień imię: {{name}}",
+      "newName": "Imię nowego domownika",
+      "add": "Dodaj",
+      "delete": "Usuń: {{name}}",
+      "confirmDelete": "Usunąć: {{name}}?",
+      "cancel": "Anuluj",
+      "confirm": "Usuń",
+      "loadFailed": "Nie udało się wczytać domowników. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz.",
+      "invite": "Zaproś",
+      "newLink": "Nowy link",
+      "revokeLink": "Unieważnij link",
+      "recover": "Odzyskaj dostęp",
+      "recoverHint": "Gdy ktoś zgubi telefon",
+      "promote": "Nadaj rolę administratora",
+      "demote": "Odbierz rolę administratora",
+      "removeUser": "Usuń konto",
+      "confirmRemoveUser": "Usunąć konto: {{name}}? Domownik zostaje.",
+      "lastAdmin": "Ostatni administrator musi zostać. Najpierw nadaj tę rolę komuś innemu.",
+      "outdated": "Ktoś to w międzyczasie zmienił. Lista jest znowu aktualna.",
+      "issued": {
+        "invite": {
+          "title": "Zaproszenie dla: {{name}}",
+          "body": "Wyślij ten link tylko tej osobie. Otworzy go na swoim telefonie i utworzy klucz dostępu."
+        },
+        "recovery": {
+          "title": "Link odzyskania dla: {{name}}",
+          "body": "Wyślij ten link tylko tej osobie. Otworzy go na nowym telefonie i doda klucz dostępu."
+        },
+        "address": "Adres linku",
+        "copy": "Kopiuj",
+        "copied": "Skopiowano",
+        "note": "Link działa 48 godzin i tylko raz. Nowy link unieważnia ten.",
+        "done": "Gotowe"
+      }
+    },
+    "slots": {
+      "intro": "Pory posiłków to wiersze w planie. Wyłączony posiłek znika z planu, ale nie kasuje historii.",
+      "nameLabel": "Nazwa posiłku {{number}}",
+      "moveUp": "W górę: {{name}}",
+      "moveDown": "W dół: {{name}}",
+      "inPlan": "{{name}} w planie",
+      "newName": "Nowy posiłek",
+      "newNamePlaceholder": "np. Kolacja na mieście",
+      "add": "Dodaj posiłek",
+      "inPlanCount": "Posiłków dziennie w planie: {{count}}.",
+      "lastEnabled": "Co najmniej jeden posiłek zostaje w planie.",
+      "loadFailed": "Nie udało się wczytać posiłków. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "account": {
+      "intro": "Te ustawienia dotyczą tylko Ciebie, na każdym urządzeniu, na którym się logujesz.",
+      "language": "Język interfejsu",
+      "theme": "Motyw",
+      "themeNote": "Systemowy podąża za ustawieniem telefonu lub komputera.",
+      "preferencesNotSaved": "Zmiana działa na tym urządzeniu, ale nie zapisano jej na koncie. Sprawdź połączenie.",
+      "passkeys": {
+        "title": "Klucze dostępu",
+        "add": "Dodaj",
+        "adding": "Czekam na klucz dostępu…",
+        "unnamed": "Klucz dostępu",
+        "nameLabel": "Nazwa klucza",
+        "rename": "Zmień nazwę: {{name}}",
+        "added": "Dodany {{date}}",
+        "lastUsed": "ostatnio użyty {{date}}",
+        "notUsedYet": "jeszcze nie użyty do logowania",
+        "remove": "Usuń: {{name}}",
+        "confirmRemove": "Usunąć: {{name}}? Inne urządzenia trzeba będzie zalogować ponownie.",
+        "cancel": "Anuluj",
+        "confirm": "Usuń",
+        "onlyOne": "To Twój jedyny klucz. Zanim go usuniesz, dodaj drugi.",
+        "lastPasskey": "Ostatni klucz musi zostać. Najpierw dodaj drugi.",
+        "note": "Klucze synchronizują się przez menedżer haseł telefonu. Dodaj drugi, jeśli używasz kilku urządzeń bez wspólnego konta.",
+        "loadFailed": "Nie udało się wczytać kluczy. Sprawdź połączenie.",
+        "retry": "Spróbuj ponownie",
+        "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz.",
+        "cancelled": "Dodawanie klucza przerwane. Spróbuj jeszcze raz.",
+        "unsupported": "Klucze dostępu tu nie działają. Otwórz aplikację przez HTTPS w aktualnej przeglądarce.",
+        "addFailed": "Nie udało się zapisać klucza. Sprawdź połączenie i spróbuj jeszcze raz."
+      },
+      "sessions": {
+        "title": "Inne urządzenia",
+        "body": "Zgubiony telefon albo logowanie na cudzym komputerze? Wyloguj wszędzie poza tym urządzeniem.",
+        "signOutOthers": "Wyloguj inne urządzenia",
+        "done": "Inne urządzenia są wylogowane.",
+        "failed": "Nie udało się wylogować innych urządzeń. Sprawdź połączenie i spróbuj jeszcze raz."
+      }
+    },
+    "rules": {
+      "intro": "Krótkie zdania, które agent czyta przed planowaniem. Wyłączona zasada zostaje na później.",
+      "textLabel": "Zasada {{number}}",
+      "moveUp": "Zasada {{number}} w górę",
+      "moveDown": "Zasada {{number}} w dół",
+      "enabled": "Zasada {{number}} włączona",
+      "delete": "Usuń zasadę {{number}}",
+      "confirmDelete": "Usunąć zasadę {{number}}?",
+      "cancel": "Anuluj",
+      "confirm": "Usuń",
+      "newText": "Nowa zasada",
+      "newTextPlaceholder": "np. Słodkie śniadanie tylko w weekend",
+      "add": "Dodaj",
+      "empty": "Nie ma jeszcze zasad. Agent planuje bez dodatkowych wskazówek.",
+      "agentReads": "Zasady czytane przez agenta: {{count}}.",
+      "loadFailed": "Nie udało się wczytać zasad. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "language": {
+      "intro": "W tym języku agent pisze przepisy, nazwy pozycji na listach i notatki. Język przycisków i menu każdy wybiera sam w swoim koncie.",
+      "note": "Zmiana nie tłumaczy istniejących przepisów. Agent może to zrobić, jeśli go poprosisz.",
+      "options": {
+        "pl": { "name": "Polski", "description": "Przepisy i listy po polsku" },
+        "en": { "name": "English", "description": "Przepisy i listy po angielsku" },
+        "de": { "name": "Deutsch", "description": "Przepisy i listy po niemiecku" },
+        "fr": { "name": "Français", "description": "Przepisy i listy po francusku" },
+        "es": { "name": "Español", "description": "Przepisy i listy po hiszpańsku" },
+        "it": { "name": "Italiano", "description": "Przepisy i listy po włosku" },
+        "cs": { "name": "Čeština", "description": "Przepisy i listy po czesku" },
+        "uk": { "name": "Українська", "description": "Przepisy i listy po ukraińsku" }
+      },
+      "loadFailed": "Nie udało się wczytać języka treści. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    }
+  },
+  "signIn": {
+    "title": "Spiżarnia",
+    "intro": "Plan posiłków i zakupy dla całego domu.",
+    "accountLabel": "Konto",
+    "accountPlaceholder": "Wybierz klucz dostępu",
+    "signIn": "Zaloguj się kluczem dostępu",
+    "signingIn": "Czekam na klucz dostępu…",
+    "retry": "Spróbuj ponownie",
+    "hint": "Nie masz konta? Poproś administratora o zaproszenie.",
+    "expired": "Sesja wygasła. Zaloguj się ponownie.",
+    "cancelled": {
+      "title": "Logowanie przerwane.",
+      "body": "Okno klucza zostało zamknięte albo klucz nie pasuje do tego adresu. Spróbuj jeszcze raz albo poproś administratora o nowy link."
+    },
+    "rejected": {
+      "title": "Nie znamy tego klucza dostępu.",
+      "body": "Mógł zostać usunięty. Poproś administratora o nowy link."
+    },
+    "failed": {
+      "title": "Nie udało się zalogować.",
+      "body": "Sprawdź połączenie i spróbuj ponownie."
+    },
+    "unsupported": {
+      "title": "Klucze dostępu tu nie działają.",
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+    }
+  },
+  "redeemLink": {
+    "loading": "Otwieranie linku…",
+    "loadFailed": {
+      "title": "Nie udało się otworzyć linku.",
+      "body": "Sprawdź połączenie i spróbuj ponownie."
+    },
+    "invite": {
+      "label": "Zaproszenie",
+      "title": "{{name}} zaprasza Cię do Spiżarni",
+      "titleAnonymous": "Zaproszenie do Spiżarni",
+      "create": "Dołącz i utwórz klucz"
+    },
+    "recovery": {
+      "label": "Link odzyskania",
+      "title": "Wróć do Spiżarni, {{name}}",
+      "body": "Utwórz klucz dostępu na tym urządzeniu. Klucze na innych urządzeniach działają dalej.",
+      "create": "Utwórz klucz dostępu"
+    },
+    "validUntil": "Ważny do {{date}}",
+    "nameLabel": "Jak masz na imię?",
+    "creating": "Czekam na klucz dostępu…",
+    "retry": "Spróbuj ponownie",
+    "hint": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+    "cancelled": {
+      "title": "Tworzenie klucza przerwane.",
+      "body": "Okno klucza zostało zamknięte. Spróbuj jeszcze raz."
+    },
+    "failed": {
+      "title": "Nie udało się zapisać klucza.",
+      "body": "Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "unsupported": {
+      "title": "Klucze dostępu tu nie działają.",
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+    },
+    "expired": {
+      "title": "Link wygasł",
+      "body": "Link działa 48 godzin. Poproś administratora o nowy."
+    },
+    "used": {
+      "title": "Link został już użyty",
+      "body": "Każdy link działa tylko raz. Jeśli to nie Ty, powiedz administratorowi."
+    },
+    "revoked": {
+      "title": "Link został unieważniony",
+      "body": "Administrator go unieważnił albo wysłał nowszy. Poproś o nowy link."
+    },
+    "notFound": {
+      "title": "Ten link nie działa",
+      "body": "Sprawdź, czy skopiowano cały adres, albo poproś administratora o nowy link."
+    },
+    "done": {
+      "title": "Witaj w domu!",
+      "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "action": "Przejdź do planu"
+    },
+    "signIn": "Przejdź do logowania"
   }
 }

@@ -17,7 +17,7 @@ public static class HealthEndpoint
             return Results.Json(
                 new HealthResponse(healthy ? "ok" : "unhealthy", Version),
                 statusCode: healthy ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable);
-        });
+        }).AllowAnonymous();
         return api;
     }
 }

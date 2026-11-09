@@ -3,19 +3,22 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { TranslocoService } from '@jsverse/transloco';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { DEFAULT_UI_LANGUAGE, isUiLanguage, UiLanguage } from './ui-language';
 
 const STORAGE_KEY = 'pantry.uiLanguage';
 
-/** The UI language of the current device. E3 replaces the local preference with the user's setting. */
+/**
+ * The UI language of this device, kept in `localStorage` for the screens before sign-in.
+ * After sign-in `UserPreferences` sets it from the user's saved choice.
+ */
 @Injectable({ providedIn: 'root' })
 export class UiLanguageService {
   private readonly transloco = inject(TranslocoService);
   private readonly document = inject(DOCUMENT);
   private readonly title = inject(Title);
 
-  readonly current = toSignal(this.transloco.langChanges$, {
+  readonly current = toSignal(this.transloco.langChanges$ as Observable<UiLanguage>, {
     initialValue: this.transloco.getActiveLang() as UiLanguage,
   });
 

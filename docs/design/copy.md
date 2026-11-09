@@ -67,7 +67,11 @@ Use these exact words. If the meaning changes, change the glossary first.
 | UI language | Język interfejsu | Interface language |
 | Access token | Token dostępu | Access token |
 | Passkey | Klucz dostępu | Passkey |
+| Admin | Administrator | Admin |
+| Invite | Zaproszenie | Invite |
+| Recovery link | Link odzyskania | Recovery link |
 | Theme | Motyw | Theme |
+| My account | Moje konto | My account |
 
 ## Patterns
 

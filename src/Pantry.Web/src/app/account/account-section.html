@@ -1,0 +1,159 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.account.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('account.intro') }}</p>
+  </div>
+
+  <section class="grid gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card" data-testid="account-language">
+    <h3 class="text-lg font-extrabold">{{ t('account.language') }}</h3>
+    <app-language-switcher />
+  </section>
+
+  <section class="grid gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card" data-testid="account-theme">
+    <h3 class="text-lg font-extrabold">{{ t('account.theme') }}</h3>
+    <app-theme-switcher />
+    <p class="text-xs text-muted-foreground">{{ t('account.themeNote') }}</p>
+  </section>
+
+  @if (preferences.saveFailed()) {
+    <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.preferencesNotSaved') }}</p>
+  }
+
+  <section class="grid gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card" data-testid="account-passkeys">
+    <div class="flex items-center gap-3">
+      <h3 class="flex-1 text-lg font-extrabold">{{ t('account.passkeys.title') }}</h3>
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        type="button"
+        data-testid="passkey-add"
+        [disabled]="addState() === 'adding' || addState() === 'unsupported'"
+        (click)="add()"
+      >
+        <app-icon name="plus" class="size-4" />
+        {{ addState() === 'adding' ? t('account.passkeys.adding') : t('account.passkeys.add') }}
+      </button>
+    </div>
+
+    @if (passkeyList.error() && !passkeyList.hasValue()) {
+      <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+        <span class="flex-1">{{ t('account.passkeys.loadFailed') }}</span>
+        <button hlmBtn variant="outline" size="sm" type="button" (click)="passkeyList.reload()">{{ t('account.passkeys.retry') }}</button>
+      </div>
+    } @else if (passkeyList.hasValue()) {
+      <ul class="grid" data-testid="passkeys">
+        @for (passkey of passkeys(); track passkey.id) {
+          @let name = passkey.name ?? t('account.passkeys.unnamed');
+          <li
+            class="grid grid-cols-[24px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 border-t border-border py-2.5 first:border-t-0 md:grid-cols-[24px_minmax(0,1fr)_auto]"
+            data-testid="passkey"
+          >
+            <app-icon name="key" class="size-6" />
+            <div class="grid min-w-0 justify-items-start gap-0.5">
+              @if (editingId() === passkey.id) {
+                <input
+                  #nameInput
+                  class="h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 font-extrabold"
+                  [value]="passkey.name ?? ''"
+                  [maxLength]="nameMaxLength"
+                  [attr.aria-label]="t('account.passkeys.nameLabel')"
+                  (keydown.enter)="rename(passkey, nameInput.value)"
+                  (keydown.escape)="editingId.set(null)"
+                  (blur)="rename(passkey, nameInput.value)"
+                />
+              } @else {
+                <button
+                  type="button"
+                  class="max-w-full truncate rounded-chip text-left font-extrabold hover:underline"
+                  data-testid="passkey-name"
+                  [attr.aria-label]="t('account.passkeys.rename', { name })"
+                  (click)="editingId.set(passkey.id)"
+                >
+                  {{ name }}
+                </button>
+              }
+              <span class="text-xs text-muted-foreground">
+                {{ t('account.passkeys.added', { date: (passkey.createdAt | date: dateFormat : undefined : language()) }) }} ·
+                @if (passkey.lastUsedAt) {
+                  {{ t('account.passkeys.lastUsed', { date: (passkey.lastUsedAt | date: dateFormat : undefined : language()) }) }}
+                } @else {
+                  {{ t('account.passkeys.notUsedYet') }}
+                }
+              </span>
+            </div>
+            <div class="col-start-2 flex flex-wrap items-center gap-2 md:col-auto md:justify-self-end" role="group" [attr.aria-label]="name">
+              @if (removingId() === passkey.id) {
+                <span class="text-sm font-bold">{{ t('account.passkeys.confirmRemove', { name }) }}</span>
+                <button hlmBtn variant="ghost" size="sm" type="button" (click)="removingId.set(null)">{{ t('account.passkeys.cancel') }}</button>
+                <button hlmBtn variant="destructive" size="sm" type="button" data-testid="passkey-remove-confirm" (click)="remove(passkey)">
+                  {{ t('account.passkeys.confirm') }}
+                </button>
+              } @else {
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  data-testid="passkey-remove"
+                  [disabled]="onlyOne()"
+                  [title]="onlyOne() ? t('account.passkeys.onlyOne') : ''"
+                  [attr.aria-label]="t('account.passkeys.remove', { name })"
+                  (click)="removingId.set(passkey.id)"
+                >
+                  <app-icon name="close" class="size-4" />
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+      @if (onlyOne()) {
+        <p class="text-xs text-muted-foreground" data-testid="passkey-only-one">{{ t('account.passkeys.onlyOne') }}</p>
+      }
+    }
+
+    <p class="text-xs text-muted-foreground">{{ t('account.passkeys.note') }}</p>
+
+    @switch (addState()) {
+      @case ('cancelled') {
+        <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.passkeys.cancelled') }}</p>
+      }
+      @case ('failed') {
+        <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.passkeys.addFailed') }}</p>
+      }
+      @case ('unsupported') {
+        <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.passkeys.unsupported') }}</p>
+      }
+    }
+    @if (lastPasskey()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.passkeys.lastPasskey') }}</p>
+    }
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.passkeys.saveFailed') }}</p>
+    }
+  </section>
+
+  <section class="grid gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card" data-testid="account-sessions">
+    <h3 class="text-lg font-extrabold">{{ t('account.sessions.title') }}</h3>
+    <p class="text-sm text-muted-foreground">{{ t('account.sessions.body') }}</p>
+    <button
+      hlmBtn
+      variant="outline"
+      size="sm"
+      type="button"
+      class="justify-self-start"
+      data-testid="sign-out-others"
+      [disabled]="signingOutOthers()"
+      (click)="signOutOthers()"
+    >
+      <app-icon name="signOut" class="size-4" />
+      {{ t('account.sessions.signOutOthers') }}
+    </button>
+    @if (othersSignedOut() === 'done') {
+      <p class="text-sm font-bold text-success" role="status">{{ t('account.sessions.done') }}</p>
+    } @else if (othersSignedOut() === 'failed') {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('account.sessions.failed') }}</p>
+    }
+  </section>
+</ng-container>

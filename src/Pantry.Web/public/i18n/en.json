@@ -1,17 +1,9 @@
 {
   "app": {
-    "name": "Pantry",
-    "tagline": "Scaffold is running. Features arrive epic by epic."
-  },
-  "health": {
-    "label": "API",
-    "ok": "ok",
-    "unhealthy": "unhealthy",
-    "unreachable": "unreachable",
-    "checking": "checking..."
+    "name": "Pantry"
   },
   "language": {
-    "label": "Language",
+    "label": "Interface language",
     "en": "English",
     "pl": "Polski"
   },
@@ -70,6 +62,335 @@
       "online": "Saved",
       "offline": "Offline",
       "pending": "Waiting to sync"
+    },
+    "detail": {
+      "online": "Online · everything saved",
+      "offline": "Offline · changes are waiting",
+      "pending": "Online · sending changes"
     }
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "mainNavigation": "Main navigation",
+    "account": "Account",
+    "myAccount": "My account",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "planner": "Plan",
+    "recipes": "Recipes",
+    "shopping": "Shopping",
+    "household": "Household"
+  },
+  "emptyState": {
+    "planner": {
+      "title": "Plan this week",
+      "description": "Drag dishes from the tray or ask the agent for proposals. You accept them with one click.",
+      "agentHint": "Ask Claude: \"Plan next week's dinners in Pantry.\""
+    },
+    "recipes": {
+      "title": "Add your first recipe",
+      "description": "Type it in, or give the agent a link to a recipe page and it will copy it and match the ingredients.",
+      "agentHint": "Ask Claude: \"Add the recipe from this link to Pantry.\""
+    },
+    "shopping": {
+      "title": "Everything is in the cart",
+      "description": "Nothing left to buy. A new list comes from the plan when you need one."
+    }
+  },
+  "firstRun": {
+    "label": "First run",
+    "title": "Let's set up Pantry",
+    "intro": "This account will be the admin. Then you can invite the rest of the household.",
+    "nameLabel": "What is your name?",
+    "namePlaceholder": "e.g. Alex",
+    "create": "Create a passkey",
+    "creating": "Waiting for the passkey…",
+    "retry": "Try again",
+    "hint": "No password. The passkey stays in your phone's password manager.",
+    "cancelled": {
+      "title": "Passkey creation cancelled.",
+      "body": "The passkey window was closed. Try again."
+    },
+    "failed": {
+      "title": "The passkey could not be saved.",
+      "body": "Check the connection and try again."
+    },
+    "unsupported": {
+      "title": "Passkeys do not work here.",
+      "body": "Open the app over HTTPS in an up-to-date browser."
+    },
+    "alreadyDone": {
+      "title": "Pantry is already set up",
+      "body": "Someone else finished the first run. Ask them for an invite.",
+      "action": "Go to the app"
+    },
+    "done": {
+      "title": "Welcome home!",
+      "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "action": "Go to the plan"
+    }
+  },
+  "household": {
+    "title": "Household",
+    "sectionsLabel": "Household settings",
+    "back": "Household",
+    "notBuiltYet": "This part of the settings is still being built.",
+    "sections": {
+      "members": {
+        "title": "Members",
+        "description": "Who eats and how much"
+      },
+      "slots": {
+        "title": "Meals",
+        "description": "Meal times in the plan"
+      },
+      "dislikes": {
+        "title": "We don't eat",
+        "description": "Never and avoid"
+      },
+      "rules": {
+        "title": "Planning rules",
+        "description": "Guidance for the agent"
+      },
+      "language": {
+        "title": "Content language",
+        "description": "The language the agent writes in"
+      },
+      "tokens": {
+        "title": "Access tokens",
+        "description": "For agents over MCP"
+      },
+      "account": {
+        "title": "My account",
+        "description": "Language, theme, passkeys"
+      }
+    },
+    "members": {
+      "intro": "The portion factor says how much each member eats. Their sum is the household serving, which sets the shopping quantities.",
+      "householdServing": "Household serving",
+      "portionFactor": "Portion factor: {{name}}",
+      "less": "Less for {{name}}",
+      "more": "More for {{name}}",
+      "bounds": "Portion factor from {{min}} to {{max}}, in steps of {{step}}.",
+      "account": {
+        "admin": "admin",
+        "user": "has an account",
+        "none": "no account",
+        "invited": "invite sent",
+        "recoveryLinkSent": "recovery link sent"
+      },
+      "nameLabel": "Name",
+      "rename": "Rename {{name}}",
+      "newName": "New member's name",
+      "add": "Add",
+      "delete": "Remove {{name}}",
+      "confirmDelete": "Remove {{name}}?",
+      "cancel": "Cancel",
+      "confirm": "Remove",
+      "loadFailed": "Members could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again.",
+      "invite": "Invite",
+      "newLink": "New link",
+      "revokeLink": "Revoke link",
+      "recover": "Recover access",
+      "recoverHint": "When someone loses their phone",
+      "promote": "Make admin",
+      "demote": "Remove admin role",
+      "removeUser": "Remove account",
+      "confirmRemoveUser": "Remove the account of {{name}}? The member stays.",
+      "lastAdmin": "The last admin has to stay. Make someone else an admin first.",
+      "outdated": "Someone changed this in the meantime. The list is up to date again.",
+      "issued": {
+        "invite": {
+          "title": "Invite for {{name}}",
+          "body": "Send this link only to this person. They open it on their phone and create a passkey."
+        },
+        "recovery": {
+          "title": "Recovery link for {{name}}",
+          "body": "Send this link only to this person. They open it on the new phone and add a passkey."
+        },
+        "address": "Link address",
+        "copy": "Copy",
+        "copied": "Copied",
+        "note": "The link works for 48 hours and only once. A new link cancels this one.",
+        "done": "Done"
+      }
+    },
+    "slots": {
+      "intro": "Meals are the rows of the plan. A disabled meal leaves the plan, but its history stays.",
+      "nameLabel": "Name of meal {{number}}",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "inPlan": "{{name}} in the plan",
+      "newName": "New meal",
+      "newNamePlaceholder": "e.g. Dinner out",
+      "add": "Add meal",
+      "inPlanCount": "Meals a day in the plan: {{count}}.",
+      "lastEnabled": "At least one meal stays in the plan.",
+      "loadFailed": "Meals could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "account": {
+      "intro": "These settings apply only to you, on every device you sign in on.",
+      "language": "Interface language",
+      "theme": "Theme",
+      "themeNote": "System follows the setting of your phone or computer.",
+      "preferencesNotSaved": "The change works on this device but was not saved to your account. Check the connection.",
+      "passkeys": {
+        "title": "Passkeys",
+        "add": "Add",
+        "adding": "Waiting for the passkey…",
+        "unnamed": "Passkey",
+        "nameLabel": "Passkey name",
+        "rename": "Rename {{name}}",
+        "added": "Added {{date}}",
+        "lastUsed": "last used {{date}}",
+        "notUsedYet": "not used to sign in yet",
+        "remove": "Remove {{name}}",
+        "confirmRemove": "Remove {{name}}? Other devices will have to sign in again.",
+        "cancel": "Cancel",
+        "confirm": "Remove",
+        "onlyOne": "This is your only passkey. Add another one before removing it.",
+        "lastPasskey": "The last passkey has to stay. Add another one first.",
+        "note": "Passkeys sync through your phone's password manager. Add a second one if you use devices without a shared account.",
+        "loadFailed": "Passkeys could not be loaded. Check the connection.",
+        "retry": "Try again",
+        "saveFailed": "The change was not saved. Check the connection and try again.",
+        "cancelled": "Adding the passkey was cancelled. Try again.",
+        "unsupported": "Passkeys do not work here. Open the app over HTTPS in an up-to-date browser.",
+        "addFailed": "The passkey could not be saved. Check the connection and try again."
+      },
+      "sessions": {
+        "title": "Other devices",
+        "body": "Lost a phone or signed in on someone else's computer? Sign out everywhere except here.",
+        "signOutOthers": "Sign out other devices",
+        "done": "Other devices are signed out.",
+        "failed": "Other devices were not signed out. Check the connection and try again."
+      }
+    },
+    "rules": {
+      "intro": "Short sentences the agent reads before planning. A disabled rule stays for later.",
+      "textLabel": "Rule {{number}}",
+      "moveUp": "Move rule {{number}} up",
+      "moveDown": "Move rule {{number}} down",
+      "enabled": "Rule {{number}} on",
+      "delete": "Remove rule {{number}}",
+      "confirmDelete": "Remove rule {{number}}?",
+      "cancel": "Cancel",
+      "confirm": "Remove",
+      "newText": "New rule",
+      "newTextPlaceholder": "e.g. Sweet breakfast only at the weekend",
+      "add": "Add",
+      "empty": "No rules yet. The agent plans without extra guidance.",
+      "agentReads": "Rules the agent reads: {{count}}.",
+      "loadFailed": "Rules could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "language": {
+      "intro": "The agent writes recipes, list items and notes in this language. Everyone picks the language of buttons and menus in their own account.",
+      "note": "Changing it does not translate existing recipes. The agent can do that if you ask.",
+      "options": {
+        "pl": { "name": "Polski", "description": "Recipes and lists in Polish" },
+        "en": { "name": "English", "description": "Recipes and lists in English" },
+        "de": { "name": "Deutsch", "description": "Recipes and lists in German" },
+        "fr": { "name": "Français", "description": "Recipes and lists in French" },
+        "es": { "name": "Español", "description": "Recipes and lists in Spanish" },
+        "it": { "name": "Italiano", "description": "Recipes and lists in Italian" },
+        "cs": { "name": "Čeština", "description": "Recipes and lists in Czech" },
+        "uk": { "name": "Українська", "description": "Recipes and lists in Ukrainian" }
+      },
+      "loadFailed": "The content language could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
+    }
+  },
+  "signIn": {
+    "title": "Pantry",
+    "intro": "Meal plan and shopping for the whole household.",
+    "accountLabel": "Account",
+    "accountPlaceholder": "Pick your passkey",
+    "signIn": "Sign in with a passkey",
+    "signingIn": "Waiting for the passkey…",
+    "retry": "Try again",
+    "hint": "No account? Ask the admin for an invite.",
+    "expired": "Your session has expired. Sign in again.",
+    "cancelled": {
+      "title": "Sign-in interrupted.",
+      "body": "The passkey window was closed or the passkey does not match this address. Try again or ask the admin for a new link."
+    },
+    "rejected": {
+      "title": "This passkey is not known here.",
+      "body": "It may have been removed. Ask the admin for a new link."
+    },
+    "failed": {
+      "title": "Could not sign in.",
+      "body": "Check the connection and try again."
+    },
+    "unsupported": {
+      "title": "Passkeys do not work here.",
+      "body": "Open the app over HTTPS in an up-to-date browser."
+    }
+  },
+  "redeemLink": {
+    "loading": "Opening the link…",
+    "loadFailed": {
+      "title": "The link could not be opened.",
+      "body": "Check the connection and try again."
+    },
+    "invite": {
+      "label": "Invite",
+      "title": "{{name}} invites you to Pantry",
+      "titleAnonymous": "You are invited to Pantry",
+      "create": "Join and create a passkey"
+    },
+    "recovery": {
+      "label": "Recovery link",
+      "title": "Get back into Pantry, {{name}}",
+      "body": "Create a passkey on this device. Passkeys on your other devices keep working.",
+      "create": "Create a passkey"
+    },
+    "validUntil": "Valid until {{date}}",
+    "nameLabel": "What is your name?",
+    "creating": "Waiting for the passkey…",
+    "retry": "Try again",
+    "hint": "No password. The passkey stays in your phone's password manager.",
+    "cancelled": {
+      "title": "Passkey creation cancelled.",
+      "body": "The passkey window was closed. Try again."
+    },
+    "failed": {
+      "title": "The passkey could not be saved.",
+      "body": "Check the connection and try again."
+    },
+    "unsupported": {
+      "title": "Passkeys do not work here.",
+      "body": "Open the app over HTTPS in an up-to-date browser."
+    },
+    "expired": {
+      "title": "This link has expired",
+      "body": "Links work for 48 hours. Ask the admin for a new one."
+    },
+    "used": {
+      "title": "This link was already used",
+      "body": "Each link works only once. If it was not you, tell the admin."
+    },
+    "revoked": {
+      "title": "This link was cancelled",
+      "body": "The admin cancelled it or sent a newer one. Ask for a new link."
+    },
+    "notFound": {
+      "title": "This link does not work",
+      "body": "Check that the whole address was copied, or ask the admin for a new link."
+    },
+    "done": {
+      "title": "Welcome home!",
+      "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "action": "Go to the plan"
+    },
+    "signIn": "Go to sign-in"
   }
 }

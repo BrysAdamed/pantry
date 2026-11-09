@@ -1,0 +1,233 @@
+<ng-container *transloco="let t; prefix: 'household'">
+  <div class="grid gap-1">
+    <h2 class="text-2xl md:text-[30px]">{{ t('sections.members.title') }}</h2>
+    <p class="max-w-[70ch] text-sm text-muted-foreground">{{ t('members.intro') }}</p>
+  </div>
+
+  @if (household.error() && !household.hasValue()) {
+    <div class="flex flex-wrap items-center gap-3 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">
+      <span class="flex-1">{{ t('members.loadFailed') }}</span>
+      <button hlmBtn variant="outline" size="sm" type="button" (click)="household.reload()">{{ t('members.retry') }}</button>
+    </div>
+  } @else if (household.hasValue()) {
+    <div class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-4.5 py-4 shadow-card">
+      <ul class="grid" data-testid="members">
+        @for (member of members(); track member.id) {
+          <li
+            class="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border py-2.5 first:border-t-0 md:grid-cols-[44px_minmax(0,1fr)_auto_minmax(44px,auto)]"
+            data-testid="member"
+          >
+            <span
+              class="grid size-10 place-items-center rounded-full border-2 border-outline bg-secondary font-display font-extrabold md:size-11"
+              aria-hidden="true"
+              >{{ initial(member.name) }}</span
+            >
+
+            <div class="grid min-w-0 justify-items-start gap-1">
+              @if (editingId() === member.id) {
+                <input
+                  #nameInput
+                  class="h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 font-extrabold"
+                  [value]="member.name"
+                  [maxLength]="nameMaxLength"
+                  [attr.aria-label]="t('members.nameLabel')"
+                  (keydown.enter)="rename(member, nameInput.value)"
+                  (keydown.escape)="editingId.set(null)"
+                  (blur)="rename(member, nameInput.value)"
+                />
+              } @else {
+                <button
+                  type="button"
+                  class="max-w-full truncate rounded-chip text-left font-extrabold hover:underline"
+                  [attr.aria-label]="t('members.rename', { name: member.name })"
+                  (click)="editingId.set(member.id)"
+                >
+                  {{ member.name }}
+                </button>
+              }
+              @switch (member.account) {
+                @case ('admin') {
+                  <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-success bg-success-surface text-success">{{ t('members.account.admin') }}</span>
+                }
+                @case ('user') {
+                  <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-success bg-success-surface text-success">{{ t('members.account.user') }}</span>
+                }
+                @default {
+                  @if (openLinkByMember().has(member.id)) {
+                    <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-info bg-info-surface text-info">{{ t('members.account.invited') }}</span>
+                  } @else {
+                    <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-border text-muted-foreground">{{ t('members.account.none') }}</span>
+                  }
+                }
+              }
+              @if (member.account && openLinkByMember().has(member.id)) {
+                <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-info bg-info-surface text-info">{{ t('members.account.recoveryLinkSent') }}</span>
+              }
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button
+                hlmBtn
+                variant="outline"
+                size="icon-sm"
+                type="button"
+                [disabled]="member.portionFactor <= bounds.min"
+                [attr.aria-label]="t('members.less', { name: member.name })"
+                (click)="step(member.id, -1)"
+              >
+                <app-icon name="minus" class="size-4" />
+              </button>
+              <output
+                class="min-w-11 text-center font-display text-lg font-extrabold tabular-nums"
+                [attr.aria-label]="t('members.portionFactor', { name: member.name })"
+                data-testid="portion-factor"
+                >{{ member.portionFactor | number: factorFormat : language() }}</output
+              >
+              <button
+                hlmBtn
+                variant="outline"
+                size="icon-sm"
+                type="button"
+                [disabled]="member.portionFactor >= bounds.max"
+                [attr.aria-label]="t('members.more', { name: member.name })"
+                (click)="step(member.id, 1)"
+              >
+                <app-icon name="plus" class="size-4" />
+              </button>
+            </div>
+
+            <div
+              class="col-start-2 col-end-4 flex flex-wrap items-center gap-2 empty:hidden md:col-auto md:justify-self-end"
+              role="group"
+              [attr.aria-label]="member.name"
+            >
+              @if (isAdmin()) {
+                @let link = openLinkByMember().get(member.id);
+                @if (!member.account) {
+                  <button hlmBtn variant="outline" size="sm" type="button" (click)="issueLink(member)">
+                    <app-icon name="link" class="size-4" />
+                    {{ link ? t('members.newLink') : t('members.invite') }}
+                  </button>
+                  @if (link) {
+                    <button hlmBtn variant="ghost" size="sm" type="button" (click)="revokeLink(link)">{{ t('members.revokeLink') }}</button>
+                  }
+                } @else if (member.userId !== myUserId()) {
+                  @if (removingUserOf() === member.id) {
+                    <span class="text-sm font-bold">{{ t('members.confirmRemoveUser', { name: member.name }) }}</span>
+                    <button hlmBtn variant="ghost" size="sm" type="button" (click)="removingUserOf.set(null)">{{ t('members.cancel') }}</button>
+                    <button hlmBtn variant="destructive" size="sm" type="button" (click)="removeUser(member)">{{ t('members.removeUser') }}</button>
+                  } @else {
+                    <button hlmBtn variant="ghost" size="sm" type="button" [title]="t('members.recoverHint')" (click)="issueLink(member)">
+                      {{ t('members.recover') }}
+                    </button>
+                    @if (link) {
+                      <button hlmBtn variant="ghost" size="sm" type="button" (click)="revokeLink(link)">{{ t('members.revokeLink') }}</button>
+                    }
+                    @if (member.account === 'admin') {
+                      <button hlmBtn variant="ghost" size="sm" type="button" (click)="changeRole(member, 'user')">{{ t('members.demote') }}</button>
+                    } @else {
+                      <button hlmBtn variant="ghost" size="sm" type="button" (click)="changeRole(member, 'admin')">{{ t('members.promote') }}</button>
+                    }
+                    <button hlmBtn variant="ghost" size="sm" type="button" class="text-danger" (click)="removingUserOf.set(member.id)">
+                      {{ t('members.removeUser') }}
+                    </button>
+                  }
+                }
+              }
+              @if (!member.account) {
+                @if (deletingId() === member.id) {
+                  <span class="text-sm font-bold">{{ t('members.confirmDelete', { name: member.name }) }}</span>
+                  <button hlmBtn variant="ghost" size="sm" type="button" (click)="deletingId.set(null)">{{ t('members.cancel') }}</button>
+                  <button hlmBtn variant="destructive" size="sm" type="button" (click)="delete(member)">{{ t('members.confirm') }}</button>
+                } @else {
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon-sm"
+                    type="button"
+                    [attr.aria-label]="t('members.delete', { name: member.name })"
+                    (click)="deletingId.set(member.id)"
+                  >
+                    <app-icon name="close" class="size-4" />
+                  </button>
+                }
+              }
+            </div>
+          </li>
+        }
+      </ul>
+
+      <div class="flex items-center justify-between border-t-2 border-dashed border-border pt-2.5 font-bold" aria-live="polite">
+        <span>{{ t('members.householdServing') }}</span>
+        <b class="font-display text-[22px] tabular-nums" data-testid="household-serving">{{
+          householdServing() | number: factorFormat : language()
+        }}</b>
+      </div>
+
+      <form class="flex gap-2" (submit)="add($event)">
+        <input
+          class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3"
+          [value]="newName()"
+          [maxLength]="nameMaxLength"
+          [placeholder]="t('members.newName')"
+          [attr.aria-label]="t('members.newName')"
+          (input)="newName.set($any($event.target).value)"
+        />
+        <button hlmBtn variant="outline" type="submit" [disabled]="!canAdd() || adding()">
+          <app-icon name="plus" class="size-4" />
+          {{ t('members.add') }}
+        </button>
+      </form>
+
+      <p class="text-xs text-muted-foreground">
+        {{
+          t('members.bounds', {
+            min: (bounds.min | number: factorFormat : language()),
+            max: (bounds.max | number: factorFormat : language()),
+            step: (bounds.step | number: factorFormat : language())
+          })
+        }}
+      </p>
+    </div>
+
+    @if (issued(); as issuedLink) {
+      <section
+        class="grid gap-3 rounded-card border-2 border-primary bg-card px-4.5 py-4 shadow-card"
+        data-testid="issued-link"
+        [attr.aria-label]="t('members.issued.' + issuedLink.kind + '.title', { name: issuedLink.name })"
+      >
+        <h3 class="text-lg font-extrabold">{{ t('members.issued.' + issuedLink.kind + '.title', { name: issuedLink.name }) }}</h3>
+        <p class="text-sm text-muted-foreground">{{ t('members.issued.' + issuedLink.kind + '.body') }}</p>
+        <div class="flex gap-2">
+          <input
+            #issuedUrl
+            readonly
+            class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3 font-mono text-sm"
+            data-testid="issued-link-url"
+            [value]="issuedLink.url"
+            [attr.aria-label]="t('members.issued.address')"
+            (focus)="issuedUrl.select()"
+          />
+          <button hlmBtn variant="outline" type="button" data-testid="issued-link-copy" (click)="copyIssuedLink()">
+            <app-icon name="copy" class="size-4" />
+            {{ copied() ? t('members.issued.copied') : t('members.issued.copy') }}
+          </button>
+        </div>
+        <p class="text-xs text-muted-foreground">{{ t('members.issued.note') }}</p>
+        <button hlmBtn type="button" class="justify-self-end" (click)="issued.set(null)">{{ t('members.issued.done') }}</button>
+      </section>
+    }
+
+    @if (lastAdmin()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('members.lastAdmin') }}</p>
+    }
+
+    @if (outdated()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('members.outdated') }}</p>
+    }
+
+    @if (saveFailed()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('members.saveFailed') }}</p>
+    }
+  }
+</ng-container>
