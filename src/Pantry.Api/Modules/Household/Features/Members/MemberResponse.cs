@@ -2,19 +2,34 @@ using System.Globalization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Pantry.Api.Modules.Household.Domain;
 using Pantry.Api.Modules.Identity;
-using Pantry.Api.Modules.Identity.Domain;
 
 namespace Pantry.Api.Modules.Household.Features.Members;
 
-/// <summary>A member as the settings screen shows it. <c>Account</c> is the linked user's role, or null without an account.</summary>
-public sealed record MemberResponse(Guid Id, string Name, decimal PortionFactor, int Position, UserRole? Account)
+/// <summary>
+/// A member as the settings screen shows it. <c>Account</c> is the linked user's role and <c>UserId</c> that user,
+/// both null without an account.
+/// </summary>
+public sealed record MemberResponse(Guid Id, string Name, decimal PortionFactor, int Position, MemberAccount? Account, Guid? UserId)
 {
-    public static MemberResponse From(Member member, IReadOnlyList<UserAccount> users) => new(
-        member.Id,
-        member.Name,
-        member.PortionFactor,
-        member.Position,
-        users.FirstOrDefault(u => u.Id == member.UserId)?.Role);
+    public static MemberResponse From(Member member, IReadOnlyList<UserAccount> users)
+    {
+        var user = users.FirstOrDefault(u => u.Id == member.UserId);
+        return new(member.Id, member.Name, member.PortionFactor, member.Position, ToMemberAccount(user?.Role), user?.Id);
+    }
+
+    private static MemberAccount? ToMemberAccount(AccountRole? role) => role switch
+    {
+        AccountRole.Admin => MemberAccount.Admin,
+        AccountRole.User => MemberAccount.User,
+        null => null,
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, null),
+    };
+}
+
+public enum MemberAccount
+{
+    Admin,
+    User,
 }
 
 public sealed record MemberRequest(string? Name, decimal PortionFactor);

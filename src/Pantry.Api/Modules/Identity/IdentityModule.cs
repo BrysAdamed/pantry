@@ -1,12 +1,16 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Modules.Identity.Auth;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
+using Pantry.Api.Modules.Identity.Features.PasskeyLinks;
+using Pantry.Api.Modules.Identity.Features.Redeem;
 using Pantry.Api.Modules.Identity.Features.Setup;
 using Pantry.Api.Modules.Identity.Features.SignIn;
+using Pantry.Api.Modules.Identity.Features.Users;
 using Pantry.Api.Modules.Identity.Persistence;
 
 namespace Pantry.Api.Modules.Identity;
@@ -29,8 +33,10 @@ public static class IdentityModule
 
         services.AddAuthentication(IdentityConstants.ApplicationScheme)
             .AddCookie(IdentityConstants.ApplicationScheme)
-            .AddCookie(IdentityConstants.TwoFactorUserIdScheme);
-        services.AddAuthorization();
+            .AddCookie(IdentityConstants.TwoFactorUserIdScheme)
+            .AddCookie(IdentityConstants.TwoFactorRememberMeScheme);
+        services.AddAuthorization(IdentityPolicies.Add);
+        services.TryAddSingleton(TimeProvider.System);
         services.AddIdentityCore<User>(options =>
             {
                 options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
@@ -45,6 +51,10 @@ public static class IdentityModule
             .Configure<IOptions<SessionSettings>>(SessionCookieConfiguration.ApplySession);
         services.AddOptions<CookieAuthenticationOptions>(IdentityConstants.TwoFactorUserIdScheme)
             .Configure(SessionCookieConfiguration.ApplyPasskeyCeremony);
+        services.AddOptions<CookieAuthenticationOptions>(IdentityConstants.TwoFactorRememberMeScheme)
+            .Configure(SessionCookieConfiguration.ApplyRememberMe);
+        services.AddOptions<SecurityStampValidatorOptions>()
+            .Configure<IOptions<SessionSettings>>((options, settings) => options.ValidationInterval = settings.Value.ValidationInterval);
 
         return services;
     }
@@ -62,6 +72,21 @@ public static class IdentityModule
         auth.MapSignOut();
 
         api.MapGetMe();
+
+        var links = api.MapGroup("/passkey-links").RequireAuthorization(IdentityPolicies.Admin);
+        links.MapGetOpenPasskeyLinks();
+        links.MapIssueInvite();
+        links.MapIssueRecoveryLink();
+        links.MapRevokePasskeyLink();
+
+        var redeem = api.MapGroup("/passkey-links/redeem/{token}").AllowAnonymous();
+        redeem.MapGetRedeemableLink();
+        redeem.MapCreateRedeemPasskeyOptions();
+        redeem.MapCompleteRedeem();
+
+        var users = api.MapGroup("/users").RequireAuthorization(IdentityPolicies.Admin);
+        users.MapRemoveUser();
+        users.MapChangeUserRole();
         return api;
     }
 }

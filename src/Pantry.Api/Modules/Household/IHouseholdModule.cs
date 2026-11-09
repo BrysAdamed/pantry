@@ -19,6 +19,15 @@ public interface IHouseholdModule
     /// the admin's member with the default portion factor.
     /// </summary>
     Task CompleteFirstRunAsync(FirstRunAdmin admin, DbTransaction transaction, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Links a member without a user to a new user, inside the caller's transaction (ADR 0015).
+    /// Returns false when the member no longer exists or already has a user.
+    /// </summary>
+    Task<bool> LinkMemberToUserAsync(Guid memberId, Guid userId, DbTransaction transaction, CancellationToken cancellationToken = default);
+
+    /// <summary>Unlinks the member of a user who is being removed, inside the caller's transaction (ADR 0015). The member stays.</summary>
+    Task UnlinkUserAsync(Guid userId, DbTransaction transaction, CancellationToken cancellationToken = default);
 }
 
 public sealed record HouseholdMember(Guid Id, string Name, decimal PortionFactor, int Position, Guid? UserId);

@@ -14,8 +14,6 @@ namespace Pantry.Api.Modules.Identity.Features.Setup;
 /// <summary>Finishes the first run: verifies the new passkey, creates the admin and signs them in.</summary>
 public static class CompleteFirstRun
 {
-    private const long FirstRunLockKey = 0x5041_4E54_5259_0001;
-
     public static RouteHandlerBuilder MapCompleteFirstRun(this IEndpointRouteBuilder setup) =>
         setup.MapPost("/complete", HandleAsync);
 
@@ -51,7 +49,7 @@ public static class CompleteFirstRun
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        await db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({FirstRunLockKey})", cancellationToken);
+        await db.LockFirstRunAsync(cancellationToken);
         if (await db.Users.AnyAsync(cancellationToken))
         {
             return FirstRunProblems.AlreadyDone();

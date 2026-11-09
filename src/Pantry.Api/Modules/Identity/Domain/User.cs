@@ -14,13 +14,17 @@ public sealed class User : IdentityUser<Guid>
 
     public ThemePreference Theme { get; set; } = ThemePreference.System;
 
-    public static User CreateAdmin(Guid id, string displayName) => new()
+    public static User Create(Guid id, string displayName, UserRole role) => new()
     {
         Id = id,
         UserName = id.ToString("N"),
         DisplayName = displayName,
-        Role = UserRole.Admin,
+        Role = role,
     };
+
+    public static User CreateAdmin(Guid id, string displayName) => Create(id, displayName, UserRole.Admin);
+
+    public static bool IsValidDisplayName(string displayName) => displayName.Length is > 0 and <= DisplayNameMaxLength;
 }
 
 public enum UserRole

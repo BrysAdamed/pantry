@@ -1,25 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Pantry.Api.Tests.Infrastructure;
 
 namespace Pantry.Api.Tests.Identity;
 
 internal static class IdentityScenarios
 {
-    /// <summary>Runs the first run with <paramref name="authenticator"/> on a fresh client and returns that signed-in client.</summary>
-    public static async Task<HttpClient> CreateAdminAsync(PantryApiFactory factory, SoftwareAuthenticator authenticator, string displayName = "Admin example")
-    {
-        var client = factory.CreateBrowserClient();
-        await client.GetAsync("/api/setup");
-        var options = await client.PostAsJsonAsync("/api/setup/passkey-options", new { displayName });
-        Assert.Equal(HttpStatusCode.OK, options.StatusCode);
-        var credential = authenticator.Create(await options.Content.ReadFromJsonAsync<JsonElement>());
-        var complete = await client.PostAsJsonAsync("/api/setup/complete", new { credential });
-        Assert.Equal(HttpStatusCode.OK, complete.StatusCode);
-        return client;
-    }
-
     /// <summary>The SPA's sign-in: fetch a token, request options, answer them with the passkey, post the assertion.</summary>
     public static async Task<HttpResponseMessage> SignInAsync(HttpClient client, SoftwareAuthenticator authenticator)
     {
@@ -28,6 +16,51 @@ internal static class IdentityScenarios
         Assert.Equal(HttpStatusCode.OK, options.StatusCode);
         var credential = authenticator.Get(await options.Content.ReadFromJsonAsync<JsonElement>());
         return await client.PostAsJsonAsync("/api/auth/sign-in", new { credential });
+    }
+
+    public static async Task<Guid> AddMemberAsync(HttpClient admin, string name = "Guest")
+    {
+        var response = await admin.PostAsJsonAsync("/api/household/members", new { name, portionFactor = 1m });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+    }
+
+    /// <summary>Issues an invite for <paramref name="memberId"/> and returns the token from the link.</summary>
+    public static async Task<string> IssueInviteAsync(HttpClient admin, Guid memberId)
+    {
+        var response = await admin.PostAsJsonAsync("/api/passkey-links/invites", new { memberId });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
+    }
+
+    public static async Task<string> IssueRecoveryLinkAsync(HttpClient admin, Guid userId)
+    {
+        var response = await admin.PostAsJsonAsync("/api/passkey-links/recovery", new { userId });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
+    }
+
+    public static string RedeemUrl(string token) => $"/api/passkey-links/redeem/{token}";
+
+    /// <summary>The SPA's redeem screen: open the link, request creation options, create the passkey.</summary>
+    public static async Task<JsonObject> CreateLinkPasskeyAsync(
+        HttpClient client, string token, SoftwareAuthenticator authenticator, string displayName = "Invited example")
+    {
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync(RedeemUrl(token))).StatusCode);
+        var options = await client.PostAsJsonAsync($"{RedeemUrl(token)}/passkey-options", new { displayName });
+        Assert.Equal(HttpStatusCode.OK, options.StatusCode);
+        return authenticator.Create(await options.Content.ReadFromJsonAsync<JsonElement>());
+    }
+
+    public static Task<HttpResponseMessage> CompleteLinkAsync(HttpClient client, string token, JsonObject credential) =>
+        client.PostAsJsonAsync($"{RedeemUrl(token)}/complete", new { credential });
+
+    /// <summary>Redeems the link on <paramref name="client"/> and returns the signed-in user's id.</summary>
+    public static async Task<Guid> RedeemAsync(HttpClient client, string token, SoftwareAuthenticator authenticator, string displayName = "Invited example")
+    {
+        var response = await CompleteLinkAsync(client, token, await CreateLinkPasskeyAsync(client, token, authenticator, displayName));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
     }
 
     public static string SetCookie(HttpResponseMessage response, string name) =>

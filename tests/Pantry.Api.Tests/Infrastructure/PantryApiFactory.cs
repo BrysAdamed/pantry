@@ -44,7 +44,7 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         _ = Services;
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("TRUNCATE identity.users, household.members CASCADE", connection);
+        await using var command = new NpgsqlCommand("TRUNCATE identity.passkey_links, identity.users, household.members CASCADE", connection);
         await command.ExecuteNonQueryAsync();
     }
 
@@ -54,6 +54,7 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting($"ConnectionStrings:{DatabaseServiceCollectionExtensions.ConnectionStringName}", ConnectionString);
         builder.UseSetting("Identity:Passkeys:RelyingPartyId", RelyingPartyId);
         builder.UseSetting("Identity:Passkeys:Origins:0", Origin);
+        builder.UseSetting("Identity:Session:ValidationInterval", "00:00:00");
         builder.ConfigureTestServices(services => services.AddModuleDbContext<TestModuleDbContext>(TestModuleDbContext.Schema));
     }
 }

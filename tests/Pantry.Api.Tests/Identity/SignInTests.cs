@@ -31,7 +31,7 @@ public sealed class SignInTests(PantryApiFactory factory) : IAsyncLifetime
     public async Task Sign_in_with_a_registered_passkey_starts_a_persistent_session()
     {
         // Arrange
-        await CreateAdminAsync(factory, _authenticator);
+        await factory.CreateAdminAsync(authenticator: _authenticator);
         var client = factory.CreateBrowserClient();
 
         // Act
@@ -55,7 +55,7 @@ public sealed class SignInTests(PantryApiFactory factory) : IAsyncLifetime
     public async Task Sign_in_with_an_unknown_passkey_returns_401_and_no_session()
     {
         // Arrange
-        await CreateAdminAsync(factory, _authenticator);
+        await factory.CreateAdminAsync(authenticator: _authenticator);
         using var stranger = new SoftwareAuthenticator(PantryApiFactory.Origin);
         var client = factory.CreateBrowserClient();
 
@@ -72,7 +72,7 @@ public sealed class SignInTests(PantryApiFactory factory) : IAsyncLifetime
     [Fact]
     public async Task Sign_in_without_passkey_options_returns_401()
     {
-        await CreateAdminAsync(factory, _authenticator);
+        await factory.CreateAdminAsync(authenticator: _authenticator);
         var client = factory.CreateBrowserClient();
         await client.GetAsync("/api/antiforgery");
         var credential = _authenticator.Get(JsonDocument.Parse("""{"rpId":"localhost","challenge":"AAAA"}""").RootElement);
@@ -86,7 +86,7 @@ public sealed class SignInTests(PantryApiFactory factory) : IAsyncLifetime
     public async Task Sign_out_clears_the_session_and_hands_out_an_anonymous_token()
     {
         // Arrange
-        var client = await CreateAdminAsync(factory, _authenticator);
+        var client = await factory.CreateAdminAsync(authenticator: _authenticator);
 
         // Act
         var response = await client.PostAsync("/api/auth/sign-out", null);
@@ -102,7 +102,7 @@ public sealed class SignInTests(PantryApiFactory factory) : IAsyncLifetime
     public async Task Sign_in_works_after_the_session_ended_with_a_stale_token()
     {
         // Arrange
-        await CreateAdminAsync(factory, _authenticator);
+        await factory.CreateAdminAsync(authenticator: _authenticator);
         var cookies = new CookieContainerHandler();
         var client = factory.CreateBrowserClient(cookies);
         Assert.Equal(HttpStatusCode.OK, (await SignInAsync(client, _authenticator)).StatusCode);
@@ -128,7 +128,7 @@ public sealed class SignInTests(PantryApiFactory factory) : IAsyncLifetime
     {
         // Arrange
         var cookies = new CookieContainerHandler();
-        await CreateAdminAsync(factory, _authenticator);
+        await factory.CreateAdminAsync(authenticator: _authenticator);
         Assert.Equal(HttpStatusCode.OK, (await SignInAsync(factory.CreateBrowserClient(cookies), _authenticator)).StatusCode);
 
         // Act

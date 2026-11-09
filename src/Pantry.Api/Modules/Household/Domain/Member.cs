@@ -16,7 +16,7 @@ public sealed class Member
 
     public int Position { get; set; }
 
-    public Guid? UserId { get; init; }
+    public Guid? UserId { get; set; }
 
     public static bool IsValidName(string name) => name.Length is > 0 and <= NameMaxLength;
 

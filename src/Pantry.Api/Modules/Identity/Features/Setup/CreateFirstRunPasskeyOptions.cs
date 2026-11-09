@@ -19,12 +19,9 @@ public static class CreateFirstRunPasskeyOptions
         CancellationToken cancellationToken)
     {
         var displayName = request.DisplayName?.Trim() ?? string.Empty;
-        if (displayName.Length is 0 or > User.DisplayNameMaxLength)
+        if (!User.IsValidDisplayName(displayName))
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [nameof(request.DisplayName)] = [$"Display name must have 1 to {User.DisplayNameMaxLength} characters."],
-            });
+            return DisplayNameValidation.Problem();
         }
 
         if (await db.Users.AnyAsync(cancellationToken))
@@ -44,6 +41,14 @@ public static class CreateFirstRunPasskeyOptions
 }
 
 public sealed record FirstRunPasskeyOptionsRequest(string? DisplayName);
+
+internal static class DisplayNameValidation
+{
+    public static ValidationProblem Problem() => TypedResults.ValidationProblem(new Dictionary<string, string[]>
+    {
+        ["DisplayName"] = [$"Display name must have 1 to {User.DisplayNameMaxLength} characters."],
+    });
+}
 
 internal static class FirstRunProblems
 {

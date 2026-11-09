@@ -128,6 +128,77 @@ namespace Pantry.Api.Modules.Identity.Persistence.Migrations
                     b.ToTable("user_tokens", "identity");
                 });
 
+            modelBuilder.Entity("Pantry.Api.Modules.Identity.Domain.PasskeyLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid?>("MemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("member_id");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<byte[]>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_passkey_links");
+
+                    b.HasIndex("CreatedByUserId")
+                        .HasDatabaseName("ix_passkey_links_created_by_user_id");
+
+                    b.HasIndex("MemberId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_passkey_links_member_id")
+                        .HasFilter("used_at IS NULL AND revoked_at IS NULL");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_passkey_links_token_hash");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_passkey_links_user_id")
+                        .HasFilter("used_at IS NULL AND revoked_at IS NULL");
+
+                    b.ToTable("passkey_links", "identity", t =>
+                        {
+                            t.HasCheckConstraint("ck_passkey_links_target", "(kind = 'invite') = (member_id IS NOT NULL) AND (kind = 'recovery') = (user_id IS NOT NULL)");
+                        });
+                });
+
             modelBuilder.Entity("Pantry.Api.Modules.Identity.Domain.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -314,6 +385,21 @@ namespace Pantry.Api.Modules.Identity.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("Pantry.Api.Modules.Identity.Domain.PasskeyLink", b =>
+                {
+                    b.HasOne("Pantry.Api.Modules.Identity.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_passkey_links_users_created_by_user_id");
+
+                    b.HasOne("Pantry.Api.Modules.Identity.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_passkey_links_users_user_id");
                 });
 #pragma warning restore 612, 618
         }
