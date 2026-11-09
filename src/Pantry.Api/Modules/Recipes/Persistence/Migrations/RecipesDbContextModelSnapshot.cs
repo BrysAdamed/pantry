@@ -24,6 +24,45 @@ namespace Pantry.Api.Modules.Recipes.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Pantry.Api.Modules.Recipes.Domain.HistoryEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<Guid>("MealSlotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("meal_slot_id");
+
+                    b.Property<Guid>("PlanEntryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_entry_id");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipe_id");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_history_entries");
+
+                    b.HasIndex("PlanEntryId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_history_entries_plan_entry_id");
+
+                    b.HasIndex("RecipeId", "Date")
+                        .HasDatabaseName("ix_history_entries_recipe_id_date");
+
+                    b.ToTable("history_entries", "recipes");
+                });
+
             modelBuilder.Entity("Pantry.Api.Modules.Recipes.Domain.Recipe", b =>
                 {
                     b.Property<Guid>("Id")
@@ -108,6 +147,16 @@ namespace Pantry.Api.Modules.Recipes.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_recipes_servings", "servings > 0");
                         });
+                });
+
+            modelBuilder.Entity("Pantry.Api.Modules.Recipes.Domain.HistoryEntry", b =>
+                {
+                    b.HasOne("Pantry.Api.Modules.Recipes.Domain.Recipe", null)
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_history_entries_recipes_recipe_id");
                 });
 
             modelBuilder.Entity("Pantry.Api.Modules.Recipes.Domain.Recipe", b =>

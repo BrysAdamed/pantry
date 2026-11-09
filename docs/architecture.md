@@ -35,8 +35,8 @@ Modules, each owning its tables, endpoints and MCP tools. `Identity`, `Household
 | `Identity` | users, passkeys, passwords, invites, access tokens | E3, E8 |
 | `Household` | members, portion factors, meal slots, dislikes, rules, content language | E3 |
 | `Catalog` | ingredients, units, conversions, staples | E4 |
-| `Recipes` | recipes, nutrition, ratings | E5 |
-| `Planner` | plan entries, leftovers, history | E6 |
+| `Recipes` | recipes, nutrition, history, ratings | E5 |
+| `Planner` | plan entries, leftovers | E6 |
 | `Shopping` | lists, items, orders, cart run reports, product memory | E7 |
 
 Rules:
@@ -65,6 +65,8 @@ See [ADR 0019](adr/0019-ingredient-catalog.md). Categories (`IngredientCategory`
 ## Recipes
 
 See [ADR 0023](adr/0023-recipe-model.md). `Modules/Recipes/`, schema `recipes`: a `Recipe` owns its tags, steps and ingredient lines. `GET /api/recipes[?archived=&page=&pageSize=]` pages the library in name order (archived recipes only with `archived=true`), `GET`/`PUT /api/recipes/{id}` read and replace one, `POST /api/recipes` adds one, `POST /api/recipes/{id}/archive` and `/restore` archive and restore it; there is no delete. The request and response carry `lines` (outside any section) and `sections` (`name` and `lines`, in order); a line takes `ingredientId` or `ingredientName`, which `RecipeInput` resolves through `ICatalogModule.ResolveIngredientAsync` once the rest of the request is valid. Each line keeps the quantity entered for the recipe servings and the quantity per serving (`RecipeQuantities.PerServing`); reads return both, with the ingredient name and needs review flag from the catalog. Tags are normalized by `RecipeTag.Normalize` (trimmed, whitespace collapsed, lower case); `GET /api/recipes/tags[?search=&limit=]` suggests the tags of recipes that are not archived, most used first. Other modules read through `IRecipesModule`: `GetRecipeAsync` / `GetRecipesAsync` (summaries, archived included) and `GetIngredientsPerServingAsync` (lines per serving; `RecipeIngredientPerServing.ToQuantityLine(servings)` feeds `ICatalogModule.SumQuantitiesAsync`).
+
+*History entries* ([ADR 0024](adr/0024-recipe-history.md)) live in `recipes.history_entries`, one per eaten plan entry. The Planner writes them in its own transaction through `IRecipesModule.RecordEatenAsync` (idempotent per plan entry; a leftover removes the entry) and `RecordUneatenAsync`; `GetLastEatenAsync` and `GetHistoryAsync` read them, and `GET /api/recipes/{id}/history` lists a recipe's entries newest first.
 
 ## Authentication
 

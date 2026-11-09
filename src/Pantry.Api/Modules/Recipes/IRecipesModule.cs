@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Pantry.Api.Modules.Catalog;
 
 namespace Pantry.Api.Modules.Recipes;
@@ -20,7 +21,34 @@ public interface IRecipesModule
     /// </summary>
     Task<IReadOnlyList<RecipeIngredientPerServing>> GetIngredientsPerServingAsync(
         IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records that a plan entry was eaten, inside the caller's transaction (ADR 0015). Idempotent per plan entry: a
+    /// second call keeps one history entry and takes the recipe, date and meal slot it is given. A leftover is not
+    /// history, so recording one removes the plan entry's history entry if it has one.
+    /// </summary>
+    /// <exception cref="ArgumentException">The recipe does not exist.</exception>
+    Task RecordEatenAsync(EatenPlanEntry entry, DbTransaction transaction, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records that a plan entry is no longer eaten (or was deleted), inside the caller's transaction (ADR 0015): its
+    /// history entry goes, together with its rating. Does nothing when it has none.
+    /// </summary>
+    Task RecordUneatenAsync(Guid planEntryId, DbTransaction transaction, CancellationToken cancellationToken = default);
+
+    /// <summary>The date each recipe among <paramref name="recipeIds"/> was last eaten. Recipes never eaten are left out.</summary>
+    Task<IReadOnlyDictionary<Guid, DateOnly>> GetLastEatenAsync(
+        IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default);
+
+    /// <summary>The history entries of a recipe, newest first. Empty when it was never eaten or does not exist.</summary>
+    Task<IReadOnlyList<RecipeHistoryEntry>> GetHistoryAsync(Guid recipeId, CancellationToken cancellationToken = default);
 }
+
+/// <summary>A plan entry that became eaten, as the Planner reports it. A leftover eats a dish cooked earlier.</summary>
+public sealed record EatenPlanEntry(Guid PlanEntryId, Guid RecipeId, DateOnly Date, Guid MealSlotId, bool IsLeftover);
+
+/// <summary>One time the household ate a recipe: the plan entry it came from, on <c>Date</c> in the meal slot <c>MealSlotId</c>.</summary>
+public sealed record RecipeHistoryEntry(Guid Id, Guid RecipeId, DateOnly Date, Guid MealSlotId, Guid PlanEntryId);
 
 /// <summary>
 /// A recipe as other modules see it. <c>Servings</c> is what its quantities were entered for; <c>CooldownDays</c> is the

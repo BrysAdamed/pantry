@@ -13,6 +13,8 @@ public sealed class RecipesDbContext(DbContextOptions<RecipesDbContext> options)
 
     public DbSet<Recipe> Recipes => Set<Recipe>();
 
+    public DbSet<HistoryEntry> HistoryEntries => Set<HistoryEntry>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema(Schema);
@@ -80,6 +82,15 @@ public sealed class RecipesDbContext(DbContextOptions<RecipesDbContext> options)
             recipe.Navigation(r => r.Tags).UsePropertyAccessMode(PropertyAccessMode.Field);
             recipe.Navigation(r => r.Steps).UsePropertyAccessMode(PropertyAccessMode.Field);
             recipe.Navigation(r => r.Lines).UsePropertyAccessMode(PropertyAccessMode.Field);
+        });
+
+        builder.Entity<HistoryEntry>(history =>
+        {
+            history.ToTable("history_entries");
+            history.Property(h => h.Id).ValueGeneratedNever();
+            history.HasIndex(h => h.PlanEntryId).IsUnique();
+            history.HasIndex(h => new { h.RecipeId, h.Date });
+            history.HasOne<Recipe>().WithMany().HasForeignKey(h => h.RecipeId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 

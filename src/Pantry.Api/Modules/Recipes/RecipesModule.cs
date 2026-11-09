@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pantry.Api.Infrastructure.Database;
+using Pantry.Api.Modules.Recipes.Features.History;
 using Pantry.Api.Modules.Recipes.Features.Recipes;
 using Pantry.Api.Modules.Recipes.Features.Tags;
 using Pantry.Api.Modules.Recipes.Persistence;
@@ -25,6 +26,7 @@ public static class RecipesModule
         recipes.MapUpdateRecipe();
         recipes.MapArchiveRecipe();
         recipes.MapGetTags();
+        recipes.MapGetRecipeHistory();
         return api;
     }
 }
