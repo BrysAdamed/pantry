@@ -70,11 +70,15 @@ public sealed class MyAccountTests(PantryApiFactory factory) : IAsyncLifetime
         var missingLanguage = await client.PutAsJsonAsync("/api/me/ui-language", new { });
         var unknownTheme = await client.PutAsJsonAsync("/api/me/theme", new { theme = "sepia" });
         var missingTheme = await client.PutAsJsonAsync("/api/me/theme", new { });
+        var numericLanguage = await client.PutAsJsonAsync("/api/me/ui-language", new { uiLanguage = 1 });
+        var numericTheme = await client.PutAsJsonAsync("/api/me/theme", new { theme = 9 });
 
         Assert.Equal(HttpStatusCode.BadRequest, unknownLanguage.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, missingLanguage.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, unknownTheme.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, missingTheme.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, numericLanguage.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, numericTheme.StatusCode);
     }
 
     [Fact]
@@ -215,6 +219,27 @@ public sealed class MyAccountTests(PantryApiFactory factory) : IAsyncLifetime
 
         Assert.Single(responses, r => r.StatusCode == HttpStatusCode.Conflict);
         Assert.Single(await PasskeysAsync(await SignedInDeviceAsync(_phone, _laptop)));
+    }
+
+    [Fact]
+    public async Task Removing_passkeys_at_the_same_time_never_fails_with_a_server_error()
+    {
+        // Arrange
+        using var tablet = new SoftwareAuthenticator(PantryApiFactory.Origin);
+        var client = await factory.CreateAdminAsync(authenticator: _phone);
+        await AddPasskeyAsync(client, _laptop, "Laptop");
+        await AddPasskeyAsync(client, tablet, "Tablet");
+
+        // Act
+        var responses = await Task.WhenAll(
+            client.DeleteAsync($"{PasskeysUrl}/{Base64Url(_phone.CredentialId)}"),
+            client.DeleteAsync($"{PasskeysUrl}/{Base64Url(_laptop.CredentialId)}"));
+
+        // Assert
+        Assert.All(responses, r => Assert.Contains(r.StatusCode, new[] { HttpStatusCode.NoContent, HttpStatusCode.Unauthorized }));
+        var removed = responses.Count(r => r.StatusCode == HttpStatusCode.NoContent);
+        Assert.InRange(removed, 1, 2);
+        Assert.Equal(3 - removed, (await PasskeysAsync(await SignedInDeviceAsync(tablet))).Length);
     }
 
     [Fact]

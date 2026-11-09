@@ -23,8 +23,7 @@ public static class RemovePasskey
         SignInManager<User> signInManager,
         CancellationToken cancellationToken)
     {
-        var user = await userManager.GetUserAsync(httpContext.User);
-        if (user is null)
+        if (userManager.GetUserId(httpContext.User) is not { } userId)
         {
             return TypedResults.Unauthorized();
         }
@@ -34,9 +33,17 @@ public static class RemovePasskey
             return TypedResults.NotFound();
         }
 
+        User? user;
         await using (var transaction = await db.Database.BeginTransactionAsync(cancellationToken))
         {
             await db.LockUserAdministrationAsync(cancellationToken);
+            user = await userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return TypedResults.Unauthorized();
+            }
+
+            await db.Entry(user).ReloadAsync(cancellationToken);
             var passkeys = await db.UserPasskeys.Where(p => p.UserId == user.Id).Select(p => p.CredentialId).ToListAsync(cancellationToken);
             if (!passkeys.Any(p => p.AsSpan().SequenceEqual(credentialId)))
             {

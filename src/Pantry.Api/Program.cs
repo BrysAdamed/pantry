@@ -15,7 +15,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddPersistentDataProtection();
 builder.Services.AddApiAntiforgery();
 builder.Services.ConfigureHttpJsonOptions(options =>
-    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
 
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddHouseholdModule();

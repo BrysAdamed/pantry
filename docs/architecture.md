@@ -20,7 +20,7 @@ One container serves the API, the MCP endpoint and the built Angular app. Postgr
 src/Pantry.Api/          .NET host: endpoints, modules, MCP, static SPA in wwwroot/
 src/Pantry.Api/Modules/  one folder per module (see below)
 src/Pantry.Web/          Angular 21 app
-src/Pantry.Api/Infrastructure/  cross-cutting host code (database, health)
+src/Pantry.Api/Infrastructure/  cross-cutting host code (database, health, antiforgery, data protection, HTTP)
 src/Pantry.Web/e2e/      Playwright end-to-end tests
 tests/Pantry.Api.Tests/  xUnit integration tests (WebApplicationFactory + Testcontainers Postgres)
 docs/                    vision, architecture, glossary, ADRs
@@ -28,7 +28,7 @@ docs/                    vision, architecture, glossary, ADRs
 
 ## Modules
 
-Planned modules, each owning its tables, endpoints and MCP tools:
+Modules, each owning its tables, endpoints and MCP tools. `Identity` and `Household` exist; the rest are planned:
 
 | Module | Owns | Epic |
 |---|---|---|
@@ -67,7 +67,7 @@ See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only
 - Angular 21, zoneless, signals, standalone components, `httpResource` for reads.
 - Tailwind CSS v4 and Spartan UI. Spartan's styled (helm) components are copied into `src/app/shared/ui/` and imported as `@spartan-ng/helm/<name>`. Add one with `npx ng g @spartan-ng/cli:ui <name>`. Design tokens come from E2.
 - Angular CDK for drag and drop in the planner.
-- Feature folders mirror backend modules: `src/app/<feature>/`. App-wide services live in `src/app/core/`.
+- Feature folders mirror backend modules or screen areas: `src/app/<feature>/` (for example `identity/` for sign-in, `account/` for My account, both served by the `Identity` module). App-wide services live in `src/app/core/`.
 - The shell (`src/app/shell/`) frames every screen: an icon rail from the `md` breakpoint (768px) up, a header with sync state and avatar plus bottom tabs below it. Each destination (`planner`, `recipes`, `shopping`, `household`) is a lazy route that loads `src/app/<feature>/<feature>.routes.ts`; until its epic lands, that file shows the feature's empty state.
 - Menus and popovers use Angular CDK overlays (ADR 0009) with a focus trap and Escape to close.
 - i18n: PL and EN at runtime with Transloco ([ADR 0011](adr/0011-runtime-i18n.md)). Labels live in `public/i18n/{en,pl}.json`; templates use `*transloco="let t"`. Every new key goes into both files (a test enforces it). Numbers and dates use Angular's locale pipes with the UI language as the locale (`number: '1.0-2' : language()`); locale data for `pl` is registered in `provideI18n`.
