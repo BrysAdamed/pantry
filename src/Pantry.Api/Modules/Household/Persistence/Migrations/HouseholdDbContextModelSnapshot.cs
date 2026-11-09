@@ -70,18 +70,25 @@ namespace Pantry.Api.Modules.Household.Persistence.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("content_language");
 
+                    b.Property<int>("CooldownDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("cooldown_days");
+
                     b.HasKey("Id")
                         .HasName("pk_households");
 
                     b.ToTable("households", "household", t =>
                         {
+                            t.HasCheckConstraint("ck_households_cooldown_days", "cooldown_days BETWEEN 0 AND 365");
+
                             t.HasCheckConstraint("ck_households_singleton", "id = 1");
                         });
 
                     b.HasData(
                         new
                         {
-                            Id = 1
+                            Id = 1,
+                            CooldownDays = 21
                         });
                 });
 

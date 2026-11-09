@@ -385,6 +385,17 @@
       "loadFailed": "Nie udało się wczytać języka treści. Sprawdź połączenie.",
       "retry": "Spróbuj ponownie",
       "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "cooldown": {
+      "title": "Przerwa przed powtórką",
+      "intro": "Ile dni po zjedzeniu przepis jest oznaczony jako za wcześnie. Agent też to widzi, ale nic nie jest blokowane.",
+      "label": "Przerwa",
+      "days": "dni",
+      "note": "Przepis może mieć własną przerwę. 0 wyłącza przerwę.",
+      "invalid": "Wpisz pełną liczbę dni od {{min}} do {{max}}.",
+      "loadFailed": "Nie udało się wczytać przerwy. Sprawdź połączenie.",
+      "retry": "Spróbuj ponownie",
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
     }
   },
   "signIn": {

@@ -5,11 +5,15 @@ import { HlmButton } from '@spartan-ng/helm/button';
 import { Icon } from '../../shared/icon/icon';
 import { Switch } from '../../shared/switch/switch';
 import { HouseholdApi, PLANNING_RULE_TEXT_MAX_LENGTH, PLANNING_RULES_URL, PlanningRule } from '../household-api';
+import { CooldownSetting } from './cooldown-setting';
 
-/** Planning rules in order: edit in place, arrows to reorder, a switch to keep a rule for later, remove after a confirmation. */
+/**
+ * Planning rules in order: edit in place, arrows to reorder, a switch to keep a rule for later, remove after a confirmation.
+ * The household cooldown follows, as the other thing agents weigh when planning.
+ */
 @Component({
   selector: 'app-planning-rules-section',
-  imports: [TranslocoDirective, HlmButton, Icon, Switch],
+  imports: [TranslocoDirective, HlmButton, Icon, Switch, CooldownSetting],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'grid content-start gap-4.5' },
   templateUrl: './planning-rules-section.html',

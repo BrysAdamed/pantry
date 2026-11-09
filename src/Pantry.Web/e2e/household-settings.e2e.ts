@@ -176,6 +176,13 @@ async function mockHousehold(page: Page, language: 'en' | 'pl' = 'en', role: 'ad
     }
     return route.fulfill({ json: contentLanguage });
   });
+  const cooldown = { cooldownDays: 21 };
+  await page.route('/api/household/cooldown', async (route) => {
+    if (route.request().method() === 'PUT') {
+      cooldown.cooldownDays = route.request().postDataJSON().cooldownDays;
+    }
+    return route.fulfill({ json: cooldown });
+  });
   await page.addInitScript((lang) => localStorage.setItem('pantry.uiLanguage', lang), language);
 }
 
@@ -374,6 +381,24 @@ test('adds, switches off, reorders and removes planning rules', async ({ page })
     .poll(() => texts.evaluateAll((inputs) => inputs.map((input) => (input as HTMLTextAreaElement).value)))
     .toEqual(['Weekday dinners under 30 minutes', 'Fish at least once a week']);
   await expect(page.getByRole('switch', { name: 'Rule 1 on', exact: true })).toHaveAttribute('aria-checked', 'false');
+});
+
+test('changes the household break before a repeat', async ({ page }) => {
+  await mockHousehold(page, 'pl');
+  await page.goto('/household/rules');
+  const days = page.getByTestId('cooldown').getByRole('spinbutton');
+  await expect(days).toHaveValue('21');
+
+  await days.fill('400');
+  await days.press('Enter');
+  await expect(page.getByTestId('cooldown').getByRole('alert')).toHaveText('Wpisz pełną liczbę dni od 0 do 365.');
+
+  await days.fill('14');
+  await days.press('Enter');
+  await expect(page.getByTestId('cooldown').getByRole('alert')).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByTestId('cooldown').getByRole('spinbutton')).toHaveValue('14');
 });
 
 test('picks the content language independently of the interface language', async ({ page }) => {

@@ -385,6 +385,17 @@
       "loadFailed": "The content language could not be loaded. Check the connection.",
       "retry": "Try again",
       "saveFailed": "The change was not saved. Check the connection and try again."
+    },
+    "cooldown": {
+      "title": "Break before a repeat",
+      "intro": "How many days after a meal a recipe is marked too soon. The agent sees it too, but nothing is blocked.",
+      "label": "Break",
+      "days": "days",
+      "note": "A recipe can have its own break. 0 turns the break off.",
+      "invalid": "Enter a whole number of days from {{min}} to {{max}}.",
+      "loadFailed": "The break could not be loaded. Check the connection.",
+      "retry": "Try again",
+      "saveFailed": "The change was not saved. Check the connection and try again."
     }
   },
   "signIn": {

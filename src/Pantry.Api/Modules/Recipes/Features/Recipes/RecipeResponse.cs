@@ -24,6 +24,7 @@ public sealed record RecipeResponse(
     int RatingCount,
     bool IsFavourite,
     int? CooldownDays,
+    RecipeCooldown Cooldown,
     bool IsArchived,
     DateTimeOffset? ArchivedAt,
     DateTimeOffset CreatedAt,
@@ -36,6 +37,7 @@ public sealed record RecipeResponse(
         Recipe recipe, RecipesDbContext db, ICatalogModule catalog, IHouseholdModule household, CancellationToken cancellationToken)
     {
         var rating = await RecipeRatings.LoadAsync(db, recipe, cancellationToken);
+        var cooldown = await RecipeCooldowns.LoadAsync(db, household, recipe, cancellationToken);
         var lines = recipe.OrderedLines();
         var ingredients = (await catalog.GetIngredientsAsync(lines.Select(l => l.IngredientId).Distinct().ToList(), cancellationToken))
             .ToDictionary(i => i.Id);
@@ -70,6 +72,7 @@ public sealed record RecipeResponse(
             rating.RatingCount,
             rating.IsFavourite,
             recipe.CooldownDays,
+            cooldown,
             recipe.IsArchived,
             recipe.ArchivedAt,
             recipe.CreatedAt,

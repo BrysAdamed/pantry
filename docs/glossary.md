@@ -48,7 +48,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Make again** | A recipe flag (*Zrobić ponownie*), yes by default. The latest rating that answers it sets it, and it can be changed on the recipe at any time. *No* means agents stop proposing the dish. |
 | **Favourite** | A recipe with *make again* yes and an average rating of at least 4 (*Ulubione*). Derived, there is no button. The tray and agents offer favourites first. |
 | **To rate** | History entries from the last 14 days (configurable) without a rating (*Do oceny*). *Later* leaves an entry there until it is rated or too old. |
-| **Cooldown** | Minimum time before a favourite should be planned again. |
+| **Cooldown** | How long after a recipe was eaten it should not come back (*Przerwa*), in days: the recipe's own cooldown, or else the household one (21 by default); 0 means none. Applies to every recipe. Its *available from* date is last eaten + cooldown; a recipe never eaten is available now. Planning it earlier is *too soon* (*Za wcześnie*), a soft hint: nothing is blocked, and agents read it. |
 | **Shopping list** | A named list of items. Either *generated* from the plan for a date range or *general* (drugstore, pets...). |
 | **List item** | A line on a shopping list: ingredient or free text, quantity, state (open, have at home, bought). |
 | **Order** | A merged set of list items handed to an agent for a cart run. |

@@ -84,6 +84,15 @@ export interface ContentLanguageSetting {
   contentLanguage: ContentLanguage;
 }
 
+export const COOLDOWN_URL = '/api/household/cooldown';
+
+/** Household cooldown in days; 0 turns it off. */
+export const COOLDOWN_DAYS = { min: 0, max: 365 } as const;
+
+export interface CooldownSetting {
+  cooldownDays: number;
+}
+
 export interface MemberChange {
   name: string;
   portionFactor: number;
@@ -155,6 +164,10 @@ export class HouseholdApi {
 
   deleteDislike(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${DISLIKES_URL}/${id}`));
+  }
+
+  setCooldown(cooldownDays: number): Promise<CooldownSetting> {
+    return firstValueFrom(this.http.put<CooldownSetting>(COOLDOWN_URL, { cooldownDays }));
   }
 
   setContentLanguage(contentLanguage: ContentLanguage): Promise<ContentLanguageSetting> {

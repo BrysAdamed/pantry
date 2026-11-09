@@ -30,8 +30,11 @@ public sealed class HouseholdDbContext(DbContextOptions<HouseholdDbContext> opti
 
         builder.Entity<Domain.Household>(household =>
         {
-            household.ToTable("households", table => table.HasCheckConstraint(
-                "ck_households_singleton", $"id = {Domain.Household.SingletonId}"));
+            household.ToTable("households", table =>
+            {
+                table.HasCheckConstraint("ck_households_singleton", $"id = {Domain.Household.SingletonId}");
+                table.HasCheckConstraint("ck_households_cooldown_days", $"cooldown_days BETWEEN 0 AND {Domain.Household.MaxCooldownDays}");
+            });
             household.Property(h => h.Id).ValueGeneratedNever();
             household.Property(h => h.ContentLanguage)
                 .HasConversion(language => language!.Code, code => ContentLanguage.Parse(code))

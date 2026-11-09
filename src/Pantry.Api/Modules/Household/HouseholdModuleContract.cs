@@ -44,6 +44,9 @@ internal sealed class HouseholdModuleContract(HouseholdDbContext db, DbContextOp
         return household.ContentLanguage ?? ContentLanguage.Default;
     }
 
+    public Task<int> GetCooldownDaysAsync(CancellationToken cancellationToken = default) =>
+        db.Households.Select(h => h.CooldownDays).SingleAsync(cancellationToken);
+
     public async Task CompleteFirstRunAsync(FirstRunAdmin admin, DbTransaction transaction, CancellationToken cancellationToken = default)
     {
         await using var joined = await JoinAsync(transaction, cancellationToken);

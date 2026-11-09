@@ -1,5 +1,6 @@
 using Pantry.Api.Infrastructure.Database;
 using Pantry.Api.Modules.Catalog;
+using Pantry.Api.Modules.Household.Features.Cooldown;
 using Pantry.Api.Modules.Household.Features.Dislikes;
 using Pantry.Api.Modules.Household.Features.Language;
 using Pantry.Api.Modules.Household.Features.MealSlots;
@@ -52,6 +53,8 @@ public static class HouseholdModule
         var contentLanguage = api.MapGroup("/household/content-language");
         contentLanguage.MapGetContentLanguage();
         contentLanguage.MapSetContentLanguage();
+
+        api.MapGroup("/household/cooldown").MapCooldown();
         return api;
     }
 }

@@ -106,6 +106,20 @@ internal sealed class RecipesModuleContract(
             .ToList();
     }
 
+    public async Task<IReadOnlyList<RecipeCooldownSummary>> GetCooldownsAsync(
+        IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default)
+    {
+        var recipes = await db.Recipes
+            .Where(r => recipeIds.Contains(r.Id))
+            .OrderBy(r => r.Id)
+            .Select(r => new { r.Id, r.CooldownDays })
+            .ToListAsync(cancellationToken);
+        var cooldowns = await RecipeCooldowns.LoadAsync(db, household, recipes.Select(r => (r.Id, r.CooldownDays)).ToList(), cancellationToken);
+        return cooldowns
+            .Select(pair => new RecipeCooldownSummary(pair.Key, pair.Value.Days, pair.Value.IsHouseholdDefault, pair.Value.LastEaten, pair.Value.AvailableFrom))
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<RecipeSummary>> GetFavouritesAsync(CancellationToken cancellationToken = default)
     {
         var candidates = await db.Recipes

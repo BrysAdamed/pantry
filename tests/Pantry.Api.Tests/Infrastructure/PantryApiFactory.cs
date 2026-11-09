@@ -47,7 +47,7 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
         await connection.OpenAsync();
         await using var command = new NpgsqlCommand(
             "TRUNCATE identity.passkey_links, identity.users, household.members, household.meal_slots, household.planning_rules, household.dislikes CASCADE; " +
-            "UPDATE household.households SET content_language = NULL;",
+            "UPDATE household.households SET content_language = NULL, cooldown_days = 21;",
             connection);
         await command.ExecuteNonQueryAsync();
     }

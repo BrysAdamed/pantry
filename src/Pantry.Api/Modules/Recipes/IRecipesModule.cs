@@ -51,6 +51,12 @@ public interface IRecipesModule
     Task<IReadOnlyList<RecipeSummary>> GetFavouritesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// The cooldown in effect and the <i>available from</i> date of the recipes among <paramref name="recipeIds"/>,
+    /// archived or not. Unknown ids are left out. Planning a recipe before its date is <i>too soon</i>, a soft hint only.
+    /// </summary>
+    Task<IReadOnlyList<RecipeCooldownSummary>> GetCooldownsAsync(IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// The household dislikes among the ingredients of the recipes among <paramref name="recipeIds"/>: per recipe its
     /// <i>never</i> ingredients first, then its <i>avoid</i> ones. The planner asks for confirmation before a person places
     /// a recipe with a <i>never</i> ingredient. Recipes without any are left out.
@@ -106,4 +112,15 @@ public sealed record RecipeIngredientPerServing(
 {
     /// <summary>The line for <paramref name="servings"/> (a household serving), ready for <see cref="ICatalogModule.SumQuantitiesAsync"/>.</summary>
     public QuantityLine ToQuantityLine(decimal servings) => new(IngredientId, Quantity * servings, Unit);
+}
+
+/// <summary>
+/// When a recipe should come back. <c>CooldownDays</c> is the recipe's own cooldown or else the household's
+/// (<c>IsHouseholdDefault</c>), 0 for none. <c>AvailableFrom</c> is last eaten + cooldown, the first day that is not too
+/// soon; null when the recipe was never eaten, which means it is available now.
+/// </summary>
+public sealed record RecipeCooldownSummary(Guid RecipeId, int CooldownDays, bool IsHouseholdDefault, DateOnly? LastEaten, DateOnly? AvailableFrom)
+{
+    /// <summary>Whether planning the recipe on <paramref name="date"/> is too soon.</summary>
+    public bool IsTooSoonOn(DateOnly date) => Domain.RecipeCooldown.IsTooSoon(AvailableFrom, date);
 }

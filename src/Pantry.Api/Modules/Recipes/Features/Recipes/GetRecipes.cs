@@ -54,11 +54,13 @@ public static class GetRecipes
         var dislikedIds = dislikes.Values.SelectMany(d => d).Select(d => d.IngredientId).Distinct().ToList();
         var names = (await catalog.GetIngredientsAsync(dislikedIds, cancellationToken)).ToDictionary(i => i.Id, i => i.Name);
         var ratings = await RecipeRatings.LoadAsync(db, items, cancellationToken);
+        var cooldowns = await RecipeCooldowns.LoadAsync(db, household, items, cancellationToken);
 
         return TypedResults.Ok(new RecipesPage(
             items.Select(recipe => RecipeListItem.From(
                     recipe,
                     ratings[recipe.Id],
+                    cooldowns[recipe.Id],
                     dislikes[recipe.Id].Select(d => RecipeDislikeResponse.From(d, names.GetValueOrDefault(d.IngredientId))).ToList()))
                 .ToList(),
             total,
@@ -85,11 +87,12 @@ public sealed record RecipeListItem(
     int RatingCount,
     bool IsFavourite,
     int? CooldownDays,
+    RecipeCooldown Cooldown,
     bool IsArchived,
     DateTimeOffset UpdatedAt,
     IReadOnlyList<RecipeDislikeResponse> Dislikes)
 {
-    public static RecipeListItem From(Recipe recipe, RecipeRating rating, IReadOnlyList<RecipeDislikeResponse> dislikes) => new(
+    public static RecipeListItem From(Recipe recipe, RecipeRating rating, RecipeCooldown cooldown, IReadOnlyList<RecipeDislikeResponse> dislikes) => new(
         recipe.Id,
         recipe.Name,
         recipe.Servings,
@@ -101,6 +104,7 @@ public sealed record RecipeListItem(
         rating.RatingCount,
         rating.IsFavourite,
         recipe.CooldownDays,
+        cooldown,
         recipe.IsArchived,
         recipe.UpdatedAt,
         dislikes);

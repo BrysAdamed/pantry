@@ -29,6 +29,9 @@ public interface IHouseholdModule
     /// <summary>The language agents write and translate household content into (ADR 0010).</summary>
     Task<ContentLanguage> GetContentLanguageAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>Days before a recipe should be planned again, for recipes without their own cooldown; 0 for none.</summary>
+    Task<int> GetCooldownDaysAsync(CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Sets up the household for the admin created by the first run, inside the caller's transaction (ADR 0015):
     /// the admin's member with the default portion factor, the content language from the admin's UI language and
