@@ -4,6 +4,7 @@ import { UiLanguageService } from '../core/i18n/ui-language.service';
 import { ThemeService } from '../core/theme/theme.service';
 import { CurrentUser, IdentityApi } from '../identity/identity-api';
 import { Session } from '../identity/session';
+import { fakeMatchMedia } from '../testing/match-media';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { AccountApi } from './account-api';
 import { UserPreferences } from './user-preferences';
@@ -15,9 +16,7 @@ describe('UserPreferences', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    window.matchMedia = vi.fn(
-      (query: string) => ({ matches: false, media: query, addEventListener: () => undefined }) as unknown as MediaQueryList,
-    );
+    fakeMatchMedia();
     api = { changeUiLanguage: vi.fn().mockResolvedValue(undefined), changeTheme: vi.fn().mockResolvedValue(undefined) };
     TestBed.configureTestingModule({
       providers: [provideTranslocoTesting(), { provide: AccountApi, useValue: api }, { provide: IdentityApi, useValue: {} }],
