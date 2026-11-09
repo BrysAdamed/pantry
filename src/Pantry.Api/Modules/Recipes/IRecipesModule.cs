@@ -1,5 +1,6 @@
 using System.Data.Common;
 using Pantry.Api.Modules.Catalog;
+using Pantry.Api.Modules.Household;
 
 namespace Pantry.Api.Modules.Recipes;
 
@@ -42,7 +43,18 @@ public interface IRecipesModule
 
     /// <summary>The history entries of a recipe, newest first. Empty when it was never eaten or does not exist.</summary>
     Task<IReadOnlyList<RecipeHistoryEntry>> GetHistoryAsync(Guid recipeId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The household dislikes among the ingredients of the recipes among <paramref name="recipeIds"/>: per recipe its
+    /// <i>never</i> ingredients first, then its <i>avoid</i> ones. The planner asks for confirmation before a person places
+    /// a recipe with a <i>never</i> ingredient. Recipes without any are left out.
+    /// </summary>
+    Task<IReadOnlyList<RecipeDislikeWarning>> GetDislikeWarningsAsync(
+        IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default);
 }
+
+/// <summary>A household dislike of an ingredient of a recipe; only a <see cref="DislikeKind.Never"/> one can have a reason.</summary>
+public sealed record RecipeDislikeWarning(Guid RecipeId, Guid IngredientId, DislikeKind Kind, string? Reason);
 
 /// <summary>A plan entry that became eaten, as the Planner reports it. A leftover eats a dish cooked earlier.</summary>
 public sealed record EatenPlanEntry(Guid PlanEntryId, Guid RecipeId, DateOnly Date, Guid MealSlotId, bool IsLeftover);

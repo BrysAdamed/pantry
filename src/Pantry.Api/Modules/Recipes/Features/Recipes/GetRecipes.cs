@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Pantry.Api.Modules.Catalog;
+using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
 using Pantry.Api.Modules.Recipes.Persistence;
 
@@ -15,6 +17,8 @@ public static class GetRecipes
 
     private static async Task<Results<Ok<RecipesPage>, ValidationProblem>> HandleAsync(
         RecipesDbContext db,
+        ICatalogModule catalog,
+        IHouseholdModule household,
         CancellationToken cancellationToken,
         bool archived = false,
         int page = 1,
@@ -45,13 +49,25 @@ public static class GetRecipes
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
-        return TypedResults.Ok(new RecipesPage(items.Select(RecipeListItem.From).ToList(), total, page, pageSize));
+        var warnings = await DislikeWarnings.LoadAsync(household, cancellationToken);
+        var dislikes = items.ToDictionary(r => r.Id, warnings.Of);
+        var dislikedIds = dislikes.Values.SelectMany(d => d).Select(d => d.IngredientId).Distinct().ToList();
+        var names = (await catalog.GetIngredientsAsync(dislikedIds, cancellationToken)).ToDictionary(i => i.Id, i => i.Name);
+
+        return TypedResults.Ok(new RecipesPage(
+            items.Select(recipe => RecipeListItem.From(
+                    recipe,
+                    dislikes[recipe.Id].Select(d => RecipeDislikeResponse.From(d, names.GetValueOrDefault(d.IngredientId))).ToList()))
+                .ToList(),
+            total,
+            page,
+            pageSize));
     }
 }
 
 public sealed record RecipesPage(IReadOnlyList<RecipeListItem> Items, int Total, int Page, int PageSize);
 
-/// <summary>A recipe as the library lists it; <c>Nutrition</c> is per serving.</summary>
+/// <summary>A recipe as the library lists it; <c>Nutrition</c> is per serving, <c>Dislikes</c> are never first.</summary>
 public sealed record RecipeListItem(
     Guid Id,
     string Name,
@@ -62,9 +78,10 @@ public sealed record RecipeListItem(
     bool MakeAgain,
     int? CooldownDays,
     bool IsArchived,
-    DateTimeOffset UpdatedAt)
+    DateTimeOffset UpdatedAt,
+    IReadOnlyList<RecipeDislikeResponse> Dislikes)
 {
-    public static RecipeListItem From(Recipe recipe) => new(
+    public static RecipeListItem From(Recipe recipe, IReadOnlyList<RecipeDislikeResponse> dislikes) => new(
         recipe.Id,
         recipe.Name,
         recipe.Servings,
@@ -74,5 +91,6 @@ public sealed record RecipeListItem(
         recipe.MakeAgain,
         recipe.CooldownDays,
         recipe.IsArchived,
-        recipe.UpdatedAt);
+        recipe.UpdatedAt,
+        dislikes);
 }

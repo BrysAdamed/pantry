@@ -42,6 +42,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |
 | **Possible duplicate** | Two ingredients with similar names or aliases that may mean the same thing (*Możliwy duplikat*). People either merge them or mark them *not duplicates*, and a dismissed pair is not suggested again. Found by how many three-letter sequences the names share (*similarity*, 0 to 1), ignoring case and diacritics. |
 | **Dislike** | A household-wide ingredient preference (*Nie jemy*): *never* (allergy, hard no; optional reason) or *avoid*. One per catalog ingredient; when two disliked ingredients are merged, the stricter kind stays. |
+| **Dislike warning** | A recipe's mark for an ingredient the household dislikes (*Ostrzeżenie*): red for *never*, with its reason, amber for *avoid*. Shown in the library, the detail and the editor; worked out from the current dislikes, never stored on the recipe. |
 | **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |
 | **Rating** | Household feedback on a recipe after it was eaten, plus a *make again* flag. |
 | **Cooldown** | Minimum time before a favourite should be planned again. |
