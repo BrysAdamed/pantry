@@ -27,7 +27,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Unit** | A unit a quantity is written in (*Jednostka*), from a fixed vocabulary: `g`, `kg`, `ml`, `l`, `piece`, `clove`, `tbsp`, `tsp`, `pinch`, `can`, `jar`, `pack`, `slice`, `bunch`, `handful`, `glass`. |
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
 | **Generic conversion** | A conversion that holds for every ingredient: `kg` to `g`, `l` to `ml`, `tbsp` = 15 ml, `tsp` = 5 ml. |
-| **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Takes precedence over a generic conversion. Quantities without a conversion are not summed into the base unit. |
+| **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Takes precedence over a generic conversion. One per unit; written in the base unit, so changing the base unit removes them. Quantities without a conversion are not summed into the base unit. |
 | **Needs review** | Flag on an ingredient created automatically from an unknown name (*Do sprawdzenia*). Cleared when a person or an agent confirms it, or when another ingredient is merged into it. |
 | **Merge** | Turning two ingredients into one (*Scal*): the source's names become aliases of the target, every module moves its references to the target, and the source is deleted. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |

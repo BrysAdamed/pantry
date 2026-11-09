@@ -62,4 +62,20 @@ public static class Units
         converted = 0;
         return false;
     }
+
+    /// <summary>
+    /// Converts into <paramref name="baseUnit"/> with the ingredient's own <paramref name="conversions"/> (amount of the
+    /// base unit per one unit) first and the built-in ones second. False when neither has <paramref name="unit"/>.
+    /// </summary>
+    public static bool TryConvert(
+        decimal quantity, Unit unit, Unit baseUnit, IReadOnlyDictionary<Unit, decimal> conversions, out decimal converted)
+    {
+        if (conversions.TryGetValue(unit, out var amount))
+        {
+            converted = quantity * amount;
+            return true;
+        }
+
+        return TryConvertGeneric(quantity, unit, baseUnit, out converted);
+    }
 }

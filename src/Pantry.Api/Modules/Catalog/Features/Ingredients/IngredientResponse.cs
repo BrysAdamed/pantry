@@ -9,7 +9,8 @@ public sealed record IngredientResponse(
     Unit BaseUnit,
     IngredientCategory Category,
     bool IsStaple,
-    bool NeedsReview)
+    bool NeedsReview,
+    IReadOnlyList<ConversionResponse> Conversions)
 {
     public static IngredientResponse From(Ingredient ingredient) => new(
         ingredient.Id,
@@ -18,5 +19,12 @@ public sealed record IngredientResponse(
         ingredient.BaseUnit,
         ingredient.Category,
         ingredient.IsStaple,
-        ingredient.NeedsReview);
+        ingredient.NeedsReview,
+        ingredient.Conversions.OrderBy(c => c.Unit).Select(c => new ConversionResponse(c.Unit, c.Amount)).ToList());
 }
+
+/// <summary>One <c>unit</c> is <c>amount</c> of the ingredient's base unit.</summary>
+public sealed record ConversionResponse(Unit Unit, decimal Amount);
+
+/// <summary>One <c>unit</c> is <c>amount</c> of the base unit the request ends up with.</summary>
+public sealed record ConversionRequest(Unit? Unit, decimal? Amount);

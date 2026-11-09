@@ -4,7 +4,10 @@ using Pantry.Api.Modules.Catalog.Persistence;
 
 namespace Pantry.Api.Modules.Catalog.Features.Ingredients;
 
-/// <summary>Adds an ingredient a person typed in. It does not need review; the category defaults to <c>other</c>.</summary>
+/// <summary>
+/// Adds an ingredient a person typed in, with its unit conversions. It does not need review; the category defaults to
+/// <c>other</c>.
+/// </summary>
 public static class CreateIngredient
 {
     public static RouteHandlerBuilder MapCreateIngredient(this IEndpointRouteBuilder ingredients) => ingredients.MapPost("/", HandleAsync);
@@ -20,12 +23,14 @@ public static class CreateIngredient
             return TypedResults.ValidationProblem(errors);
         }
 
+        IngredientValidation.ValidateConversions(baseUnit, request.Conversions ?? [], errors, out var conversions);
         if (errors.Count > 0)
         {
             return TypedResults.ValidationProblem(errors);
         }
 
         var ingredient = Ingredient.Create(name, aliases, baseUnit, request.Category ?? IngredientCategories.Default, request.IsStaple);
+        ingredient.SetConversions(conversions);
         db.Ingredients.Add(ingredient);
         if (await IngredientValidation.SaveAsync(db, ingredient, cancellationToken) is { } conflict)
         {
@@ -41,4 +46,5 @@ public sealed record CreateIngredientRequest(
     IReadOnlyList<string?>? Aliases,
     Unit? BaseUnit,
     IngredientCategory? Category,
-    bool IsStaple);
+    bool IsStaple,
+    IReadOnlyList<ConversionRequest?>? Conversions = null);

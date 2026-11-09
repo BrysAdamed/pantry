@@ -30,6 +30,10 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
         return ingredient is null ? null : ToContract(ingredient);
     }
 
+    public async Task<BaseQuantity?> ConvertToBaseUnitAsync(
+        Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default) =>
+        (await GetIngredientAsync(ingredientId, cancellationToken))?.ConvertToBaseUnit(quantity, unit);
+
     private static CatalogIngredient ToContract(Ingredient ingredient) => new(
         ingredient.Id,
         ingredient.Name,
@@ -37,5 +41,6 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
         ingredient.BaseUnit,
         ingredient.Category,
         ingredient.IsStaple,
-        ingredient.NeedsReview);
+        ingredient.NeedsReview,
+        ingredient.ConversionAmounts());
 }
