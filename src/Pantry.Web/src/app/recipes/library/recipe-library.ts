@@ -8,6 +8,7 @@ import { EmptyState } from '../../shared/empty-state/empty-state';
 import { Icon } from '../../shared/icon/icon';
 import { RECIPE_SORTS, RecipeSort } from '../recipes-api';
 import { newRecipePath } from '../recipes-paths';
+import { ToRateCards } from '../rating/to-rate-cards';
 import { RecipeCard } from './recipe-card';
 import { RecipeLibraryScreen } from './recipe-library-screen';
 
@@ -17,7 +18,7 @@ import { RecipeLibraryScreen } from './recipe-library-screen';
  */
 @Component({
   selector: 'app-recipe-library',
-  imports: [RouterOutlet, RouterLink, TranslocoDirective, HlmButton, Icon, EmptyState, RecipeCard],
+  imports: [RouterOutlet, RouterLink, TranslocoDirective, HlmButton, Icon, EmptyState, RecipeCard, ToRateCards],
   providers: [RecipeLibraryScreen],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './recipe-library.html',

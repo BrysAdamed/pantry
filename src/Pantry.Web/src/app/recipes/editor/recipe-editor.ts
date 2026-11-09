@@ -33,7 +33,7 @@ import {
   RecipesApi,
   TagUsage,
 } from '../recipes-api';
-import { editRecipePath, RECIPES_PATH } from '../recipes-paths';
+import { RECIPES_PATH, recipePath } from '../recipes-paths';
 import {
   addLine,
   addSection,
@@ -100,12 +100,13 @@ export class RecipeEditor {
   protected readonly units = UNITS;
   protected readonly nutrients = NUTRIENTS;
   protected readonly limits = RECIPE_LIMITS;
-  protected readonly recipesPath = RECIPES_PATH;
 
   private readonly discardDialog =
     viewChild.required<TemplateRef<DialogContext<string | null, boolean>>>('discardDialog');
 
   protected readonly isNew = computed(() => !this.id());
+  /** Back and cancel go to the recipe, or to the library for a new one. */
+  protected readonly backPath = computed(() => (this.id() ? recipePath(this.id()!) : [RECIPES_PATH]));
   protected readonly recipe = httpResource<Recipe>(() =>
     this.id() ? recipeUrl(this.id()!) : undefined,
   );
@@ -319,11 +320,8 @@ export class RecipeEditor {
       this.toasts.show(
         this.transloco.translate(id ? 'recipes.editor.toast.saved' : 'recipes.editor.toast.added'),
       );
-      if (id) {
-        this.recipe.set(saved);
-      } else {
-        await this.leave(editRecipePath(saved.id), true);
-      }
+      this.recipe.set(saved);
+      await this.leave(recipePath(saved.id), !id);
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.NotFound) {
         this.recipe.reload();
@@ -340,7 +338,7 @@ export class RecipeEditor {
   }
 
   protected cancel(): void {
-    void this.router.navigate([RECIPES_PATH]);
+    void this.router.navigate(this.backPath());
   }
 
   /** For the route's `canDeactivate`: true when there is nothing to lose or the person chose to discard it. */

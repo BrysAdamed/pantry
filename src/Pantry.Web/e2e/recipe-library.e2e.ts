@@ -44,6 +44,8 @@ const library = [
 /** `GET /api/recipes` over the sample library: search over names, tags and ingredients, tags, without never, archive. */
 async function mockLibrary(page: Page, recipes = library) {
   const queries: URLSearchParams[] = [];
+  await page.route('/api/recipes/history/to-rate', (route) => route.fulfill({ json: [] }));
+  await page.route('/api/household/meal-slots', (route) => route.fulfill({ json: [] }));
   await page.route(/\/api\/recipes\/tags(\?.*)?$/, (route) =>
     route.fulfill({
       json: [
@@ -143,6 +145,27 @@ test('says when nothing matches and clears the filters', async ({ page }) => {
   await page.getByRole('button', { name: 'Clear filters' }).click();
   await expect(page.getByTestId('recipe-search')).toHaveValue('');
   await expect(names(page)).toHaveCount(3);
+});
+
+test('opens a recipe beside the list from md up and in place of it on phones', async ({ page, isMobile }) => {
+  await mockLibrary(page);
+  const { ingredients: _, ...curry } = library[0];
+  await page.route('/api/recipes/curry', (route) =>
+    route.fulfill({ json: { ...curry, sourceUrl: null, steps: [], archivedAt: null, createdAt: curry.updatedAt, lines: [], sections: [] } }),
+  );
+  await page.route('/api/recipes/curry/history', (route) => route.fulfill({ json: [] }));
+  await page.route('/api/household/members', (route) => route.fulfill({ json: { members: [], householdServing: 2 } }));
+  await page.goto('/recipes');
+
+  await page.getByTestId('recipe-card').filter({ hasText: 'Chicken curry' }).click();
+
+  await expect(page).toHaveURL('/recipes/curry');
+  await expect(page.getByTestId('recipe-title')).toHaveText('Chicken curry');
+  if (isMobile) {
+    await expect(page.getByTestId('recipe-library')).toBeHidden();
+  } else {
+    await expect(page.getByTestId('recipe-card').filter({ hasText: 'Chicken curry' })).toHaveAttribute('aria-current', 'true');
+  }
 });
 
 test('welcomes an empty library and opens the editor from it', async ({ page }) => {

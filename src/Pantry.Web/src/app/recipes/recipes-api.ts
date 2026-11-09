@@ -64,6 +64,62 @@ export interface RecipeDislike {
   reason: string | null;
 }
 
+/**
+ * When a recipe should come back: the cooldown in effect (0 for none) and the first day that is not *too soon*
+ * (`availableFrom`, last eaten + cooldown). Dates are `yyyy-MM-dd`; null when never eaten, which means available now.
+ */
+export interface RecipeCooldown {
+  days: number;
+  isHouseholdDefault: boolean;
+  lastEaten: string | null;
+  availableFrom: string | null;
+}
+
+/** One time the household ate a recipe; `rating` is 1 to 5 stars, null while not rated. */
+export interface HistoryEntry {
+  id: string;
+  recipeId: string;
+  date: string;
+  mealSlotId: string;
+  planEntryId: string;
+  rating: number | null;
+}
+
+/** What the household now thinks of a recipe, returned by rating writes. */
+export interface RatingSummary {
+  recipeId: string;
+  makeAgain: boolean;
+  averageRating: number | null;
+  ratingCount: number;
+  isFavourite: boolean;
+}
+
+export interface RatingResult {
+  entry: HistoryEntry;
+  recipe: RatingSummary;
+}
+
+export const TO_RATE_URL = `${RECIPES_URL}/history/to-rate`;
+
+/** A history entry of the last days still waiting for a rating, newest first. */
+export interface ToRateItem {
+  id: string;
+  recipeId: string;
+  recipeName: string;
+  recipeIsArchived: boolean;
+  date: string;
+  mealSlotId: string;
+  planEntryId: string;
+}
+
+export function historyRatingUrl(entryId: string): string {
+  return `${RECIPES_URL}/history/${entryId}/rating`;
+}
+
+export function recipeHistoryUrl(id: string): string {
+  return `${recipeUrl(id)}/history`;
+}
+
 /** A recipe as the detail and the editor read it: `lines` outside any section first, then `sections` in order. */
 export interface Recipe {
   id: string;
@@ -75,8 +131,14 @@ export interface Recipe {
   steps: string[];
   nutrition: Nutrition;
   makeAgain: boolean;
+  /** Over the rated history entries, rounded to one decimal; null when none is rated. */
+  averageRating: number | null;
+  ratingCount: number;
+  /** Make again and an average rating of at least 4. */
+  isFavourite: boolean;
   /** The recipe's own cooldown; null uses the household default. */
   cooldownDays: number | null;
+  cooldown: RecipeCooldown;
   isArchived: boolean;
   archivedAt: string | null;
   createdAt: string;
@@ -113,17 +175,6 @@ export interface RecipeChange {
   cooldownDays: number | null;
   lines: RecipeLineChange[];
   sections: RecipeSectionChange[];
-}
-
-/**
- * The cooldown in effect: the recipe's own `days` or the household default. `availableFrom` (last eaten + days) is null
- * when the recipe was never eaten, which means it is available now; planning it before that date is *too soon*.
- */
-export interface RecipeCooldown {
-  days: number;
-  isHouseholdDefault: boolean;
-  lastEaten: string | null;
-  availableFrom: string | null;
 }
 
 /** A recipe as the library lists it. `averageRating` is null while no history entry is rated. */
@@ -207,5 +258,27 @@ export class RecipesApi {
 
   updateRecipe(id: string, change: RecipeChange): Promise<Recipe> {
     return firstValueFrom(this.http.put<Recipe>(recipeUrl(id), change));
+  }
+
+  archiveRecipe(id: string): Promise<Recipe> {
+    return firstValueFrom(this.http.post<Recipe>(`${recipeUrl(id)}/archive`, null));
+  }
+
+  restoreRecipe(id: string): Promise<Recipe> {
+    return firstValueFrom(this.http.post<Recipe>(`${recipeUrl(id)}/restore`, null));
+  }
+
+  /** Adds or changes the stars of a history entry; a `makeAgain` answer also sets the recipe's flag. */
+  rate(entryId: string, stars: number, makeAgain: boolean | null): Promise<RatingResult> {
+    const body = makeAgain === null ? { stars } : { stars, makeAgain };
+    return firstValueFrom(this.http.put<RatingResult>(historyRatingUrl(entryId), body));
+  }
+
+  removeRating(entryId: string): Promise<RatingResult> {
+    return firstValueFrom(this.http.delete<RatingResult>(historyRatingUrl(entryId)));
+  }
+
+  setMakeAgain(id: string, makeAgain: boolean): Promise<RatingSummary> {
+    return firstValueFrom(this.http.put<RatingSummary>(`${recipeUrl(id)}/make-again`, { makeAgain }));
   }
 }

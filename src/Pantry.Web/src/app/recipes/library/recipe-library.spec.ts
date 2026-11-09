@@ -6,14 +6,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslocoTesting } from '../../testing/transloco-testing';
 import { RecipeListItem } from '../recipes-api';
 import { recipesRoutes } from '../recipes.routes';
-import { localToday } from './recipe-card-facts';
+import { localDateIso as daysFromToday } from '../local-date';
 import { RECIPE_LIBRARY_PAGE_SIZE, RECIPE_LIBRARY_SEARCH_DELAY_MS } from './recipe-library-screen';
-
-function daysFromToday(days: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return localToday(date);
-}
 
 function recipe(id: string, name: string, change: Partial<RecipeListItem> = {}): RecipeListItem {
   return {
@@ -88,6 +82,10 @@ describe('Recipe library', () => {
 
   function answer(request: TestRequest): void {
     const url = new URL(request.request.urlWithParams, 'http://x');
+    if (url.pathname === '/api/recipes/history/to-rate' || url.pathname === '/api/household/meal-slots') {
+      request.flush([]);
+      return;
+    }
     if (url.pathname === '/api/recipes/tags') {
       request.flush([
         { tag: 'dinner', recipes: 2 },

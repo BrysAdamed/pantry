@@ -22,12 +22,6 @@ export function recipeInitial(name: string): string {
   return [...name.trim()][0]?.toLocaleUpperCase() ?? '';
 }
 
-/** Today's date on this device as the API writes dates (`2026-11-10`). */
-export function localToday(now = new Date()): string {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-
 /** Planning the recipe on `today` is *too soon*: its cooldown ends later. */
 export function isTooSoon(recipe: RecipeListItem, today: string): boolean {
   const from = recipe.cooldown.availableFrom;
@@ -60,9 +54,4 @@ export function lastEatenText(lastEaten: string | null, today: string, language:
 
 export function hasDislike(recipe: RecipeListItem, kind: 'never' | 'avoid'): boolean {
   return recipe.dislikes.some((dislike) => dislike.kind === kind);
-}
-
-/** Stars to fill for an average rating: rounded to the nearest whole star, 0 when not rated. */
-export function filledStars(averageRating: number | null): number {
-  return averageRating === null ? 0 : Math.min(5, Math.max(0, Math.round(averageRating)));
 }

@@ -1,0 +1,429 @@
+<ng-container *transloco="let t; prefix: 'recipes.detail'">
+  <a
+    class="inline-flex min-h-tap items-center gap-1.5 justify-self-start rounded-control pr-3 font-bold text-muted-foreground hover:text-foreground md:hidden"
+    data-testid="recipe-back"
+    [routerLink]="recipesPath"
+  >
+    <app-icon name="chevronLeft" class="size-5" />
+    {{ t('back') }}
+  </a>
+
+  @if (current(); as r) {
+    <header class="grid gap-2.5">
+      <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <h2
+          class="min-w-0 flex-1 text-[26px] leading-tight [overflow-wrap:anywhere] md:text-[34px]"
+          data-testid="recipe-title"
+        >
+          {{ r.name }}
+        </h2>
+        <div class="flex shrink-0 flex-wrap gap-2">
+          <a hlmBtn variant="outline" size="sm" data-testid="recipe-edit" [routerLink]="editPath()">
+            <app-icon name="edit" class="size-4" />
+            <span>{{ t('edit') }}</span>
+          </a>
+          @if (!r.isArchived) {
+            <a hlmBtn size="sm" data-testid="recipe-plan" [routerLink]="plannerPath">
+              <app-icon name="calendar" class="size-4" />
+              <span>{{ t('addToPlan') }}</span>
+            </a>
+          }
+        </div>
+      </div>
+
+      <p class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground" data-testid="recipe-facts">
+        @if (prepTime(); as time) {
+          <span class="inline-flex items-center gap-1.25" data-testid="recipe-time">
+            <app-icon name="clock" class="size-4" />
+            {{ t('time.' + time.key, time) }}
+          </span>
+        }
+        @if (r.averageRating !== null) {
+          <span class="inline-flex items-center gap-1.25" data-testid="recipe-rating">
+            <app-stars
+              [value]="r.averageRating"
+              [label]="t('ratingLabel', { rating: (r.averageRating | number: '1.0-1' : language()) })"
+            />
+            <span>{{ r.averageRating | number: '1.0-1' : language() }}</span>
+          </span>
+        } @else {
+          <span data-testid="recipe-rating">{{ t('notRated') }}</span>
+        }
+        <span data-testid="recipe-last-eaten">
+          {{
+            r.cooldown.lastEaten
+              ? t('lastEaten', { date: (r.cooldown.lastEaten | date: dateFormat : undefined : language()) })
+              : t('neverEaten')
+          }}
+        </span>
+        @if (r.sourceUrl) {
+          <span class="inline-flex items-center gap-1.25">
+            <app-icon name="link" class="size-4" />
+            <a
+              class="font-bold text-primary hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="recipe-source"
+              [href]="r.sourceUrl"
+              >{{ t('source') }}</a
+            >
+          </span>
+        }
+      </p>
+
+      @if (r.tags.length || avoid().length || r.isFavourite || tooSoon()) {
+        <p class="flex flex-wrap items-center gap-1.5">
+          @if (r.isFavourite) {
+            <span
+              class="inline-flex items-center gap-1 rounded-full border-[1.5px] border-current bg-success-surface px-1.75 py-0.5 text-[11px] font-extrabold text-success"
+              data-testid="badge-favourite"
+              >{{ t('favourite') }}</span
+            >
+          }
+          @for (tag of r.tags; track tag) {
+            <span
+              class="inline-flex items-center rounded-full border-[1.5px] border-border px-1.75 py-0.5 text-[11px] font-extrabold text-muted-foreground"
+              data-testid="recipe-tag"
+              >{{ tag }}</span
+            >
+          }
+          @if (avoid().length) {
+            <span
+              class="inline-flex items-center gap-1 rounded-full border-[1.5px] border-current bg-dislike-avoid-surface px-1.75 py-0.5 text-[11px] font-extrabold text-dislike-avoid"
+              data-testid="badge-avoid"
+            >
+              <app-icon name="alert" class="size-3.5" />
+              {{ t('avoidBadge', { names: names(avoid()) }) }}
+            </span>
+          }
+          @if (tooSoon(); as from) {
+            <span
+              class="inline-flex items-center gap-1 rounded-full border-[1.5px] border-current bg-warning-surface px-1.75 py-0.5 text-[11px] font-extrabold text-warning"
+              data-testid="badge-too-soon"
+            >
+              <app-icon name="clock" class="size-3.5" />
+              {{ t('tooSoon', { date: (from | date: dateFormat : undefined : language()) }) }}
+            </span>
+          }
+        </p>
+      }
+    </header>
+
+    @if (r.isArchived) {
+      <section
+        class="grid grid-cols-[26px_minmax(0,1fr)] gap-x-2.5 gap-y-1 rounded-control border-2 border-border bg-secondary px-3.5 py-3 text-sm"
+        aria-labelledby="archived-title"
+        data-testid="archived-banner"
+      >
+        <app-icon name="archive" class="mt-0.5 size-5 text-muted-foreground" />
+        <div class="grid gap-0.5">
+          <h3 id="archived-title" class="font-sans text-sm font-extrabold">{{ t('archived.title') }}</h3>
+          <p>{{ t('archived.text') }}</p>
+        </div>
+        <div class="col-start-2 mt-2">
+          <button
+            hlmBtn
+            size="sm"
+            type="button"
+            data-testid="recipe-restore"
+            [disabled]="!!busy()"
+            (click)="restore()"
+          >
+            {{ t('restore') }}
+          </button>
+        </div>
+      </section>
+    }
+
+    @if (never().length) {
+      <section
+        class="flex items-start gap-3 rounded-control border-2 border-current bg-dislike-never-surface px-3.5 py-3 text-sm text-dislike-never"
+        role="alert"
+        data-testid="never-alert"
+      >
+        <app-icon name="ban" class="mt-0.5 size-5" />
+        <p class="text-foreground">
+          {{
+            neverReason()
+              ? t('never.textWithReason', { names: names(never()), reason: neverReason() })
+              : t('never.text', { names: names(never()) })
+          }}
+        </p>
+      </section>
+    }
+
+    @if (actionFailed()) {
+      <p
+        class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm"
+        role="alert"
+        data-testid="action-error"
+      >
+        <app-icon name="alert" class="size-4 text-danger" />
+        {{ t('actionFailed') }}
+      </p>
+    }
+
+    <div class="grid gap-4.5 xl:grid-cols-2 xl:items-start">
+      <section
+        class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-3.5 py-4 shadow-card sm:px-4.5"
+        aria-labelledby="ingredients-title"
+        data-testid="recipe-ingredients"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h3 id="ingredients-title" class="text-xl">{{ t('ingredients') }}</h3>
+          <div class="flex items-center gap-2" role="group" [attr.aria-label]="t('servingsLabel')">
+            <button
+              hlmBtn
+              variant="outline"
+              size="icon"
+              type="button"
+              data-testid="servings-down"
+              [attr.aria-label]="t('fewerServings')"
+              (click)="step(-1)"
+            >
+              <app-icon name="minus" class="size-4" />
+            </button>
+            <output
+              class="min-w-12 text-center font-display text-xl font-extrabold tabular-nums"
+              aria-live="polite"
+              data-testid="servings"
+              >{{ servings() | number: '1.0-2' : language() }}</output
+            >
+            <button
+              hlmBtn
+              variant="outline"
+              size="icon"
+              type="button"
+              data-testid="servings-up"
+              [attr.aria-label]="t('moreServings')"
+              (click)="step(1)"
+            >
+              <app-icon name="plus" class="size-4" />
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-muted-foreground" data-testid="servings-note">
+          @if (servingsChanged()) {
+            {{ t('scaledFor', { count: servings(), servings: (servings() | number: '1.0-2' : language()) }) }}
+            <button
+              type="button"
+              class="font-bold text-primary underline"
+              data-testid="servings-reset"
+              (click)="resetServings()"
+            >
+              {{ t('backToHousehold') }}
+            </button>
+          } @else {
+            {{ t('forHousehold', { servings: (householdServings() | number: '1.0-2' : language()) }) }}
+          }
+        </p>
+
+        @for (group of groups(); track $index) {
+          <div class="grid gap-1" data-testid="ingredient-group">
+            @if (group.name !== null) {
+              <h4 class="mt-2 border-t-2 border-dashed border-border pt-3 font-sans text-sm font-extrabold" data-testid="section-title">
+                {{ group.name }}
+              </h4>
+            }
+            <ul class="grid">
+              @for (view of group.lines; track $index) {
+                <li
+                  class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-2.5 border-t border-border px-1 py-2 first:border-t-0"
+                  [class.rounded-chip]="view.dislike === 'never'"
+                  [class.bg-dislike-never-surface]="view.dislike === 'never'"
+                  [class.text-dislike-never]="view.dislike === 'never'"
+                  data-testid="ingredient-line"
+                >
+                  <span class="text-right font-extrabold tabular-nums" data-testid="line-quantity">
+                    {{ view.quantity ? (view.quantity | quantity: language()) : t('toTaste') }}
+                  </span>
+                  <span class="min-w-0 [overflow-wrap:anywhere]">
+                    <span data-testid="line-name">{{ view.line.ingredientName ?? t('unknownIngredient') }}</span>
+                    @if (view.line.note) {
+                      <span class="text-muted-foreground">, {{ view.line.note }}</span>
+                    }
+                    @if (view.dislike) {
+                      <span
+                        class="ml-1.5 inline-flex items-center rounded-full border-[1.5px] border-current px-1.75 py-0.5 text-[11px] font-extrabold"
+                        [class.bg-dislike-never-surface]="view.dislike === 'never'"
+                        [class.text-dislike-never]="view.dislike === 'never'"
+                        [class.bg-dislike-avoid-surface]="view.dislike === 'avoid'"
+                        [class.text-dislike-avoid]="view.dislike === 'avoid'"
+                        data-testid="line-dislike"
+                        >{{ t('dislike.' + view.dislike) }}</span
+                      >
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          </div>
+        } @empty {
+          <p class="text-sm text-muted-foreground">{{ t('noIngredients') }}</p>
+        }
+      </section>
+
+      <section
+        class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-3.5 py-4 shadow-card sm:px-4.5"
+        aria-labelledby="steps-title"
+        data-testid="recipe-steps"
+      >
+        <h3 id="steps-title" class="text-xl">{{ t('steps') }}</h3>
+        @if (r.steps.length) {
+          <ol class="grid gap-3.5">
+            @for (step of r.steps; track $index) {
+              <li class="grid grid-cols-[2.125rem_minmax(0,1fr)] gap-3" data-testid="recipe-step">
+                <span
+                  class="grid size-8 place-items-center rounded-full border-2 border-outline bg-accent font-display font-extrabold text-accent-foreground"
+                  aria-hidden="true"
+                  >{{ $index + 1 }}</span
+                >
+                <span class="pt-1 whitespace-pre-line [overflow-wrap:anywhere]">{{ step }}</span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="text-sm text-muted-foreground">{{ t('noSteps') }}</p>
+        }
+      </section>
+    </div>
+
+    <div class="grid gap-4.5 xl:grid-cols-2 xl:items-start">
+      <section
+        class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-3.5 py-4 shadow-card sm:px-4.5"
+        aria-labelledby="nutrition-title"
+        data-testid="recipe-nutrition"
+      >
+        <h3 id="nutrition-title" class="text-xl">{{ t('nutrition') }}</h3>
+        @if (hasNutrition()) {
+          <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            @for (nutrient of nutrients; track nutrient) {
+              <div class="grid rounded-control border-2 border-border px-2.5 py-2" data-testid="nutrient">
+                <dt class="order-2 text-xs text-muted-foreground">{{ t('nutrient.' + nutrient) }}</dt>
+                <dd class="order-1 font-display text-xl font-extrabold tabular-nums">
+                  @if (r.nutrition[nutrient] !== null) {
+                    {{ r.nutrition[nutrient] | number: '1.0-1' : language() }}{{ nutrient === 'kcal' ? '' : ' g' }}
+                  } @else {
+                    –
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+          <p class="text-xs text-muted-foreground">{{ t('perServing') }}</p>
+        } @else {
+          <p class="text-sm text-muted-foreground" data-testid="no-nutrition">{{ t('noNutrition') }}</p>
+        }
+      </section>
+
+      <section
+        class="grid min-w-0 gap-3 rounded-card border-2 border-outline bg-card px-3.5 py-4 shadow-card sm:px-4.5"
+        aria-labelledby="history-title"
+        data-testid="recipe-history"
+      >
+        <h3 id="history-title" class="text-xl">{{ t('history') }}</h3>
+        @if (r.averageRating !== null) {
+          <div class="flex items-baseline gap-2.5">
+            <b class="font-display text-[34px] leading-none" data-testid="average-rating">{{
+              r.averageRating | number: '1.0-1' : language()
+            }}</b>
+            <app-stars
+              [value]="r.averageRating"
+              [label]="t('ratingLabel', { rating: (r.averageRating | number: '1.0-1' : language()) })"
+            />
+            <span class="text-xs text-muted-foreground">{{ t('ratingCount', { count: r.ratingCount }) }}</span>
+          </div>
+        }
+        @if (history.value(); as entries) {
+          @if (entries.length) {
+            <ul class="grid gap-1.5 text-sm">
+              @for (entry of entries; track entry.id) {
+                <li
+                  class="flex items-center justify-between gap-2.5 border-t border-dashed border-border pt-1.5 first:border-t-0 first:pt-0"
+                  data-testid="history-entry"
+                >
+                  <span class="text-muted-foreground">
+                    {{ entry.date | date: dateFormat : undefined : language() }}
+                    @if (slotName(entry); as slot) {
+                      · {{ slot }}
+                    }
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    @if (entry.rating !== null) {
+                      <app-stars [value]="entry.rating" [label]="t('ratingLabel', { rating: entry.rating })" />
+                    } @else {
+                      <span class="text-xs text-muted-foreground">{{ t('entryNotRated') }}</span>
+                    }
+                    <button
+                      hlmBtn
+                      variant="ghost"
+                      size="xs"
+                      type="button"
+                      data-testid="history-rate"
+                      [attr.aria-label]="
+                        entry.rating !== null
+                          ? t('changeRatingLabel', { date: (entry.date | date: dateFormat : undefined : language()) })
+                          : t('rateLabel', { date: (entry.date | date: dateFormat : undefined : language()) })
+                      "
+                      (click)="rateEntry(entry)"
+                    >
+                      @if (entry.rating !== null) {
+                        <app-icon name="edit" class="size-3.5" />
+                      } @else {
+                        {{ t('rate') }}
+                      }
+                    </button>
+                  </span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="text-sm text-muted-foreground" data-testid="no-history">{{ t('noHistory') }}</p>
+          }
+        }
+        <div class="flex items-center justify-between gap-3 border-t-2 border-border pt-3">
+          <div class="grid gap-0.5">
+            <span class="text-sm font-bold">{{ t('makeAgain') }}</span>
+            <span class="text-xs text-muted-foreground" data-testid="make-again-note">
+              {{ r.makeAgain ? t('makeAgainYes') : t('makeAgainNo') }}
+            </span>
+          </div>
+          <app-switch
+            data-testid="make-again"
+            [checked]="r.makeAgain"
+            [label]="t('makeAgain')"
+            [disabled]="!!busy()"
+            (toggled)="setMakeAgain($event)"
+          />
+        </div>
+      </section>
+    </div>
+
+    @if (!r.isArchived) {
+      <div class="flex justify-end">
+        <button
+          hlmBtn
+          variant="ghost"
+          size="sm"
+          type="button"
+          data-testid="recipe-archive"
+          [disabled]="!!busy()"
+          (click)="archive()"
+        >
+          <app-icon name="archive" class="size-4" />
+          {{ t('archive') }}
+        </button>
+      </div>
+    }
+  } @else if (gone()) {
+    <p class="text-muted-foreground" data-testid="recipe-gone">{{ t('gone') }}</p>
+  } @else if (failed()) {
+    <p class="flex items-center gap-2 text-sm" role="alert" data-testid="recipe-load-error">
+      <app-icon name="alert" class="size-4 text-danger" />
+      {{ t('loadFailed') }}
+      <button hlmBtn variant="link" size="sm" type="button" (click)="recipe.reload()">{{ t('retry') }}</button>
+    </p>
+  } @else {
+    <p class="text-muted-foreground">{{ t('loading') }}</p>
+  }
+</ng-container>

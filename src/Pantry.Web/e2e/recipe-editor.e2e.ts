@@ -79,7 +79,11 @@ const omelette = {
   steps: ['Whisk the eggs.', 'Fry.'],
   nutrition: { kcal: null, protein: null, fat: null, carbs: null },
   makeAgain: true,
+  averageRating: null,
+  ratingCount: 0,
+  isFavourite: false,
   cooldownDays: null,
+  cooldown: { days: 21, isHouseholdDefault: true, lastEaten: null, availableFrom: null },
   isArchived: false,
   archivedAt: null,
   createdAt: '2026-11-01T10:00:00Z',
@@ -98,6 +102,11 @@ async function mockApi(page: Page) {
     return route.fulfill({ json: { items, total: items.length, page: 1, pageSize: 50 } });
   });
   await page.route('/api/household/dislikes', (route) => route.fulfill({ json: dislikes }));
+  await page.route('/api/household/members', (route) =>
+    route.fulfill({ json: { members: [], householdServing: 2 } }),
+  );
+  await page.route('/api/household/meal-slots', (route) => route.fulfill({ json: [] }));
+  await page.route(/\/api\/recipes\/[^/]+\/history$/, (route) => route.fulfill({ json: [] }));
   await page.route(/\/api\/recipes\/tags(\?.*)?$/, (route) =>
     route.fulfill({
       json: [
@@ -204,7 +213,7 @@ test('creates a recipe typed for its servings, with sections, dislike hints, tag
 
   await page.getByTestId('recipe-save').click();
 
-  await expect(page).toHaveURL(/\/recipes\/created\/edit$/);
+  await expect(page).toHaveURL(/\/recipes\/created$/);
   await expect(page.getByText('Recipe added')).toBeVisible();
   expect(sent).toEqual([
     {
@@ -288,6 +297,18 @@ test('edits a recipe and asks before unsaved changes are left', async ({ page })
     sections: [],
   });
 
+  await expect(page).toHaveURL(/\/recipes\/omelette$/);
+  await expect(page.getByTestId('recipe-title')).toHaveText('Omelette');
+});
+
+test('cancel goes back to the recipe, or to the library for a new one', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/recipes/omelette/edit');
+  await expect(page.getByTestId('recipe-name')).toHaveValue('Omelette');
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page).toHaveURL(/\/recipes\/omelette$/);
+
+  await page.goto('/recipes/new');
   await page.getByTestId('recipe-back').click();
   await expect(page).toHaveURL(/\/recipes$/);
 });

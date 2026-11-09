@@ -5,9 +5,8 @@ import { UiLanguageService } from '../../core/i18n/ui-language.service';
 import { Icon } from '../../shared/icon/icon';
 import { RecipeListItem } from '../recipes-api';
 import { recipePath } from '../recipes-paths';
-import { filledStars, hasDislike, isTooSoon, lastEatenText, recipeInitial, recipeTileColour } from './recipe-card-facts';
-
-const MAX_STARS = 5;
+import { Stars } from '../stars';
+import { hasDislike, isTooSoon, lastEatenText, recipeInitial, recipeTileColour } from './recipe-card-facts';
 
 /**
  * One recipe in the library: a coloured tile with the initial, the name, rating, prep time, when it was last eaten and
@@ -15,7 +14,7 @@ const MAX_STARS = 5;
  */
 @Component({
   selector: 'app-recipe-card',
-  imports: [RouterLink, TranslocoDirective, Icon],
+  imports: [RouterLink, TranslocoDirective, Icon, Stars],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
@@ -37,13 +36,7 @@ const MAX_STARS = 5;
         <span class="text-[15px] leading-tight font-extrabold" data-testid="recipe-name">{{ recipe().name }}</span>
         <span class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted-foreground">
           @if (recipe().averageRating !== null) {
-            <span
-              class="tracking-[1px] text-warning"
-              role="img"
-              data-testid="recipe-rating"
-              [attr.aria-label]="t('rating', { rating: ratingText() })"
-              >{{ starsText() }}</span
-            >
+            <app-stars data-testid="recipe-rating" [value]="recipe().averageRating ?? 0" [label]="t('rating', { rating: ratingText() })" />
           } @else {
             <span data-testid="recipe-rating">{{ t('notRated') }}</span>
           }
@@ -93,10 +86,6 @@ export class RecipeCard {
   protected readonly path = computed(() => recipePath(this.recipe().id));
   protected readonly colour = computed(() => recipeTileColour(this.recipe().id));
   protected readonly initial = computed(() => recipeInitial(this.recipe().name));
-  protected readonly starsText = computed(() => {
-    const filled = filledStars(this.recipe().averageRating);
-    return '★'.repeat(filled) + '☆'.repeat(MAX_STARS - filled);
-  });
   protected readonly ratingText = computed(() =>
     new Intl.NumberFormat(this.language.current(), { maximumFractionDigits: 1 }).format(this.recipe().averageRating ?? 0),
   );

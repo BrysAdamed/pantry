@@ -1,4 +1,5 @@
 import { CanDeactivateFn, Routes } from '@angular/router';
+import { RecipeDetail } from './detail/recipe-detail';
 import { RecipeEditor } from './editor/recipe-editor';
 import { NoRecipeOpen } from './library/no-recipe-open';
 import { RecipeLibrary } from './library/recipe-library';
@@ -17,6 +18,9 @@ export const recipesRoutes: Routes = [
   {
     path: '',
     component: RecipeLibrary,
-    children: [{ path: '', component: NoRecipeOpen }],
+    children: [
+      { path: '', component: NoRecipeOpen },
+      { path: ':id', component: RecipeDetail },
+    ],
   },
 ];

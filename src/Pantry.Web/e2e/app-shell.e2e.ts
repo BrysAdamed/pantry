@@ -17,6 +17,7 @@ test.beforeEach(async ({ page }) => {
     return route.fulfill({ status: 204 });
   });
   await page.route(/\/api\/catalog\/ingredients/, (route) => route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 1 } }));
+  await page.route('/api/recipes/history/to-rate', (route) => route.fulfill({ json: [] }));
   await page.route(/\/api\/recipes\/tags/, (route) => route.fulfill({ json: [] }));
   await page.route(/\/api\/recipes(\?.*)?$/, (route) => route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 50 } }));
   await page.route('/api/household/members', (route) => route.fulfill({ json: { members: [], householdServing: 0 } }));

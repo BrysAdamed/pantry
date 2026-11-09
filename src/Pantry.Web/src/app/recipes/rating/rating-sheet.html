@@ -1,0 +1,103 @@
+<app-dialog-frame *transloco="let t; prefix: 'recipes.rating'" [label]="t('label')" data-testid="rating-sheet">
+  <div class="grid gap-1">
+    <h3 class="text-[22px] leading-tight [overflow-wrap:anywhere]" data-testid="rating-recipe">{{ data.recipeName }}</h3>
+    <p class="text-sm text-muted-foreground" data-testid="rating-when">
+      {{ nearDay ? t('day.' + nearDay) : (data.date | date: dateFormat : undefined : language()) }}
+      @if (data.mealSlotName) {
+        · {{ data.mealSlotName }}
+      }
+      · {{ t('household') }}
+    </p>
+  </div>
+
+  <div class="grid gap-2">
+    <div class="flex justify-center gap-1.5" role="radiogroup" [attr.aria-label]="t('stars')">
+      @for (value of starValues; track value) {
+        <button
+          type="button"
+          role="radio"
+          class="grid size-13 place-items-center rounded-control border-2 text-[28px] leading-none outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          [class]="
+            value <= stars()
+              ? 'border-outline bg-warning-surface text-warning'
+              : 'border-border bg-background text-muted-foreground'
+          "
+          [attr.aria-checked]="value === stars()"
+          [attr.aria-label]="t('starLabel', { stars: value, word: t('word.' + value) })"
+          [attr.data-testid]="'star-' + value"
+          (click)="pick(value)"
+        >
+          <span aria-hidden="true">★</span>
+        </button>
+      }
+    </div>
+    <p class="min-h-5 text-center text-sm font-bold" aria-live="polite" data-testid="star-word">
+      {{ stars() ? t('word.' + stars()) : '' }}
+    </p>
+  </div>
+
+  <div class="grid gap-2">
+    <span class="text-[13px] font-bold" id="make-again-label">{{ t('makeAgain') }}</span>
+    <div class="grid grid-cols-2 gap-2" role="group" aria-labelledby="make-again-label">
+      <button
+        type="button"
+        class="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-control border-2 border-border bg-card font-extrabold aria-pressed:border-outline aria-pressed:bg-secondary aria-pressed:shadow-control"
+        data-testid="make-again-yes"
+        [attr.aria-pressed]="makeAgain() === true"
+        (click)="answer(true)"
+      >
+        <app-icon name="repeat" class="size-4" />
+        {{ t('yes') }}
+      </button>
+      <button
+        type="button"
+        class="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-control border-2 border-border bg-card font-extrabold aria-pressed:border-outline aria-pressed:bg-secondary aria-pressed:shadow-control"
+        data-testid="make-again-no"
+        [attr.aria-pressed]="makeAgain() === false"
+        (click)="answer(false)"
+      >
+        <app-icon name="close" class="size-4" />
+        {{ t('no') }}
+      </button>
+    </div>
+    @if (makeAgain() === false) {
+      <p class="text-xs text-muted-foreground" data-testid="make-again-hint">{{ t('noHint') }}</p>
+    }
+  </div>
+
+  @if (error(); as e) {
+    <p
+      class="flex items-center gap-2 rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm"
+      role="alert"
+      data-testid="rating-error"
+    >
+      <app-icon name="alert" class="size-4 text-danger" />
+      {{ t('error.' + e) }}
+    </p>
+  }
+
+  <div class="flex flex-wrap items-center justify-between gap-2.5">
+    <div class="flex gap-1">
+      <button hlmBtn variant="ghost" type="button" data-testid="rating-later" (click)="later()">
+        {{ isRated ? t('cancel') : t('later') }}
+      </button>
+      @if (isRated) {
+        <button
+          hlmBtn
+          variant="destructive"
+          type="button"
+          data-testid="rating-remove"
+          [disabled]="busy()"
+          (click)="remove()"
+        >
+          <app-icon name="trash" class="size-4" />
+          {{ t('remove') }}
+        </button>
+      }
+    </div>
+    <button hlmBtn type="button" data-testid="rating-save" [disabled]="!canSave()" (click)="save()">
+      <app-icon name="check" class="size-4" />
+      {{ t('save') }}
+    </button>
+  </div>
+</app-dialog-frame>

@@ -13,7 +13,7 @@ import {
   RecipesPage,
   TagUsage,
 } from '../recipes-api';
-import { localToday } from './recipe-card-facts';
+import { localDateIso } from '../local-date';
 
 export const RECIPE_LIBRARY_SEARCH_DELAY_MS = 250;
 export const RECIPE_LIBRARY_PAGE_SIZE = 50;
@@ -29,7 +29,7 @@ export class RecipeLibraryScreen {
   private readonly api = inject(RecipesApi);
 
   /** The date *too soon* and *last eaten* are counted from. */
-  readonly today = localToday();
+  readonly today = localDateIso();
 
   readonly searchText = signal('');
   readonly tags = signal<readonly string[]>([]);
@@ -109,6 +109,16 @@ export class RecipeLibraryScreen {
     this.tags.set([]);
     this.withoutNever.set(false);
     this.archived.set(false);
+  }
+
+  /** Reads the library again from the first page after a recipe changed (a rating moves it in the sort). */
+  changed(): void {
+    if (this.pages() === 1) {
+      this.page.reload();
+    } else {
+      this.pages.set(1);
+    }
+    this.librarySize.reload();
   }
 
   retry(): void {

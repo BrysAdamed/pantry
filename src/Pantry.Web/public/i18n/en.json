@@ -846,8 +846,118 @@
       "retry": "Try again",
       "nothingSelected": "Pick a recipe from the list to see it here."
     },
+    "rating": {
+      "label": "How was it?",
+      "dialogLabel": "Rating: {{name}}",
+      "household": "rated by the whole household",
+      "day": {
+        "today": "Today",
+        "yesterday": "Yesterday"
+      },
+      "stars": "Rating",
+      "starLabel": "{{stars}} out of 5, {{word}}",
+      "word": {
+        "1": "Didn't like it",
+        "2": "So-so",
+        "3": "Good",
+        "4": "Very good",
+        "5": "Superb"
+      },
+      "makeAgain": "Make it again?",
+      "yes": "Yes",
+      "no": "Rather not",
+      "noHint": "The agent will stop suggesting this dish. You can change that on the recipe.",
+      "later": "Later",
+      "cancel": "Cancel",
+      "remove": "Remove rating",
+      "save": "Save rating",
+      "error": {
+        "gone": "This meal is no longer in the history.",
+        "failed": "The rating could not be saved. Try again."
+      },
+      "toast": {
+        "rated": "Thanks! Rating saved",
+        "removed": "Rating removed"
+      },
+      "toRate": "To rate",
+      "toRateLabel": "To rate: {{name}}",
+      "rate": "Rate"
+    },
+    "detail": {
+      "back": "Recipes",
+      "edit": "Edit",
+      "addToPlan": "Add to plan",
+      "time": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "ratingLabel": "Rated {{rating}} out of 5",
+      "notRated": "Not rated yet",
+      "lastEaten": "Last eaten {{date}}",
+      "neverEaten": "Not eaten yet",
+      "source": "Source",
+      "favourite": "favourite",
+      "avoidBadge": "avoid: {{names}}",
+      "tooSoon": "too soon, best from {{date}}",
+      "archived": {
+        "title": "This recipe is archived",
+        "text": "It is hidden from the library, the tray and the agent's suggestions. History and the plan still show it."
+      },
+      "restore": "Restore",
+      "archive": "Archive",
+      "never": {
+        "text": "Contains {{names}}, which is on your \"never\" list. The agent will not suggest this recipe; you can only add it to the plan on purpose.",
+        "textWithReason": "Contains {{names}}, which is on your \"never\" list ({{reason}}). The agent will not suggest this recipe; you can only add it to the plan on purpose."
+      },
+      "actionFailed": "The change could not be saved. Try again.",
+      "ingredients": "Ingredients",
+      "servingsLabel": "Servings",
+      "fewerServings": "Fewer servings",
+      "moreServings": "More servings",
+      "scaledFor": "{count, plural, one {Scaled to {servings} serving.} other {Scaled to {servings} servings.}}",
+      "backToHousehold": "Back to household servings",
+      "forHousehold": "For the household ({{servings}} servings).",
+      "toTaste": "to taste",
+      "unknownIngredient": "ingredient no longer in the catalog",
+      "dislike": {
+        "never": "never",
+        "avoid": "avoid"
+      },
+      "noIngredients": "This recipe has no ingredients yet.",
+      "steps": "Method",
+      "noSteps": "This recipe has no steps yet.",
+      "nutrition": "Nutrition",
+      "nutrient": {
+        "kcal": "kcal",
+        "protein": "protein",
+        "fat": "fat",
+        "carbs": "carbs"
+      },
+      "perServing": "Per serving.",
+      "noNutrition": "This recipe has no nutrition data. Days with it in the plan are marked incomplete.",
+      "history": "History and rating",
+      "ratingCount": "{count, plural, one {# rating} other {# ratings}}",
+      "entryNotRated": "not rated",
+      "rate": "Rate",
+      "rateLabel": "Rate the meal of {{date}}",
+      "changeRatingLabel": "Change or remove the rating of {{date}}",
+      "noHistory": "You have not eaten this dish yet.",
+      "makeAgain": "Make again",
+      "makeAgainYes": "The agent may suggest this dish.",
+      "makeAgainNo": "Not again; the agent skips it.",
+      "toast": {
+        "archived": "Recipe archived",
+        "restored": "Recipe restored"
+      },
+      "gone": "This recipe does not exist.",
+      "loadFailed": "The recipe could not be loaded.",
+      "retry": "Try again",
+      "loading": "Loading…"
+    },
     "editor": {
       "back": "Recipes",
+      "backToRecipe": "Back to the recipe",
       "newTitle": "New recipe",
       "editTitle": "Edit recipe",
       "name": "Name",

@@ -23,6 +23,9 @@ async function mockApi(page: Page, overrides: Partial<MockApi> = {}): Promise<Mo
   await page.route('/api/me', (route) =>
     api.signedIn ? route.fulfill({ json: user }) : route.fulfill({ status: 401 }),
   );
+  await page.route(/\/api\/recipes(\?.*)?$/, (route) => route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 50 } }));
+  await page.route(/\/api\/recipes\/tags\?.*$/, (route) => route.fulfill({ json: [] }));
+  await page.route('/api/recipes/history/to-rate', (route) => route.fulfill({ json: [] }));
   await page.route('/api/antiforgery', (route) => route.fulfill({ status: 204 }));
   await page.route('/api/auth/passkey-options', (route) => route.fulfill({ json: requestOptions }));
   await page.route('/api/auth/sign-in', (route) => {
@@ -216,7 +219,7 @@ test('signs out and the back button does not show the app again', async ({ page 
   await withoutPasskeyAutofill(page);
   await page.goto('/planner');
   await page.getByRole('link', { name: 'Recipes' }).filter({ visible: true }).click();
-  await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText('Add your first recipe');
+  await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Add your first recipe' })).toBeVisible();
 
   await page.getByTestId('avatar-menu-trigger').filter({ visible: true }).click();
   await page.getByTestId('sign-out').click();
@@ -241,7 +244,7 @@ test('signs in with a username and password and goes back to the requested page'
 
   expect((await signedIn).postDataJSON()).toEqual({ userName: 'alex', password: 'pantry shelf 2026' });
   await expect(page).toHaveURL('/recipes');
-  await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText('Add your first recipe');
+  await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Add your first recipe' })).toBeVisible();
 });
 
 test('gives the same message for a wrong password and an unknown username', async ({ page }) => {
