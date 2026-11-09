@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.route('/api/health', (route) => route.fulfill({ json: { status: 'ok', version: 'e2e' } }));
+  await page.route('/api/setup', (route) => route.fulfill({ json: { firstRunNeeded: false } }));
 });
 
 test('shows the app and the API status', async ({ page }) => {

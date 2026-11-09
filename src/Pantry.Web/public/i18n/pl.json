@@ -71,5 +71,38 @@
       "offline": "Offline",
       "pending": "Czeka na wysłanie"
     }
+  },
+  "firstRun": {
+    "label": "Pierwsze uruchomienie",
+    "title": "Załóżmy Spiżarnię",
+    "intro": "To konto będzie kontem administratora. Potem zaprosisz resztę domowników.",
+    "nameLabel": "Jak masz na imię?",
+    "namePlaceholder": "np. Ania",
+    "create": "Utwórz klucz dostępu",
+    "creating": "Czekam na klucz dostępu…",
+    "retry": "Spróbuj ponownie",
+    "hint": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+    "cancelled": {
+      "title": "Tworzenie klucza przerwane.",
+      "body": "Okno klucza zostało zamknięte. Spróbuj jeszcze raz."
+    },
+    "failed": {
+      "title": "Nie udało się zapisać klucza.",
+      "body": "Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "unsupported": {
+      "title": "Klucze dostępu tu nie działają.",
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+    },
+    "alreadyDone": {
+      "title": "Spiżarnia jest już założona",
+      "body": "Ktoś inny zakończył pierwsze uruchomienie. Poproś tę osobę o zaproszenie.",
+      "action": "Przejdź do aplikacji"
+    },
+    "done": {
+      "title": "Witaj w domu!",
+      "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "action": "Przejdź do planu"
+    }
   }
 }
