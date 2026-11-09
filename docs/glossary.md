@@ -24,6 +24,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
 | **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Quantities without a conversion are not summed into the base unit. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |
+| **Possible duplicate** | Two ingredients with similar names or aliases that may mean the same thing (*Możliwy duplikat*). People either merge them or mark them *not duplicates*, and a dismissed pair is not suggested again. |
 | **Dislike** | A household-wide ingredient preference: *never* (allergy, hard no) or *avoid*. |
 | **Planning rule** | A short free-text rule agents follow when planning (e.g. weekday dinners under 30 minutes), with an order. A disabled rule is kept for later but agents do not see it. Structured rules are out of scope for V1. |
 | **Rating** | Household feedback on a recipe after it was eaten, plus a *make again* flag. |

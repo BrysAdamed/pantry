@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Składniki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* PAN-29 ingredients prototype. Tokens mirror src/Pantry.Web/src/styles.css (ADR 0013). */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff4e6, #1b141e);
+  --foreground: light-dark(#2a1b2d, #fbefe3);
+  --card: light-dark(#ffffff, #251c29);
+  --secondary: light-dark(#fde6cc, #322536);
+  --muted-foreground: light-dark(#6e5b70, #c2aec3);
+  --border: light-dark(#f0d9bf, #3d2e42);
+  --outline: light-dark(#2a1b2d, #7a6280);
+  --primary: light-dark(#6e2a5e, #e59cd0);
+  --primary-foreground: light-dark(#fff4e6, #1b141e);
+  --accent: #f4a259;
+  --accent-foreground: light-dark(#2a1b2d, #1b141e);
+  --agent: light-dark(#1c6964, #6fd0c6);
+  --agent-surface: light-dark(#ddf1ee, #173a37);
+  --success: light-dark(#28724a, #7dd3a0);
+  --success-surface: light-dark(#e2f2e7, #17311f);
+  --warning: light-dark(#a8520f, #f4a259);
+  --warning-surface: light-dark(#fcead6, #3a2814);
+  --danger: light-dark(#b8342a, #ff8a7a);
+  --danger-surface: light-dark(#fbe3df, #3d1c19);
+  --info: var(--agent);
+  --info-surface: var(--agent-surface);
+  --page: light-dark(#f6efe6, #141113);
+
+  --ingredient-review: var(--info);
+  --ingredient-review-surface: var(--info-surface);
+  --ingredient-duplicate: var(--warning);
+  --ingredient-duplicate-surface: var(--warning-surface);
+
+  --radius-chip: 8px; --radius-control: 12px; --radius-card: 16px;
+  --shadow-control: 2px 2px 0 var(--outline);
+  --shadow-card: 3px 3px 0 var(--outline);
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .5; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.i.sm { width: 14px; height: 14px; }
+
+.wrap { max-width: 1340px; margin: 0 auto; padding: 20px 16px 64px; display: grid; gap: 28px; }
+.pagebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 700; }
+.pagebar h1 { font-size: clamp(24px, 3vw, 32px); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
+.ctl { display: grid; gap: 4px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-control); background: var(--secondary); }
+.seg button { border: 0; background: none; padding: 7px 13px; min-height: 36px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow-control); outline: 2px solid var(--outline); outline-offset: -2px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.spacer { flex: 1; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-control); border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--card); font-weight: 700; font-size: 14px; white-space: nowrap; transition: translate .08s, box-shadow .08s; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.btn.accent { background: var(--accent); color: var(--accent-foreground); }
+.btn.ghost { border-color: transparent; box-shadow: none; background: none; }
+.btn.danger { color: var(--danger); }
+.btn.dangerfill { background: var(--danger); color: var(--primary-foreground); }
+.btn.icon { width: 44px; padding: 0; }
+.btn.icon.sm { width: 36px; }
+.btn:active:not(:disabled) { translate: 1px 1px; box-shadow: none; }
+.link { border: 0; background: none; padding: 0; color: var(--primary); font-weight: 700; text-decoration: underline; }
+
+.frame-label { margin-bottom: 10px; }
+.scroller { overflow-x: auto; border-radius: 20px; border: 2px solid var(--outline); box-shadow: var(--shadow-card); }
+
+/* Desktop shell */
+.desk { min-width: 1200px; height: 820px; display: grid; grid-template-columns: 84px 400px minmax(0, 1fr); background: var(--background); position: relative; }
+.side { background: var(--card); border-right: 2px solid var(--outline); padding: 18px 8px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.mark { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--outline); box-shadow: var(--shadow-control); background: var(--accent); color: var(--accent-foreground); border-radius: 10px; }
+.nav { display: grid; gap: 4px; }
+.nav a { position: relative; display: grid; justify-items: center; gap: 4px; padding: 8px 4px; min-height: 56px; width: 64px; font-size: 11px; border-radius: var(--radius-control); color: var(--muted-foreground); text-decoration: none; font-weight: 700; border: 2px solid transparent; }
+.nav a.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--outline); }
+.count { position: absolute; top: 2px; right: 6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--ingredient-review); color: var(--primary-foreground); font-size: 11px; font-weight: 800; display: grid; place-items: center; border: 1.5px solid var(--card); }
+
+/* List column */
+.libcol { border-right: 2px solid var(--outline); display: flex; flex-direction: column; min-height: 0; background: var(--background); }
+.libhead { padding: 20px 16px 10px; display: grid; gap: 12px; }
+.libhead .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.libhead h2 { font-size: 28px; }
+.search { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: var(--radius-control); border: 2px solid var(--outline); background: var(--card); color: var(--muted-foreground); }
+.search input { border: 0; background: none; flex: 1; min-width: 0; outline: none; color: var(--foreground); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chip { border: 2px solid var(--border); background: var(--card); padding: 5px 11px; min-height: 36px; font-size: 13px; font-weight: 700; color: var(--muted-foreground); border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; }
+.chip[aria-pressed="true"] { color: var(--accent-foreground); background: var(--accent); border-color: var(--outline); }
+.chip .n { font-variant-numeric: tabular-nums; }
+.chipsel { border: 2px solid var(--border); background: var(--card); border-radius: 999px; padding: 5px 10px; min-height: 36px; font-size: 13px; font-weight: 700; color: var(--muted-foreground); max-width: 100%; }
+.chipsel.on { color: var(--accent-foreground); background: var(--accent); border-color: var(--outline); }
+.sumrow { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted-foreground); min-height: 24px; }
+.list { flex: 1; overflow-y: auto; padding: 0 16px 24px; display: flex; flex-direction: column; gap: 4px; }
+.list > * { flex: none; }
+
+.tidy { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-card); border: 2px dashed var(--outline); background: var(--card); margin-bottom: 8px; }
+.tidy .ln { display: flex; align-items: center; gap: 10px; min-height: 40px; font-size: 14px; }
+.tidy .ln .txt { flex: 1; }
+.tidy .dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.tidy .dot.review { color: var(--ingredient-review); background: var(--ingredient-review-surface); }
+.tidy .dot.dup { color: var(--ingredient-duplicate); background: var(--ingredient-duplicate-surface); }
+
+.group { position: sticky; top: 0; z-index: 1; background: var(--background); padding: 10px 4px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-foreground); font-weight: 800; display: flex; justify-content: space-between; }
+.irow { width: 100%; text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 9px 12px; min-height: 52px; border-radius: var(--radius-control); border: 2px solid transparent; background: var(--card); }
+.irow:hover { border-color: var(--border); }
+.irow[aria-current="true"] { border-color: var(--outline); box-shadow: var(--shadow-control); }
+.irow .nm { font-weight: 800; font-size: 15px; line-height: 1.25; }
+.irow .sub { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: var(--muted-foreground); align-items: center; }
+.irow mark { background: color-mix(in srgb, var(--accent) 45%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+.unit { font-size: 12px; font-weight: 800; min-width: 38px; text-align: center; padding: 2px 8px; border-radius: var(--radius-chip); border: 1.5px solid var(--border); color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
+.badge.review { color: var(--ingredient-review); background: var(--ingredient-review-surface); }
+.badge.dup { color: var(--ingredient-duplicate); background: var(--ingredient-duplicate-surface); }
+.badge.staple { color: var(--foreground); background: var(--secondary); border-color: var(--border); }
+.badge.never { color: var(--danger); background: var(--danger-surface); }
+.badge.avoid { color: var(--warning); background: var(--warning-surface); }
+.badge.new { color: var(--info); background: var(--info-surface); }
+
+.empty { text-align: center; color: var(--muted-foreground); padding: 28px 12px; font-size: 14px; display: grid; gap: 12px; justify-items: center; }
+.empty h3 { color: var(--foreground); font-size: 22px; }
+.emptyhero { display: grid; gap: 14px; justify-items: center; text-align: center; padding: 48px 24px; max-width: 460px; margin: 0 auto; }
+.emptyhero .art { width: 84px; height: 84px; border-radius: 24px; border: 2px solid var(--outline); box-shadow: var(--shadow-card); background: var(--accent); color: var(--accent-foreground); display: grid; place-items: center; }
+.emptyhero .art svg.i { width: 40px; height: 40px; }
+.emptyhero h2 { font-size: 28px; }
+.emptyhero p { color: var(--muted-foreground); }
+.agenthint { font-size: 13px; color: var(--agent); background: var(--agent-surface); border: 2px dashed var(--agent); border-radius: var(--radius-control); padding: 8px 12px; max-width: 40ch; }
+
+/* Detail */
+.detail { overflow-y: auto; padding: 24px 28px 0; display: grid; gap: 18px; align-content: start; min-width: 0; }
+.dhead { display: grid; gap: 8px; }
+.dhead .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.dhead h2 { font-size: 34px; line-height: 1.1; overflow-wrap: anywhere; }
+.dhead .facts { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 14px; color: var(--muted-foreground); align-items: center; }
+.alert { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 4px 10px; padding: 12px 14px; border-radius: var(--radius-control); border: 2px solid currentColor; font-size: 14px; }
+.alert > svg { margin-top: 2px; }
+.alert .txt { color: var(--foreground); display: grid; gap: 2px; }
+.alert .txt b { font-weight: 800; }
+.alert .acts { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.alert.review { color: var(--ingredient-review); background: var(--ingredient-review-surface); }
+.alert.dup { color: var(--ingredient-duplicate); background: var(--ingredient-duplicate-surface); }
+.alert.danger { color: var(--danger); background: var(--danger-surface); }
+.cols { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.stack { display: grid; gap: 18px; min-width: 0; }
+.card { background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 16px 18px; display: grid; gap: 14px; min-width: 0; }
+.card h3 { font-size: 20px; }
+.card .ch { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.note { font-size: 12px; color: var(--muted-foreground); }
+.field { display: grid; gap: 6px; }
+.field > span:first-child, .field > .fl { font-size: 13px; font-weight: 700; }
+.input { width: 100%; border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 10px 12px; min-height: 44px; outline-offset: 2px; }
+.input.title { font-family: var(--font-display); font-weight: 800; font-size: 22px; }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.err { font-size: 12px; font-weight: 700; color: var(--danger); display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.tagedit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 6px; min-height: 44px; }
+.tagedit .badge { padding: 4px 6px 4px 10px; font-size: 13px; color: var(--foreground); border-color: var(--outline); background: var(--secondary); }
+.tagedit .badge button { border: 0; background: none; padding: 0 2px; display: grid; place-items: center; min-width: 22px; min-height: 22px; }
+.tagedit input { border: 0; background: none; outline: none; flex: 1; min-width: 120px; padding: 4px; }
+.unitseg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.unitseg button { min-height: 52px; border-radius: var(--radius-control); border: 2px solid var(--border); background: var(--card); display: grid; align-content: center; justify-items: center; line-height: 1.15; }
+.unitseg button b { font-family: var(--font-display); font-size: 18px; }
+.unitseg button span { font-size: 11px; color: var(--muted-foreground); }
+.unitseg button[aria-checked="true"] { border-color: var(--outline); background: var(--secondary); box-shadow: var(--shadow-control); }
+.toggle { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.toggle b { display: block; font-size: 14px; }
+.sw { width: 44px; height: 28px; border-radius: 999px; border: 2px solid var(--outline); background: var(--secondary); position: relative; padding: 0; flex: none; }
+.sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--outline); transition: left .12s; }
+.sw[aria-checked="true"] { background: var(--accent); }
+.sw[aria-checked="true"]::after { left: 19px; }
+
+.convs { display: grid; gap: 6px; }
+.conv { display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center; padding: 6px 4px 6px 12px; border-radius: var(--radius-control); background: var(--secondary); font-weight: 700; font-variant-numeric: tabular-nums; }
+.convadd { display: grid; grid-template-columns: auto minmax(0, 1fr) auto 84px auto; gap: 6px; align-items: center; }
+.convadd .addc { grid-column: 1 / -1; justify-self: end; }
+.convadd .eq { font-weight: 800; color: var(--muted-foreground); }
+.convadd .base { font-weight: 800; }
+.builtin { font-size: 12px; color: var(--muted-foreground); border-top: 1px dashed var(--border); padding-top: 10px; }
+.uses { list-style: none; margin: 0; padding: 0; display: grid; }
+.uses li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 2px; border-top: 1px solid var(--border); font-size: 14px; }
+.uses li:first-child { border-top: 0; }
+.uses b { font-variant-numeric: tabular-nums; }
+.addbtn { justify-self: start; border: 2px dashed var(--border); background: none; border-radius: var(--radius-control); min-height: 40px; padding: 0 14px; font-weight: 700; color: var(--primary); display: inline-flex; gap: 6px; align-items: center; }
+.formbar { z-index: 2; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; padding: 14px 0 18px; background: linear-gradient(transparent, var(--background) 28%); }
+.formbar.sticky { position: sticky; bottom: 0; }
+.formbar .dirty { margin-right: auto; font-size: 13px; color: var(--muted-foreground); font-weight: 700; display: inline-flex; gap: 6px; align-items: center; }
+.formbar .dirty::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 1.5px solid var(--outline); }
+
+/* Duplicates view */
+.pairs { display: grid; gap: 12px; }
+.pair { display: grid; gap: 12px; padding: 14px 16px; border-radius: var(--radius-card); border: 2px solid var(--outline); background: var(--card); box-shadow: var(--shadow-card); }
+.pair .two { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); gap: 8px; align-items: center; }
+.pair .side2 { display: grid; gap: 2px; padding: 8px 10px; border-radius: var(--radius-control); background: var(--secondary); min-width: 0; }
+.pair .side2 b { overflow-wrap: anywhere; }
+.pair .vs { color: var(--ingredient-duplicate); display: grid; place-items: center; }
+
+/* Dialogs */
+.scrim { position: absolute; inset: 0; z-index: 8; background: rgb(20 12 22 / .45); }
+.desk-modal { position: absolute; z-index: 9; left: 50%; top: 50%; translate: -50% -50%; width: 560px; max-height: 92%; overflow-y: auto; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 22px; display: grid; gap: 16px; animation: fade .15s ease-out; }
+.desk-modal.narrow { width: 440px; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; max-height: 88%; overflow-y: auto; background: var(--card); border-top: 2px solid var(--outline); border-radius: 24px 24px 0 0; padding: 8px 18px 26px; display: grid; gap: 16px; animation: up .18s ease-out; }
+@keyframes up { from { translate: 0 30px; opacity: 0; } }
+@keyframes fade { from { opacity: 0; } }
+.handle { width: 44px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto; }
+.dlg { display: grid; gap: 16px; }
+.dlg h3 { font-size: 22px; }
+.dlg .acts { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.dlg .acts .left { margin-right: auto; }
+.keep { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.keep button { display: grid; gap: 6px; text-align: left; align-content: start; border: 2px solid var(--border); background: var(--card); border-radius: var(--radius-control); padding: 12px; min-height: 120px; }
+.keep button[aria-checked="true"] { border-color: var(--outline); box-shadow: var(--shadow-control); background: var(--secondary); }
+.keep .top { display: flex; gap: 8px; align-items: center; }
+.keep .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--outline); display: grid; place-items: center; flex: none; }
+.keep button[aria-checked="true"] .dot::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+.keep b { font-size: 16px; overflow-wrap: anywhere; }
+.keep .m { font-size: 12px; color: var(--muted-foreground); display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.preview { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--radius-control); border: 2px solid var(--border); }
+.preview ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.preview .gone { color: var(--muted-foreground); text-decoration: line-through; }
+.warnline { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--warning); font-weight: 700; }
+.warnline span { color: var(--foreground); font-weight: 500; }
+.toast { position: absolute; left: 50%; bottom: 24px; translate: -50% 0; z-index: 10; background: var(--foreground); color: var(--background); border-radius: var(--radius-control); padding: 10px 16px; font-weight: 700; font-size: 14px; white-space: nowrap; }
+.phone .toast { bottom: 96px; }
+
+/* Picker */
+.picker { position: relative; }
+.picker .box { display: flex; align-items: center; gap: 8px; border: 2px solid var(--outline); border-radius: var(--radius-control); background: var(--card); padding: 0 12px; min-height: 44px; color: var(--muted-foreground); }
+.picker input { border: 0; background: none; outline: none; flex: 1; min-width: 0; color: var(--foreground); min-height: 40px; }
+.picker .pop { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 6; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-control); padding: 6px; display: grid; gap: 2px; max-height: 320px; overflow-y: auto; }
+.opt { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; text-align: left; border: 0; background: none; border-radius: 9px; padding: 8px 10px; min-height: 44px; }
+.opt[aria-selected="true"] { background: var(--secondary); outline: 2px solid var(--outline); outline-offset: -2px; }
+.opt[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+.opt .nm { font-weight: 700; }
+.opt .al { grid-column: 1 / -1; font-size: 12px; color: var(--muted-foreground); }
+.opt .al mark, .opt .nm mark { background: color-mix(in srgb, var(--accent) 45%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+.opt.newopt { border-top: 1px dashed var(--border); border-radius: 0 0 9px 9px; color: var(--info); }
+.opt.newopt .al { color: var(--info); }
+.pop .none { padding: 10px; font-size: 13px; color: var(--muted-foreground); }
+.picked { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipx { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--outline); background: var(--secondary); border-radius: 999px; padding: 4px 6px 4px 12px; font-weight: 700; font-size: 14px; min-height: 36px; }
+.chipx button { border: 0; background: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; padding: 0; }
+.demos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start; }
+.recline { display: grid; grid-template-columns: 72px 96px minmax(0, 1fr); gap: 8px; align-items: start; }
+.recline .hint { grid-column: 3; font-size: 12px; font-weight: 700; display: flex; gap: 4px; align-items: center; color: var(--info); }
+
+/* Phone */
+.duo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; }
+.phone { width: 390px; max-width: 100%; height: 840px; border-radius: 44px; border: 10px solid #1b1714; background: var(--background); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px -25px rgb(0 0 0 / .45); }
+.statusbar { height: 40px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-size: 13px; font-weight: 700; }
+.pview { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.pview .libhead { padding: 4px 16px 8px; }
+.pview .list { padding: 0 12px 100px; }
+.pbar { display: flex; align-items: center; gap: 8px; padding: 4px 10px 8px; flex: none; }
+.pbar .ttl { flex: 1; font-weight: 800; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pscroll { flex: 1; overflow-y: auto; padding: 0 14px 84px; display: grid; gap: 16px; align-content: start; }
+.phone .detail { padding: 0; overflow: visible; }
+.phone .dhead h2 { font-size: 26px; }
+.phone .cols { grid-template-columns: minmax(0, 1fr); }
+.phone .keep { grid-template-columns: 1fr; }
+.phone .keep button { min-height: 0; }
+.phone .formbar.sticky { bottom: 76px; padding-bottom: 12px; }
+.phone .emptyhero { padding: 28px 8px; }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; height: 76px; padding-bottom: 14px; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--card); border-top: 2px solid var(--outline); }
+.tabbar a { position: relative; display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-decoration: none; }
+.tabbar a.on { color: var(--primary); }
+.tabbar .count { top: 4px; right: calc(50% - 22px); }
+
+.notes { display: grid; gap: 16px; background: var(--card); border: 2px solid var(--outline); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 20px; min-width: 0; }
+.notes h3 { font-size: 22px; }
+.notes .lg { display: grid; gap: 8px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.notes li { max-width: 68ch; }
+.notes p { color: var(--muted-foreground); }
+
+@media (max-width: 900px) { .duo { grid-template-columns: minmax(0, 1fr); } .phone { margin: 0 auto; } }
+@media (max-width: 440px) { .phone { border-width: 6px; border-radius: 32px; height: 780px; } .recline { grid-template-columns: 64px 84px minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pagebar">
+    <div>
+      <div class="label">PAN-29 · Spiżarnia</div>
+      <h1>Składniki</h1>
+    </div>
+    <div class="switches">
+      <button class="btn sm" data-act="sim-agent">Symuluj: agent dodaje składnik</button>
+      <div class="ctl"><span class="label">Katalog</span><div class="seg" id="dataset">
+        <button data-v="sample">Przykładowy</button><button data-v="empty">Pusty</button>
+      </div></div>
+      <div class="ctl"><span class="label">Motyw</span><div class="seg" id="theme">
+        <button data-v="system">System</button><button data-v="light">Jasny</button><button data-v="dark">Ciemny</button>
+      </div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="label frame-label">Katalog i składnik · komputer</div>
+    <div class="scroller">
+      <div class="desk" id="desk">
+        <aside class="side">
+          <span class="mark" data-icon="jar" title="Spiżarnia"></span>
+          <nav class="nav" id="desk-nav"></nav>
+        </aside>
+        <div class="libcol" id="desk-lib"></div>
+        <div class="detail" id="desk-detail"></div>
+        <div id="desk-modal"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="duo">
+    <div>
+      <div class="label frame-label">Ten sam katalog · telefon</div>
+      <div class="phone" id="phone">
+        <div class="statusbar"><span>21:40</span><span>58%</span></div>
+        <div class="pview" id="pview"></div>
+        <nav class="tabbar" id="phone-nav"></nav>
+        <div id="psheet"></div>
+      </div>
+    </div>
+    <div class="notes">
+      <div>
+        <h3>Jak to działa</h3>
+        <p>Komputer i telefon pokazują te same dane. Zmiana w jednym widoku od razu widać w drugim. Przełącznik „Katalog” u góry pokazuje stan po świeżej instalacji.</p>
+      </div>
+      <div class="lg">
+        <div class="label">Lista</div>
+        <ul>
+          <li>Składniki są pogrupowane według kategorii, w tej samej stałej kolejności co lista zakupów. Każdy wiersz pokazuje jednostkę bazową i znaczniki: „podstawowy”, „do sprawdzenia”.</li>
+          <li>Wyszukiwarka szuka w nazwach i aliasach, bez względu na wielkość liter i polskie znaki („zolta” znajdzie „żółta”). Gdy pasuje alias, wiersz mówi który.</li>
+          <li>Karta „Porządki” zbiera to, co czeka na człowieka: składniki dodane automatycznie i możliwe duplikaty. Znika, gdy nie ma nic do zrobienia. Licznik na zakładce pokazuje tylko składniki do sprawdzenia.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Składnik</div>
+        <ul>
+          <li>Szczegóły to od razu formularz: pól jest mało, a oglądanie składnika bez edycji nic nie daje. Pasek „Zapisz” pojawia się dopiero po zmianie.</li>
+          <li>„Zatwierdź” zdejmuje znacznik „do sprawdzenia”. Z filtrem „Do sprawdzenia” jest też „Zatwierdź i dalej”, żeby przejść całą kolejkę.</li>
+          <li>Zmiana jednostki bazowej usuwa przeliczniki, więc najpierw pyta. Przelicznik na jednostkę, która przelicza się sama (kg przy gramach), jest niedostępny.</li>
+          <li>„Gdzie używany” liczy odwołania z każdego modułu. Usunąć da się tylko nieużywany składnik; używany prowadzi do połączenia.</li>
+        </ul>
+      </div>
+      <div class="lg">
+        <div class="label">Duplikaty i łączenie</div>
+        <ul>
+          <li>Możliwy duplikat widać na liście, w karcie „Porządki” i w samym składniku. „To nie duplikaty” chowa parę na stałe.</li>
+          <li>Łączenie zaczyna się z pary albo z przycisku „Połącz z…” w składniku (wtedy najpierw wybierasz drugi składnik). Potem wybierasz, który zostaje, i widzisz, co się przeniesie. Tego nie da się cofnąć, więc jest potwierdzenie.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="label frame-label">Wybór składnika · wspólny komponent</div>
+    <div class="demos" id="demos"></div>
+  </section>
+</div>
+
+<script>
+const ICONS = {
+  jar: '<path d="M7 3h10M8 3v3l-2 3v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M6 12h12"/>',
+  cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+  carrot: '<path d="M14.5 9.5L4.6 19.4a1.4 1.4 0 0 1-2-2l9.9-9.9"/><path d="M12.5 7.5a3 3 0 0 1 4 4"/><path d="M16 8l5-5M15 5l1.5-3M19 9l3-1.5"/><path d="M8 13l2 2M6 16l1.5 1.5"/>',
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  left: '<path d="M15 18l-6-6 6-6"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  merge: '<path d="M7 3v4a5 5 0 0 0 5 5 5 5 0 0 1 5 5v4"/><path d="M17 3v4a5 5 0 0 1-5 5"/><path d="M4 18l3 3 3-3"/>',
+  twins: '<circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  dots: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>'
+};
+const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const hydrateIcons = root => root.querySelectorAll('[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon, el.classList.contains('sm') ? 'sm' : ''); });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = n => Number(n).toLocaleString('pl-PL', { maximumFractionDigits: 2 });
+const fold = s => s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/ł/g, 'l').trim();
+const plural = (n, one, few, many) => n === 1 ? one : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? few : many);
+
+const CATS = [['veg', 'Warzywa i owoce'], ['dairy', 'Nabiał i jajka'], ['meat', 'Mięso i ryby'], ['bakery', 'Pieczywo'], ['dry', 'Suche i puszki'], ['spices', 'Przyprawy'], ['frozen', 'Mrożonki'], ['drinks', 'Napoje'], ['other', 'Inne']];
+const catLabel = c => CATS.find(x => x[0] === c)[1];
+const BASES = [['g', 'g', 'waga'], ['ml', 'ml', 'objętość'], ['piece', 'szt.', 'sztuki']];
+const UNITS = { g: 'g', kg: 'kg', ml: 'ml', l: 'l', piece: 'szt.', clove: 'ząbek', tbsp: 'łyżka', tsp: 'łyżeczka', pinch: 'szczypta', can: 'puszka', pack: 'opakowanie', slice: 'plaster', bunch: 'pęczek' };
+const FAMILY = { g: ['g', 'kg'], ml: ['ml', 'l', 'tbsp', 'tsp'], piece: ['piece'] };
+const BUILTIN = { g: '1 kg = 1000 g', ml: '1 l = 1000 ml, 1 łyżka = 15 ml, 1 łyżeczka = 5 ml', piece: null };
+const u = k => UNITS[k];
+
+const I = (id, n, cat, unit, o = {}) => ({ id, n, cat, unit, al: o.al ?? [], staple: !!o.staple, conv: o.conv ?? [], review: o.review ?? null, uses: { r: o.r ?? 0, l: o.l ?? 0, d: o.d ?? null } });
+const SAMPLE = () => [
+  I('cebula', 'cebula', 'veg', 'g', { al: ['cebulka'], conv: [['piece', 150]], r: 5, l: 1 }),
+  I('cebula-zolta', 'cebula żółta', 'veg', 'g', { conv: [['piece', 120]], r: 1, d: 'avoid', review: { by: 'agent', when: '8 lis', from: 'Leczo z cukinią' } }),
+  I('czosnek', 'czosnek', 'veg', 'g', { conv: [['clove', 5]], r: 4 }),
+  I('ziemniaki', 'ziemniaki', 'veg', 'g', { al: ['kartofle'], conv: [['piece', 100]], r: 3, l: 1 }),
+  I('marchew', 'marchew', 'veg', 'g', { al: ['marchewka'], conv: [['piece', 80]], r: 2 }),
+  I('cukinia', 'cukinia', 'veg', 'g', { conv: [['piece', 300]], r: 1 }),
+  I('papryka', 'papryka czerwona', 'veg', 'g', { al: ['papryka'], conv: [['piece', 150]], r: 2 }),
+  I('koperek', 'koperek', 'veg', 'g', { conv: [['bunch', 30]], r: 1 }),
+  I('kolendra', 'kolendra', 'veg', 'g', { conv: [['bunch', 25]], r: 1, d: 'avoid' }),
+  I('mleko', 'mleko', 'dairy', 'ml', { al: ['mleko 2%'], r: 2, l: 1 }),
+  I('jajko', 'jajko', 'dairy', 'piece', { al: ['jajka', 'jaja'], r: 3 }),
+  I('jajka-l', 'jajka L', 'dairy', 'piece', { r: 1, review: { by: 'recipe', when: '6 lis', from: 'Naleśniki z twarogiem' } }),
+  I('maslo', 'masło', 'dairy', 'g', { conv: [['tbsp', 15], ['pack', 200]], r: 2 }),
+  I('smietana', 'śmietana 18%', 'dairy', 'ml', { r: 1 }),
+  I('twarog', 'twaróg', 'dairy', 'g', { al: ['twarożek'], conv: [['pack', 250]], r: 2 }),
+  I('parmezan', 'parmezan', 'dairy', 'g', { r: 0, review: { by: 'agent', when: '9 lis', from: null } }),
+  I('kurczak', 'pierś z kurczaka', 'meat', 'g', { al: ['filet z kurczaka'], conv: [['piece', 200]], r: 2 }),
+  I('losos', 'łosoś', 'meat', 'g', { r: 1 }),
+  I('boczek', 'boczek', 'meat', 'g', { conv: [['slice', 15]], r: 0 }),
+  I('chleb', 'chleb żytni', 'bakery', 'piece', { al: ['chleb'], conv: [], r: 0, l: 1 }),
+  I('maka', 'mąka pszenna', 'dry', 'g', { al: ['mąka'], conv: [['tbsp', 10]], r: 2 }),
+  I('cukier', 'cukier', 'dry', 'g', { conv: [['tsp', 5]], r: 2, staple: true }),
+  I('ryz', 'ryż basmati', 'dry', 'g', { r: 2 }),
+  I('pomidory', 'pomidory z puszki', 'dry', 'g', { al: ['pomidory w puszce'], conv: [['can', 400]], r: 2 }),
+  I('pomidory-krojone', 'pomidory krojone', 'dry', 'g', { r: 1, l: 1, review: { by: 'agent', when: '9 lis', from: 'Pomidorowa z ryżem' } }),
+  I('mleczko', 'mleczko kokosowe', 'dry', 'ml', { conv: [['can', 400]], r: 1 }),
+  I('oliwa', 'oliwa', 'dry', 'ml', { al: ['oliwa z oliwek'], r: 3, staple: true }),
+  I('olej', 'olej rzepakowy', 'dry', 'ml', { al: ['olej'], r: 2, staple: true }),
+  I('orzechy', 'orzechy włoskie', 'dry', 'g', { r: 1, d: 'never' }),
+  I('sol', 'sól', 'spices', 'g', { conv: [['pinch', 1]], r: 9, staple: true }),
+  I('pieprz', 'pieprz czarny', 'spices', 'g', { al: ['pieprz'], r: 6, staple: true }),
+  I('cynamon', 'cynamon', 'spices', 'g', { conv: [['tsp', 3]], r: 1, staple: true }),
+  I('papryka-mielona', 'papryka słodka mielona', 'spices', 'g', { r: 2, staple: true }),
+  I('groszek', 'groszek mrożony', 'frozen', 'g', { al: ['zielony groszek'], conv: [['pack', 450]], r: 1 }),
+  I('sok', 'sok pomarańczowy', 'drinks', 'ml', { r: 0, l: 1 })
+];
+const SAMPLE_PAIRS = () => [['cebula', 'cebula-zolta'], ['pomidory', 'pomidory-krojone'], ['jajko', 'jajka-l']];
+
+let items = SAMPLE();
+let pairs = SAMPLE_PAIRS();
+const state = { q: '', review: false, staple: false, cat: '', sel: 'cebula-zolta', view: 'item', draft: null, aliasErr: '', convDraft: { unit: '', amt: '' }, convErr: '', pv: 'list', dlg: null, toast: '' };
+
+const byId = id => items.find(x => x.id === id);
+const reviewCount = () => items.filter(x => x.review).length;
+const pairOf = id => pairs.filter(p => p.includes(id)).map(p => p[0] === id ? p[1] : p[0]);
+const usedTotal = x => x.uses.r + x.uses.l + (x.uses.d ? 1 : 0);
+const dislikeLabel = d => d === 'never' ? 'nigdy' : 'unikamy';
+const usesText = x => {
+  const parts = [];
+  if (x.uses.r) parts.push(`${x.uses.r} ${plural(x.uses.r, 'przepis', 'przepisy', 'przepisów')}`);
+  if (x.uses.l) parts.push(`${x.uses.l} ${plural(x.uses.l, 'lista zakupów', 'listy zakupów', 'list zakupów')}`);
+  if (x.uses.d) parts.push(`Nie jemy (${dislikeLabel(x.uses.d)})`);
+  return parts.join(', ');
+};
+
+function names(x) { return [x.n, ...x.al]; }
+function matchOf(x, q) {
+  const f = fold(q);
+  if (!f) return { ok: true };
+  if (fold(x.n).includes(f)) return { ok: true, score: fold(x.n).startsWith(f) ? 0 : 1 };
+  const al = x.al.find(a => fold(a).includes(f));
+  return al ? { ok: true, alias: al, score: 2 } : { ok: false };
+}
+function hl(text, q) {
+  const f = fold(q);
+  if (!f) return esc(text);
+  const i = fold(text).indexOf(f);
+  if (i < 0) return esc(text);
+  return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + f.length)) + '</mark>' + esc(text.slice(i + f.length));
+}
+function filtered() {
+  return items.filter(x => (!state.review || x.review) && (!state.staple || x.staple) && (!state.cat || x.cat === state.cat) && matchOf(x, state.q).ok);
+}
+
+function navHtml() {
+  const n = reviewCount();
+  const links = [['cal', 'Plan'], ['book', 'Przepisy'], ['cart', 'Zakupy'], ['carrot', 'Składniki'], ['home', 'Dom']];
+  return links.map(([ic, l]) => `<a href="#" class="${l === 'Składniki' ? 'on' : ''}" ${l === 'Składniki' ? 'aria-current="page"' : ''}>${icon(ic)}${l}${l === 'Składniki' && n ? `<span class="count" aria-label="${n} do sprawdzenia">${n}</span>` : ''}</a>`).join('');
+}
+
+function tidyHtml() {
+  const r = reviewCount();
+  const d = pairs.length;
+  if (!r && !d) return '';
+  return `<div class="tidy"><span class="label">Porządki</span>
+    ${r ? `<div class="ln"><span class="dot review">${icon('sparkle', 'sm')}</span><span class="txt">${r} ${plural(r, 'składnik', 'składniki', 'składników')} do sprawdzenia</span><button class="btn sm" data-act="review-filter">${state.review ? 'Pokaż wszystkie' : 'Przejrzyj'}</button></div>` : ''}
+    ${d ? `<div class="ln"><span class="dot dup">${icon('twins', 'sm')}</span><span class="txt">${d} ${plural(d, 'możliwy duplikat', 'możliwe duplikaty', 'możliwych duplikatów')}</span><button class="btn sm" data-act="dupes">Przejrzyj</button></div>` : ''}
+  </div>`;
+}
+
+function rowHtml(x, where) {
+  const m = matchOf(x, state.q);
+  const cur = where === 'desk' && state.view === 'item' && x.id === state.sel ? 'aria-current="true"' : '';
+  const badges = [
+    x.review ? `<span class="badge review">do sprawdzenia</span>` : '',
+    pairOf(x.id).length ? `<span class="badge dup">możliwy duplikat</span>` : '',
+    x.staple ? `<span class="badge staple">podstawowy</span>` : '',
+    x.uses.d ? `<span class="badge ${x.uses.d}">${x.uses.d === 'never' ? icon('ban', 'sm') : ''}${dislikeLabel(x.uses.d)}</span>` : ''
+  ].join('');
+  const sub = (m.alias ? `<span>pasuje: ${hl(m.alias, state.q)}</span>` : '') + badges;
+  return `<button class="irow" data-act="open" data-id="${x.id}" ${cur}><span class="nm">${hl(x.n, state.q)}</span><span class="unit" title="Jednostka bazowa">${u(x.unit)}</span>${sub ? `<span class="sub">${sub}</span>` : ''}</button>`;
+}
+
+function listHtml(where) {
+  if (!items.length) return '';
+  const list = filtered();
+  if (!list.length) {
+    if (state.review && !state.q && !state.staple && !state.cat) return `<div class="empty">${icon('check')}<h3>Wszystko sprawdzone</h3><p>Nowe składniki od agenta i z przepisów pojawią się tutaj.</p><button class="btn sm" data-act="review-filter">Pokaż wszystkie</button></div>`;
+    return `<div class="empty"><p>Nic nie pasuje${state.q ? ` do „${esc(state.q)}”` : ''}.</p>${state.q ? `<button class="btn sm primary" data-act="new" data-name="${esc(state.q)}">${icon('plus', 'sm')}Dodaj „${esc(state.q)}”</button>` : ''}<button class="link" data-act="clear">Wyczyść filtry</button></div>`;
+  }
+  return CATS.map(([c, label]) => {
+    const its = list.filter(x => x.cat === c).sort((a, b) => a.n.localeCompare(b.n, 'pl'));
+    return its.length ? `<div class="group"><span>${label}</span><span>${its.length}</span></div>${its.map(x => rowHtml(x, where)).join('')}` : '';
+  }).join('');
+}
+
+function libHtml(where) {
+  if (!items.length) return `<div class="libhead"><div class="top"><h2>Składniki</h2><button class="btn sm primary" data-act="new">${icon('plus', 'sm')}Nowy</button></div></div>
+    ${where === 'phone' ? `<div class="list">${emptyHeroHtml()}</div>` : ''}`;
+  const n = filtered().length;
+  const rc = reviewCount();
+  return `<div class="libhead">
+      <div class="top"><h2>Składniki</h2><button class="btn sm primary" data-act="new">${icon('plus', 'sm')}Nowy</button></div>
+      <label class="search">${icon('search')}<input data-input="q" type="search" value="${esc(state.q)}" placeholder="Szukaj w nazwach i aliasach" aria-label="Szukaj składnika"></label>
+      <div class="chips" role="group" aria-label="Filtry">
+        <button class="chip" data-act="review-filter" aria-pressed="${state.review}">${icon('sparkle', 'sm')}Do sprawdzenia${rc ? ` <span class="n">${rc}</span>` : ''}</button>
+        <button class="chip" data-act="staple-filter" aria-pressed="${state.staple}">Podstawowe</button>
+        <select class="chipsel ${state.cat ? 'on' : ''}" data-input="cat" aria-label="Kategoria"><option value="">Wszystkie kategorie</option>${CATS.map(([v, l]) => `<option value="${v}" ${state.cat === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      </div>
+      <div class="sumrow"><span>${n} ${plural(n, 'składnik', 'składniki', 'składników')}${n !== items.length ? ` z ${items.length}` : ''}</span>${state.q || state.review || state.staple || state.cat ? '<button class="link" data-act="clear">Wyczyść</button>' : ''}</div>
+    </div>
+    <div class="list">${tidyHtml()}${listHtml(where)}</div>`;
+}
+
+function emptyHeroHtml() {
+  return `<div class="emptyhero"><div class="art">${icon('carrot')}</div><h2>Składniki pojawią się same</h2>
+    <p>Każdy składnik z nowego przepisu trafia tutaj. Agent też je dodaje, a Ty potem je sprawdzasz.</p>
+    <button class="btn primary" data-act="new">${icon('plus', 'sm')}Dodaj składnik</button>
+    <div class="agenthint">Poproś Claude: „Dodaj do Spiżarni przepis na leczo z cukinią.”</div></div>`;
+}
+
+function startDraft(x, name) {
+  state.draft = x ? structuredClone(x) : { id: 'new' + Date.now(), n: name ?? '', cat: 'other', unit: 'g', al: [], staple: false, conv: [], review: null, uses: { r: 0, l: 0, d: null }, isNew: true };
+  state.aliasErr = ''; state.convErr = ''; state.convDraft = { unit: '', amt: '' };
+}
+const isDirty = () => { const d = state.draft; if (!d) return false; if (d.isNew) return true; const { isNew, ...rest } = d; return JSON.stringify(rest) !== JSON.stringify(byId(d.id)); };
+function conflictOf(d) {
+  for (const nm of names(d)) {
+    const other = items.find(x => x.id !== d.id && names(x).some(y => fold(y) === fold(nm)));
+    if (nm.trim() && other) return { nm, other };
+  }
+  return null;
+}
+
+function itemHtml(where) {
+  const d = state.draft;
+  const saved = byId(d.id);
+  const dup = saved ? pairOf(d.id).map(byId) : [];
+  const conflict = conflictOf(d);
+  const reviewBanner = saved?.review ? `<div class="alert review">${icon('sparkle')}<div class="txt"><b>Do sprawdzenia</b><span>Dodany automatycznie ${saved.review.by === 'agent' ? 'przez agenta' : 'w edytorze przepisu'} ${saved.review.when}${saved.review.from ? ` z przepisu „${esc(saved.review.from)}”` : ''}. Sprawdź kategorię i jednostkę bazową.</span></div>
+      <div class="acts"><button class="btn sm primary" data-act="confirm" ${conflict ? 'disabled' : ''}>${icon('check', 'sm')}${isDirty() ? 'Zapisz i zatwierdź' : 'Zatwierdź'}</button>${state.review && reviewCount() > 1 ? `<button class="btn sm" data-act="confirm-next" ${conflict ? 'disabled' : ''}>Zatwierdź i dalej${icon('arrow', 'sm')}</button>` : ''}</div></div>` : '';
+  const dupBanner = dup.map(o => `<div class="alert dup">${icon('twins')}<div class="txt"><b>Możliwy duplikat: „${esc(o.n)}”</b><span>Podobne nazwy. Jeśli to ten sam składnik, połącz je, a przepisy i listy przejdą na jeden.</span></div>
+      <div class="acts"><button class="btn sm" data-act="merge-pair" data-a="${d.id}" data-b="${o.id}">${icon('merge', 'sm')}Połącz…</button><button class="btn sm ghost" data-act="not-dup" data-a="${d.id}" data-b="${o.id}">To nie duplikaty</button></div></div>`).join('');
+  const famUnits = FAMILY[d.unit];
+  const convOpts = Object.keys(UNITS).filter(k => !famUnits.includes(k) && !d.conv.some(c => c[0] === k));
+  const convs = d.conv.map(([k, a], i) => `<div class="conv"><span>1 ${u(k)} = ${fmt(a)} ${u(d.unit)}</span><button class="btn icon sm ghost" data-act="del-conv" data-i="${i}" aria-label="Usuń przelicznik ${u(k)}">${icon('x', 'sm')}</button></div>`).join('');
+  return `<div class="dhead">
+      <div class="top"><h2>${d.isNew ? 'Nowy składnik' : esc(saved.n)}</h2>${d.isNew ? '' : `<button class="btn sm" data-act="merge-from" aria-label="Połącz z innym składnikiem">${icon('merge', 'sm')}<span>Połącz z…</span></button>`}</div>
+      ${d.isNew ? '' : `<div class="facts"><span>${catLabel(saved.cat)}</span><span>· jednostka ${u(saved.unit)}</span>${saved.staple ? '<span class="badge staple">podstawowy</span>' : ''}${saved.review ? '<span class="badge review">do sprawdzenia</span>' : ''}</div>`}
+    </div>
+    ${reviewBanner}${dupBanner}
+    <div class="cols">
+      <div class="card">
+        <label class="field"><span>Nazwa</span><input class="input title" data-input="name" value="${esc(d.n)}" placeholder="np. cebula" ${conflict?.nm === d.n ? 'aria-invalid="true"' : ''}></label>
+        ${conflict ? `<div class="err">${icon('alert', 'sm')}Taka nazwa albo alias już jest: „${esc(conflict.other.n)}”. ${d.isNew ? '' : `<button class="link" data-act="merge-pair" data-a="${d.id}" data-b="${conflict.other.id}">Połącz z nim</button>`}</div>` : ''}
+        <div class="field"><span class="fl">Aliasy</span>
+          <div class="tagedit">${d.al.map((a, i) => `<span class="badge">${esc(a)}<button data-act="del-alias" data-i="${i}" aria-label="Usuń alias ${esc(a)}">${icon('x', 'sm')}</button></span>`).join('')}<input data-input="alias" placeholder="Dodaj i Enter" aria-label="Nowy alias"></div>
+          ${state.aliasErr ? `<div class="err">${icon('alert', 'sm')}${state.aliasErr}</div>` : '<span class="note">Inne nazwy tego samego składnika. Wyszukiwarka i agent je rozpoznają.</span>'}</div>
+        <label class="field"><span>Kategoria</span><select class="input" data-input="cat-edit">${CATS.map(([v, l]) => `<option value="${v}" ${d.cat === v ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="note">Według kategorii układa się lista zakupów.</span></label>
+        <div class="field"><span class="fl" id="bu-${where}">Jednostka bazowa</span>
+          <div class="unitseg" role="radiogroup" aria-labelledby="bu-${where}">${BASES.map(([v, l, s]) => `<button role="radio" aria-checked="${d.unit === v}" data-act="unit" data-v="${v}"><b>${l}</b><span>${s}</span></button>`).join('')}</div>
+          <span class="note">W tej jednostce sumują się ilości na liście zakupów.</span></div>
+        <div class="toggle"><span><b>Podstawowy</b><span class="note">Zwykle w domu, jak sól czy olej. Nie trafia na listy z planu.</span></span><button class="sw" role="switch" aria-checked="${d.staple}" aria-label="Podstawowy" data-act="staple"></button></div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div class="ch"><h3>Przeliczniki</h3></div>
+          ${convs ? `<div class="convs">${convs}</div>` : `<p class="note">Bez przelicznika ilości w innych jednostkach nie dodadzą się do ${u(d.unit)}, tylko trafią na listę osobno.</p>`}
+          <div class="convadd">
+            <span>1</span>
+            <select class="input" data-input="conv-unit" aria-label="Jednostka">${['<option value="">jednostka</option>', ...convOpts.map(k => `<option value="${k}" ${state.convDraft.unit === k ? 'selected' : ''}>${u(k)}</option>`)].join('')}</select>
+            <span class="eq">=</span>
+            <input class="input" type="number" min="0" step="any" inputmode="decimal" data-input="conv-amt" value="${esc(state.convDraft.amt)}" aria-label="Ilość w ${u(d.unit)}" placeholder="0" ${state.convErr ? 'aria-invalid="true"' : ''}>
+            <span class="base">${u(d.unit)}</span>
+            <button class="btn sm addc" data-act="add-conv">${icon('plus', 'sm')}Dodaj</button>
+          </div>
+          ${state.convErr ? `<div class="err">${icon('alert', 'sm')}${state.convErr}</div>` : ''}
+          <div class="builtin">${BUILTIN[d.unit] ? `Wbudowane, zawsze działają: ${BUILTIN[d.unit]}.` : 'Sztuki nie mają wbudowanych przeliczników.'}</div>
+        </div>
+        ${d.isNew ? '' : `<div class="card"><div class="ch"><h3>Gdzie używany</h3></div>
+          ${usedTotal(saved) ? `<ul class="uses"><li><span>Przepisy</span><b>${saved.uses.r}</b></li><li><span>Listy zakupów</span><b>${saved.uses.l}</b></li><li><span>Nie jemy</span><b>${saved.uses.d ? dislikeLabel(saved.uses.d) : '—'}</b></li></ul>` : '<p class="note">Nigdzie. Możesz go usunąć.</p>'}
+        </div>`}
+      </div>
+    </div>
+    <div class="formbar ${isDirty() ? 'sticky' : ''}">
+      ${isDirty() && !d.isNew ? '<span class="dirty">Niezapisane zmiany</span>' : ''}
+      ${d.isNew ? '' : `<button class="btn ghost danger" data-act="delete" ${isDirty() ? '' : 'style="margin-right:auto"'}>${icon('trash', 'sm')}Usuń</button>`}
+      ${isDirty() ? `<button class="btn" data-act="cancel">Anuluj</button><button class="btn primary" data-act="save" ${conflict || !d.n.trim() ? 'disabled' : ''}>${icon('check', 'sm')}${d.isNew ? 'Dodaj składnik' : 'Zapisz'}</button>` : ''}
+    </div>`;
+}
+
+function dupesHtml() {
+  const head = `<div class="dhead"><h2>Możliwe duplikaty</h2><p class="note" style="font-size:14px">Pary o podobnych nazwach. Połącz je albo oznacz, że to różne składniki, a para już nie wróci.</p></div>`;
+  if (!pairs.length) return head + `<div class="empty">${icon('check')}<h3>Brak duplikatów</h3><p>Katalog jest uporządkowany.</p></div>`;
+  const side = x => `<div class="side2"><b>${esc(x.n)}</b><span class="note">${catLabel(x.cat)} · ${u(x.unit)} · ${usedTotal(x) ? usesText(x) : 'nieużywany'}</span>${x.review ? '<span><span class="badge review">do sprawdzenia</span></span>' : ''}</div>`;
+  return head + `<div class="pairs">${pairs.map(([a, b]) => `<div class="pair"><div class="two">${side(byId(a))}<span class="vs">${icon('twins')}</span>${side(byId(b))}</div>
+    <div class="row"><button class="btn sm primary" data-act="merge-pair" data-a="${a}" data-b="${b}">${icon('merge', 'sm')}Połącz…</button><button class="btn sm ghost" data-act="not-dup" data-a="${a}" data-b="${b}">To nie duplikaty</button></div></div>`).join('')}</div>`;
+}
+
+function mergePreview(keep, go) {
+  const kn = names(keep).map(fold);
+  const al = names(go).filter(n => !kn.includes(fold(n)));
+  const sameUnit = keep.unit === go.unit;
+  const copy = sameUnit ? go.conv.filter(c => !keep.conv.some(k => k[0] === c[0])) : [];
+  const skip = go.conv.filter(c => !copy.includes(c));
+  let dis = null;
+  if (go.uses.d && keep.uses.d) dis = go.uses.d === keep.uses.d ? null : `Oba są w „Nie jemy”. Zostaje surowsze: ${dislikeLabel(go.uses.d === 'never' || keep.uses.d === 'never' ? 'never' : 'avoid')}.`;
+  else if (go.uses.d) dis = `„Nie jemy (${dislikeLabel(go.uses.d)})” przechodzi na „${keep.n}”.`;
+  return { al, copy, skip, sameUnit, dis };
+}
+
+function pickerHtml(p) {
+  const res = pickerResults(p);
+  const pop = p.open && p.q.trim() ? `<div class="pop" role="listbox" id="${p.id}-list">${res.length ? res.map((o, i) => o.isNew
+      ? `<button class="opt newopt" role="option" id="${p.id}-o${i}" aria-selected="${p.active === i}" data-act="pick" data-p="${p.id}" data-new="1" tabindex="-1"><span class="nm">${icon('plus', 'sm')} Dodaj „${esc(o.n)}”</span><span class="al">Nowy składnik, trafi do katalogu po zapisaniu</span></button>`
+      : `<button class="opt" role="option" id="${p.id}-o${i}" aria-selected="${p.active === i}" ${o.disabled ? 'aria-disabled="true"' : ''} data-act="pick" data-p="${p.id}" data-id="${o.x.id}" tabindex="-1"><span class="nm">${hl(o.x.n, p.q)}</span><span class="unit">${u(o.x.unit)}</span>${o.alias || o.disabled || o.x.review ? `<span class="al">${o.alias ? `pasuje: ${hl(o.alias, p.q)}` : ''}${o.disabled ? ` ${o.disabled}` : ''}${o.x.review ? ' <span class="badge review">do sprawdzenia</span>' : ''}</span>` : ''}</button>`).join('')
+    : `<div class="none">Nie ma takiego składnika w katalogu.</div>`}</div>` : '';
+  return `<div class="picker" data-picker="${p.id}"><div class="box">${icon('search')}<input role="combobox" aria-expanded="${!!pop}" aria-controls="${p.id}-list" aria-autocomplete="list" ${p.open && res.length ? `aria-activedescendant="${p.id}-o${p.active}"` : ''} data-pinput="${p.id}" value="${esc(p.q)}" placeholder="${p.placeholder}" aria-label="${p.label}" autocomplete="off"></div>${pop}</div>`;
+}
+function pickerResults(p) {
+  const q = p.q.trim();
+  if (!q) return [];
+  const found = items.filter(x => !p.exclude?.includes(x.id)).map(x => ({ x, m: matchOf(x, q) })).filter(r => r.m.ok)
+    .sort((a, b) => a.m.score - b.m.score || a.x.n.localeCompare(b.x.n, 'pl')).slice(0, 8)
+    .map(r => ({ x: r.x, alias: r.m.alias, disabled: p.taken?.includes(r.x.id) ? '· już na liście' : '' }));
+  const exact = items.some(x => names(x).some(n => fold(n) === fold(q)));
+  if (p.allowNew && !exact) found.push({ isNew: true, n: q });
+  return found;
+}
+
+const pickers = {
+  never: { id: 'never', q: '', open: false, active: 0, allowNew: true, placeholder: 'np. orzeszki ziemne', label: 'Dodaj do „nigdy”', picked: ['orzechy'] },
+  line: { id: 'line', q: 'zolt', open: true, active: 0, allowNew: true, placeholder: 'np. cebula', label: 'Składnik', picked: null },
+  merge: { id: 'merge', q: '', open: false, active: 0, allowNew: false, placeholder: 'Szukaj składnika', label: 'Drugi składnik', exclude: [] }
+};
+pickers.never.taken = pickers.never.picked;
+
+function mergeDlgHtml() {
+  const g = state.dlg;
+  const a = byId(g.a);
+  if (!g.b) {
+    pickers.merge.exclude = [a.id];
+    return `<div class="dlg"><div><span class="label">Połącz składniki · 1 z 2</span><h3>Z czym połączyć „${esc(a.n)}”?</h3><p class="note">Wybierz składnik, który oznacza to samo. W następnym kroku zdecydujesz, który zostaje.</p></div>
+      ${pickerHtml(pickers.merge)}
+      <div class="acts"><button class="btn" data-act="close">Anuluj</button></div></div>`;
+  }
+  const b = byId(g.b);
+  const keep = byId(g.keep), go = keep === a ? b : a;
+  const p = mergePreview(keep, go);
+  const card = x => `<button role="radio" aria-checked="${g.keep === x.id}" data-act="keep" data-id="${x.id}"><span class="top"><span class="dot"></span><b>${esc(x.n)}</b></span>
+    <span class="m"><span>${catLabel(x.cat)}</span><span>${u(x.unit)}</span>${x.staple ? '<span>podstawowy</span>' : ''}</span>
+    <span class="m">${x.al.length ? `aliasy: ${x.al.map(esc).join(', ')}` : 'bez aliasów'}</span>
+    <span class="m">${x.conv.length ? x.conv.map(([k, v]) => `1 ${u(k)} = ${fmt(v)} ${u(x.unit)}`).join(', ') : 'bez przeliczników'}</span>
+    <span class="m">${usedTotal(x) ? usesText(x) : 'nieużywany'}</span>${x.review ? '<span><span class="badge review">do sprawdzenia</span></span>' : ''}</button>`;
+  return `<div class="dlg"><div><span class="label">Połącz składniki${g.picked ? ' · 2 z 2' : ''}</span><h3>Który zostaje?</h3></div>
+    <div class="keep" role="radiogroup" aria-label="Który zostaje">${card(a)}${card(b)}</div>
+    <div class="preview"><span class="label">Co się stanie</span><ul>
+      <li><span class="gone">${esc(go.n)}</span> znika. ${p.al.length ? `Jego nazwy zostają aliasami „${esc(keep.n)}”: ${p.al.map(esc).join(', ')}.` : ''}</li>
+      ${usedTotal(go) && (go.uses.r || go.uses.l) ? `<li>Przechodzi na „${esc(keep.n)}”: ${[go.uses.r ? `${go.uses.r} ${plural(go.uses.r, 'przepis', 'przepisy', 'przepisów')}` : '', go.uses.l ? `${go.uses.l} ${plural(go.uses.l, 'lista zakupów', 'listy zakupów', 'list zakupów')}` : ''].filter(Boolean).join(', ')}.</li>` : ''}
+      ${p.dis ? `<li>${esc(p.dis)}</li>` : ''}
+      ${p.copy.length ? `<li>Dochodzą przeliczniki: ${p.copy.map(([k, v]) => `1 ${u(k)} = ${fmt(v)} ${u(keep.unit)}`).join(', ')}.</li>` : ''}
+      ${p.skip.length ? `<li>Pominięte przeliczniki: ${p.skip.map(([k, v]) => `1 ${u(k)} = ${fmt(v)} ${u(go.unit)}`).join(', ')} (${p.sameUnit ? `„${esc(keep.n)}” ma już swój` : 'inna jednostka bazowa'}).</li>` : ''}
+      <li>Kategoria, jednostka bazowa i „podstawowy” zostają z „${esc(keep.n)}”${keep.review ? ', a składnik zostaje zatwierdzony' : ''}.</li>
+    </ul>
+    ${p.sameUnit ? '' : `<div class="warnline">${icon('alert', 'sm')}<span>Różne jednostki bazowe (${u(keep.unit)} i ${u(go.unit)}). Ilości w ${u(go.unit)} nie dodadzą się do ${u(keep.unit)}, dopóki nie dodasz przelicznika.</span></div>`}
+    </div>
+    <p class="note">Tego nie da się cofnąć.</p>
+    <div class="acts">${g.picked ? '<button class="btn ghost left" data-act="merge-back">Wstecz</button>' : ''}<button class="btn" data-act="close">Anuluj</button><button class="btn primary" data-act="merge-do">${icon('merge', 'sm')}Połącz</button></div></div>`;
+}
+
+function deleteDlgHtml() {
+  const x = byId(state.dlg.id);
+  if (usedTotal(x)) return `<div class="dlg"><div><span class="label">Usuń składnik</span><h3>Nie można usunąć „${esc(x.n)}”</h3></div>
+    <div class="alert danger">${icon('ban')}<div class="txt"><b>Jest używany</b><span>${usesText(x)}.</span></div></div>
+    <p>Jeśli to duplikat innego składnika, połącz je. Odwołania przejdą na ten, który zostaje.</p>
+    <div class="acts"><button class="btn" data-act="close">Zamknij</button><button class="btn primary" data-act="merge-from">${icon('merge', 'sm')}Połącz z…</button></div></div>`;
+  return `<div class="dlg"><div><span class="label">Usuń składnik</span><h3>Usunąć „${esc(x.n)}”?</h3></div>
+    <p>Nigdzie go nie używasz. Tego nie da się cofnąć.</p>
+    <div class="acts"><button class="btn" data-act="close">Anuluj</button><button class="btn dangerfill" data-act="delete-do">${icon('trash', 'sm')}Usuń</button></div></div>`;
+}
+
+function unitDlgHtml() {
+  const d = state.draft;
+  const to = state.dlg.to;
+  return `<div class="dlg"><div><span class="label">Jednostka bazowa</span><h3>Zmienić jednostkę na ${u(to)}?</h3></div>
+    <p>Przeliczniki są zapisane w ${u(d.unit)} i zostaną usunięte: ${d.conv.map(([k, v]) => `1 ${u(k)} = ${fmt(v)} ${u(d.unit)}`).join(', ')}.</p>
+    <p class="note">Zmiana zapisze się razem z resztą formularza.</p>
+    <div class="acts"><button class="btn" data-act="close">Anuluj</button><button class="btn primary" data-act="unit-do">Zmień jednostkę</button></div></div>`;
+}
+
+function dlgHtml() {
+  const t = state.dlg.type;
+  return t === 'merge' ? mergeDlgHtml() : t === 'delete' ? deleteDlgHtml() : unitDlgHtml();
+}
+
+function deskDetailHtml() {
+  if (!items.length) return state.draft?.isNew ? itemHtml('desk') : emptyHeroHtml();
+  if (state.view === 'dupes') return dupesHtml();
+  if (!state.draft) return '<div class="empty">Wybierz składnik z listy.</div>';
+  return itemHtml('desk');
+}
+
+function demosHtml() {
+  const nv = pickers.never, ln = pickers.line;
+  const lineChosen = ln.picked;
+  return `<div class="card"><div class="ch"><h3>Nie jemy · nigdy</h3><span class="note">Ustawienia domu (PAN-25)</span></div>
+      <div class="picked">${nv.picked.map(id => { const x = byId(id) ?? { n: id.replace(/^new:/, ''), id }; return `<span class="chipx">${esc(x.n)}${id.startsWith('new:') ? ' <span class="badge new">nowy</span>' : ''}<button data-act="unpick" data-id="${esc(id)}" aria-label="Usuń ${esc(x.n)}">${icon('x', 'sm')}</button></span>`; }).join('')}</div>
+      ${pickerHtml(nv)}
+      <p class="note">Składnik już na liście jest widoczny, ale nie do wybrania. Spróbuj wpisać „orz” albo „orzeszki ziemne”.</p></div>
+    <div class="card"><div class="ch"><h3>Linia przepisu</h3><span class="note">Edytor przepisu (PAN-49)</span></div>
+      <div class="recline"><input class="input" value="0,5" aria-label="Ilość"><select class="input" aria-label="Jednostka"><option>szt.</option></select>
+        <div>${lineChosen ? `<div class="chipx" style="width:100%;justify-content:space-between">${esc(lineChosen.n)}<button data-act="unpick-line" aria-label="Zmień składnik">${icon('x', 'sm')}</button></div>` : pickerHtml(ln)}</div>
+        ${lineChosen?.isNew ? `<span class="hint">${icon('sparkle', 'sm')}Nowy składnik, trafi do katalogu jako „do sprawdzenia”</span>` : ''}</div>
+      <label class="toggle"><span><b>Pozwól dodać nowy</b><span class="note">Host decyduje. Wyłączone na przykład przy łączeniu.</span></span><button class="sw" role="switch" aria-checked="${ln.allowNew}" data-act="allow-new" aria-label="Pozwól dodać nowy"></button></label>
+      <p class="note">Wpisz „zolt”: polskie znaki nie mają znaczenia, a alias też się liczy. Strzałki, Enter i Esc działają.</p></div>`;
+}
+
+function render() {
+  document.getElementById('desk-nav').innerHTML = navHtml();
+  document.getElementById('phone-nav').innerHTML = navHtml();
+  const lib = document.getElementById('desk-lib');
+  const ls = lib.querySelector('.list')?.scrollTop ?? 0;
+  lib.innerHTML = libHtml('desk');
+  const nl = lib.querySelector('.list'); if (nl) nl.scrollTop = ls;
+  const det = document.getElementById('desk-detail');
+  const ds = det.scrollTop;
+  det.innerHTML = deskDetailHtml();
+  det.scrollTop = state.keepDeskScroll === false ? 0 : ds;
+  state.keepDeskScroll = true;
+  const dlgSmall = state.dlg && state.dlg.type !== 'merge';
+  document.getElementById('desk-modal').innerHTML = (state.dlg?.where === 'desk' ? `<div class="scrim" data-act="close"></div><div class="desk-modal ${dlgSmall ? 'narrow' : ''}" role="dialog" aria-modal="true">${dlgHtml()}</div>` : '')
+    + (state.toast && state.toastWhere === 'desk' ? `<div class="toast" role="status">${state.toast}</div>` : '');
+
+  const pv = document.getElementById('pview');
+  const ps = pv.querySelector('.pscroll, .list')?.scrollTop ?? 0;
+  if (state.pv === 'list') pv.innerHTML = libHtml('phone');
+  else {
+    const title = state.pv === 'dupes' ? 'Możliwe duplikaty' : (state.draft?.isNew ? 'Nowy składnik' : byId(state.draft?.id)?.n ?? '');
+    const body = state.pv === 'dupes' ? dupesHtml() : (state.draft ? itemHtml('phone') : '');
+    pv.innerHTML = `<div class="pbar"><button class="btn icon ghost" data-act="back" aria-label="Wstecz">${icon('left')}</button><span class="ttl">${esc(title)}</span></div><div class="pscroll"><div class="detail">${body}</div></div>`;
+  }
+  const np = pv.querySelector('.pscroll, .list');
+  if (np) np.scrollTop = state.keepPhoneScroll === false ? 0 : ps;
+  state.keepPhoneScroll = true;
+  document.getElementById('psheet').innerHTML = (state.dlg?.where === 'phone' ? `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${dlgHtml()}</div>` : '')
+    + (state.toast && state.toastWhere === 'phone' ? `<div class="toast" role="status">${state.toast}</div>` : '');
+
+  document.getElementById('demos').innerHTML = demosHtml();
+}
+
+function toast(msg, where) { state.toast = msg; state.toastWhere = where; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { state.toast = ''; render(); }, 2400); }
+
+function openItem(id, inPhone) {
+  state.sel = id; state.view = 'item'; startDraft(byId(id));
+  state.keepDeskScroll = false;
+  if (inPhone) { state.pv = 'item'; state.keepPhoneScroll = false; }
+}
+function commitDraft() {
+  const { isNew, ...clean } = state.draft;
+  clean.n = clean.n.trim();
+  if (isNew) items.push(clean); else items = items.map(x => x.id === clean.id ? clean : x);
+  state.sel = clean.id;
+  startDraft(byId(clean.id));
+}
+function nextReview(afterId) {
+  const list = filtered().filter(x => x.review && x.id !== afterId);
+  return list[0]?.id;
+}
+function doMerge() {
+  const g = state.dlg;
+  const keep = byId(g.keep), go = byId(g.keep === g.a ? g.b : g.a);
+  const p = mergePreview(keep, go);
+  keep.al.push(...p.al);
+  keep.conv.push(...p.copy);
+  keep.uses.r += go.uses.r; keep.uses.l += go.uses.l;
+  if (go.uses.d) keep.uses.d = keep.uses.d === 'never' || go.uses.d === 'never' ? 'never' : 'avoid';
+  keep.review = null;
+  items = items.filter(x => x.id !== go.id);
+  pairs = pairs.filter(pr => !pr.includes(go.id));
+  return keep;
+}
+
+function act(el) {
+  const a = el.dataset.act;
+  const inPhone = !!el.closest('#phone');
+  const where = inPhone ? 'phone' : 'desk';
+  const i = Number(el.dataset.i);
+  const d = state.draft;
+  switch (a) {
+    case 'open': openItem(el.dataset.id, inPhone); break;
+    case 'review-filter': state.review = !state.review; if (state.review && !inPhone) { const n = nextReview(); if (n) openItem(n, false); } break;
+    case 'staple-filter': state.staple = !state.staple; break;
+    case 'clear': state.q = ''; state.review = false; state.staple = false; state.cat = ''; break;
+    case 'dupes': state.view = 'dupes'; state.draft = null; if (inPhone) { state.pv = 'dupes'; state.keepPhoneScroll = false; } break;
+    case 'new': startDraft(null, el.dataset.name); state.view = 'item'; state.sel = null; if (inPhone) { state.pv = 'item'; state.keepPhoneScroll = false; } break;
+    case 'back': state.pv = 'list'; if (d && !d.isNew) startDraft(byId(d.id)); if (d?.isNew) state.draft = null; state.keepPhoneScroll = false; break;
+    case 'staple': d.staple = !d.staple; break;
+    case 'unit': {
+      const to = el.dataset.v;
+      if (to === d.unit) return;
+      if (d.conv.length) { state.dlg = { type: 'unit', to, where }; break; }
+      d.unit = to; break;
+    }
+    case 'unit-do': d.unit = state.dlg.to; d.conv = []; state.dlg = null; break;
+    case 'del-alias': d.al.splice(i, 1); break;
+    case 'del-conv': d.conv.splice(i, 1); break;
+    case 'add-conv': {
+      const { unit, amt } = state.convDraft;
+      const v = Number(String(amt).replace(',', '.'));
+      if (!unit) state.convErr = 'Wybierz jednostkę.';
+      else if (!(v > 0)) state.convErr = 'Ilość musi być większa od zera.';
+      else { d.conv.push([unit, v]); state.convDraft = { unit: '', amt: '' }; state.convErr = ''; }
+      break;
+    }
+    case 'cancel': if (d.isNew) { state.draft = null; if (inPhone) state.pv = 'list'; } else startDraft(byId(d.id)); break;
+    case 'save': { const isNew = d.isNew; commitDraft(); toast(isNew ? 'Dodano składnik' : 'Zapisano składnik', where); return; }
+    case 'confirm':
+    case 'confirm-next': {
+      d.review = null; const id = d.id; commitDraft();
+      const n = a === 'confirm-next' ? nextReview(id) : null;
+      if (n) openItem(n, inPhone);
+      toast('Zatwierdzono', where); return;
+    }
+    case 'delete': state.dlg = { type: 'delete', id: d.id, where }; break;
+    case 'delete-do': {
+      const id = state.dlg.id;
+      items = items.filter(x => x.id !== id); pairs = pairs.filter(p => !p.includes(id));
+      state.dlg = null; state.draft = null; state.sel = null; if (inPhone) state.pv = 'list';
+      toast('Usunięto składnik', where); return;
+    }
+    case 'merge-from': state.dlg = { type: 'merge', a: state.dlg?.id ?? d.id, b: null, where }; pickers.merge.q = ''; pickers.merge.open = false; break;
+    case 'merge-pair': state.dlg = { type: 'merge', a: el.dataset.a, b: el.dataset.b, where }; state.dlg.keep = defaultKeep(el.dataset.a, el.dataset.b); break;
+    case 'merge-back': state.dlg.b = null; state.dlg.picked = false; break;
+    case 'keep': state.dlg.keep = el.dataset.id; break;
+    case 'merge-do': {
+      const keep = doMerge(); state.dlg = null;
+      if (state.view === 'item' || state.pv === 'item') { state.sel = keep.id; startDraft(keep); }
+      toast(`Połączono. Zostaje „${keep.n}”`, where); return;
+    }
+    case 'not-dup': {
+      pairs = pairs.filter(p => !(p.includes(el.dataset.a) && p.includes(el.dataset.b)));
+      toast('Para nie wróci jako duplikat', where); return;
+    }
+    case 'close': state.dlg = null; break;
+    case 'pick': pick(el.dataset.p, el.dataset.new ? { isNew: true } : { id: el.dataset.id }, inPhone); break;
+    case 'unpick': pickers.never.picked = pickers.never.picked.filter(x => x !== el.dataset.id); pickers.never.taken = pickers.never.picked; break;
+    case 'unpick-line': pickers.line.picked = null; pickers.line.q = ''; break;
+    case 'allow-new': pickers.line.allowNew = !pickers.line.allowNew; break;
+    case 'sim-agent': {
+      if (!byId('parmezan-2')) {
+        items.push(I('parmezan-2', 'ser parmezan', 'other', 'g', { r: 1, review: { by: 'agent', when: 'dziś', from: 'Risotto z grzybami' } }));
+        if (byId('parmezan')) pairs.unshift(['parmezan', 'parmezan-2']);
+      }
+      toast('Agent dodał „ser parmezan”', 'desk'); return;
+    }
+    default: return;
+  }
+  render();
+}
+function defaultKeep(a, b) {
+  const A = byId(a), B = byId(b);
+  if (!!A.review !== !!B.review) return A.review ? b : a;
+  return usedTotal(A) >= usedTotal(B) ? a : b;
+}
+function pick(pid, choice, inPhone) {
+  const p = pickers[pid];
+  const res = pickerResults(p);
+  if (choice.id && res.find(r => r.x?.id === choice.id)?.disabled) return;
+  if (pid === 'never') { p.picked.push(choice.isNew ? 'new:' + p.q.trim() : choice.id); p.taken = p.picked; }
+  if (pid === 'line') p.picked = choice.isNew ? { n: p.q.trim(), isNew: true } : byId(choice.id);
+  if (pid === 'merge') { state.dlg.b = choice.id; state.dlg.picked = true; state.dlg.keep = defaultKeep(state.dlg.a, choice.id); }
+  p.q = ''; p.open = false; p.active = 0;
+  render();
+  if (pid !== 'merge') document.querySelector(`#demos [data-pinput="${pid}"]`)?.focus();
+}
+
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]');
+  if (el && !el.disabled && el.getAttribute('aria-disabled') !== 'true') act(el);
+  Object.values(pickers).forEach(p => { if (p.open && !ev.target.closest(`[data-picker="${p.id}"]`)) { p.open = false; renderPickers(); } });
+});
+
+function refocus(sel, input) {
+  const pos = input.selectionStart;
+  const inPhone = !!input.closest('#phone');
+  const root = input.closest('#demos') ? '#demos' : input.closest('.desk-modal, .sheet') ? (inPhone ? '#psheet' : '#desk-modal') : (inPhone ? '#phone' : '#desk');
+  const again = document.querySelector(`${root} ${sel}`);
+  if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch { } }
+}
+function renderPickers() {
+  const active = document.activeElement;
+  const pid = active?.dataset?.pinput;
+  render();
+  if (pid) refocus(`[data-pinput="${pid}"]`, active);
+}
+
+document.addEventListener('input', ev => {
+  const el = ev.target;
+  if (el.dataset.pinput) { const p = pickers[el.dataset.pinput]; p.q = el.value; p.open = true; p.active = 0; renderPickers(); return; }
+  const k = el.dataset.input;
+  if (!k) return;
+  const d = state.draft;
+  if (k === 'q') { state.q = el.value; render(); refocus('[data-input="q"]', el); return; }
+  if (k === 'cat') { state.cat = el.value; render(); return; }
+  if (!d) return;
+  if (k === 'name') { d.n = el.value; render(); refocus('[data-input="name"]', el); return; }
+  if (k === 'cat-edit') { d.cat = el.value; render(); return; }
+  if (k === 'conv-unit') { state.convDraft.unit = el.value; state.convErr = ''; return; }
+  if (k === 'conv-amt') { state.convDraft.amt = el.value; return; }
+});
+document.addEventListener('change', ev => { const k = ev.target.dataset.input; if (k === 'cat' || k === 'cat-edit' || k === 'conv-unit') ev.target.dispatchEvent(new Event('input', { bubbles: true })); });
+
+document.addEventListener('keydown', ev => {
+  const el = ev.target;
+  if (el.dataset?.pinput) {
+    const p = pickers[el.dataset.pinput];
+    const res = pickerResults(p);
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); p.open = true; p.active = Math.min(res.length - 1, p.active + 1); renderPickers(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); p.active = Math.max(0, p.active - 1); renderPickers(); }
+    else if (ev.key === 'Enter' && p.open && res[p.active]) { ev.preventDefault(); const r = res[p.active]; pick(p.id, r.isNew ? { isNew: true } : { id: r.x.id }, !!el.closest('#phone')); }
+    else if (ev.key === 'Escape') { if (p.open) { ev.stopPropagation(); p.open = false; renderPickers(); } }
+    return;
+  }
+  if (el.dataset?.input === 'alias' && ev.key === 'Enter') {
+    ev.preventDefault();
+    const v = el.value.trim();
+    if (!v) return;
+    const d = state.draft;
+    const clash = items.find(x => x.id !== d.id && names(x).some(n => fold(n) === fold(v)));
+    if (clash) state.aliasErr = `„${esc(v)}” to już ${fold(clash.n) === fold(v) ? 'nazwa' : 'alias'} składnika „${esc(clash.n)}”.`;
+    else if (names(d).some(n => fold(n) === fold(v))) state.aliasErr = 'Ten składnik już ma taką nazwę.';
+    else { d.al.push(v); state.aliasErr = ''; }
+    render();
+    refocus('[data-input="alias"]', el);
+    return;
+  }
+  if (el.dataset?.input === 'conv-amt' && ev.key === 'Enter') { ev.preventDefault(); el.closest('.convadd').querySelector('[data-act="add-conv"]').click(); }
+  if (ev.key === 'Escape' && state.dlg) { state.dlg = null; render(); }
+});
+
+const seg = document.getElementById('theme');
+function setTheme(v) {
+  if (v === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', v);
+  seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+}
+seg.addEventListener('click', ev => { const b = ev.target.closest('button[data-v]'); if (b) setTheme(b.dataset.v); });
+
+const ds = document.getElementById('dataset');
+function setDataset(v) {
+  items = v === 'empty' ? [] : SAMPLE();
+  pairs = v === 'empty' ? [] : SAMPLE_PAIRS();
+  Object.assign(state, { q: '', review: false, staple: false, cat: '', view: 'item', pv: 'list', dlg: null });
+  pickers.never.picked = v === 'empty' ? [] : ['orzechy']; pickers.never.taken = pickers.never.picked;
+  pickers.line.picked = null; pickers.line.q = v === 'empty' ? '' : 'zolt'; pickers.line.open = v !== 'empty';
+  if (v === 'empty') { state.draft = null; state.sel = null; } else openItem('cebula-zolta', false);
+  ds.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  render();
+}
+ds.addEventListener('click', ev => { const b = ev.target.closest('button[data-v]'); if (b) setDataset(b.dataset.v); });
+
+hydrateIcons(document);
+setTheme('system');
+setDataset('sample');
+</script>
+</body>
+</html>
