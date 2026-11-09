@@ -28,6 +28,7 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Base unit** | The unit an ingredient is summed in: `g`, `ml` or `piece`. |
 | **Generic conversion** | A conversion that holds for every ingredient: `kg` to `g`, `l` to `ml`, `tbsp` = 15 ml, `tsp` = 5 ml. |
 | **Unit conversion** | Ingredient-specific rule like *1 clove = 5 g*. Takes precedence over a generic conversion. One per unit; written in the base unit, so changing the base unit removes them. Quantities without a conversion are not summed into the base unit. |
+| **Ingredient total** | What the quantity calculator gives for one ingredient: the sum in its base unit plus the amounts that could not be converted, summed per unit (*3 piece + 300 g*), with its category and staple flag. No rounding; pack sizes are the agent's job. An ingredient used only *to taste* has a total with no amount. |
 | **Needs review** | Flag on an ingredient created automatically from an unknown name (*Do sprawdzenia*). Cleared when a person or an agent confirms it, or when another ingredient is merged into it. |
 | **Merge** | Turning two ingredients into one (*Scal*): the source's names become aliases of the target, every module moves its references to the target, and the source is deleted. The target keeps its base unit, category and staple flag and is confirmed. The **merge preview** shows what will move before anything changes. |
 | **Staple** | An ingredient that is always at home and is left off generated lists by default. |

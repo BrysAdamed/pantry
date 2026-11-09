@@ -35,6 +35,12 @@ internal sealed class CatalogModuleContract(CatalogDbContext db) : ICatalogModul
         Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default) =>
         (await GetIngredientAsync(ingredientId, cancellationToken))?.ConvertToBaseUnit(quantity, unit);
 
+    public async Task<QuantityTotals> SumQuantitiesAsync(IReadOnlyCollection<QuantityLine> lines, CancellationToken cancellationToken = default)
+    {
+        var ingredients = await GetIngredientsAsync(lines.Select(l => l.IngredientId).Distinct().ToList(), cancellationToken);
+        return QuantityCalculator.Sum(lines, ingredients);
+    }
+
     public async Task<ResolvedIngredient> ResolveIngredientAsync(string name, Unit? unitUsed, CancellationToken cancellationToken = default)
     {
         var cleanName = IngredientName.Clean(name);

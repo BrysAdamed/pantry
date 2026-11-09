@@ -35,6 +35,13 @@ public interface ICatalogModule
     /// ingredient does not exist.
     /// </summary>
     Task<BaseQuantity?> ConvertToBaseUnitAsync(Guid ingredientId, decimal quantity, Unit unit, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sums the lines per ingredient with <see cref="QuantityCalculator"/>: the total in the base unit, the amounts that
+    /// cannot be converted per unit, and the category and staple flag. Throws <see cref="ArgumentException"/> for a line
+    /// with a quantity but no unit (or the reverse) or a quantity that is not greater than 0.
+    /// </summary>
+    Task<QuantityTotals> SumQuantitiesAsync(IReadOnlyCollection<QuantityLine> lines, CancellationToken cancellationToken = default);
 }
 
 /// <summary>The result of <see cref="ICatalogModule.ResolveIngredientAsync"/>; <c>Created</c> is true for a new ingredient.</summary>
