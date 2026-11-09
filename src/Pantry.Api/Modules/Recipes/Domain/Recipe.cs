@@ -80,6 +80,18 @@ public sealed class Recipe
         UpdatedAt = now;
     }
 
+    /// <summary>Sets <i>make again</i> on its own: from the detail, or from a rating that answered it (the latest answer wins).</summary>
+    public void SetMakeAgain(bool makeAgain, DateTimeOffset now)
+    {
+        if (MakeAgain == makeAgain)
+        {
+            return;
+        }
+
+        MakeAgain = makeAgain;
+        UpdatedAt = now;
+    }
+
     public void Archive(DateTimeOffset now)
     {
         if (IsArchived)

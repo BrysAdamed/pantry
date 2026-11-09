@@ -89,8 +89,32 @@ internal sealed class RecipesModuleContract(
         await db.HistoryEntries
             .Where(h => h.RecipeId == recipeId)
             .OrderByDescending(h => h.Date).ThenByDescending(h => h.RecordedAt).ThenByDescending(h => h.Id)
-            .Select(h => new RecipeHistoryEntry(h.Id, h.RecipeId, h.Date, h.MealSlotId, h.PlanEntryId))
+            .Select(h => new RecipeHistoryEntry(h.Id, h.RecipeId, h.Date, h.MealSlotId, h.PlanEntryId, h.Rating))
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<RecipeRatingSummary>> GetRatingsAsync(
+        IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default)
+    {
+        var recipes = await db.Recipes
+            .Where(r => recipeIds.Contains(r.Id))
+            .OrderBy(r => r.Id)
+            .Select(r => new { r.Id, r.MakeAgain })
+            .ToListAsync(cancellationToken);
+        var ratings = await RecipeRatings.LoadAsync(db, recipes.Select(r => (r.Id, r.MakeAgain)).ToList(), cancellationToken);
+        return ratings
+            .Select(pair => RecipeRatings.ToSummary(pair.Key, pair.Value))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<RecipeSummary>> GetFavouritesAsync(CancellationToken cancellationToken = default)
+    {
+        var candidates = await db.Recipes
+            .Where(r => r.ArchivedAt == null && r.MakeAgain)
+            .Select(r => new { r.Id, r.MakeAgain })
+            .ToListAsync(cancellationToken);
+        var ratings = await RecipeRatings.LoadAsync(db, candidates.Select(r => (r.Id, r.MakeAgain)).ToList(), cancellationToken);
+        return await GetRecipesAsync(ratings.Where(r => r.Value.IsFavourite).Select(r => r.Key).ToList(), cancellationToken);
+    }
 
     public async Task<IReadOnlyList<RecipeDislikeWarning>> GetDislikeWarningsAsync(
         IReadOnlyCollection<Guid> recipeIds, CancellationToken cancellationToken = default)

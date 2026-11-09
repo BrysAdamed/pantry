@@ -42,6 +42,14 @@ namespace Pantry.Api.Modules.Recipes.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("plan_entry_id");
 
+                    b.Property<DateTimeOffset?>("RatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("rated_at");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("rating");
+
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("uuid")
                         .HasColumnName("recipe_id");
@@ -60,7 +68,12 @@ namespace Pantry.Api.Modules.Recipes.Persistence.Migrations
                     b.HasIndex("RecipeId", "Date")
                         .HasDatabaseName("ix_history_entries_recipe_id_date");
 
-                    b.ToTable("history_entries", "recipes");
+                    b.ToTable("history_entries", "recipes", t =>
+                        {
+                            t.HasCheckConstraint("ck_history_entries_rated_at", "(rating IS NULL) = (rated_at IS NULL)");
+
+                            t.HasCheckConstraint("ck_history_entries_rating", "rating IS NULL OR rating BETWEEN 1 AND 5");
+                        });
                 });
 
             modelBuilder.Entity("Pantry.Api.Modules.Recipes.Domain.Recipe", b =>

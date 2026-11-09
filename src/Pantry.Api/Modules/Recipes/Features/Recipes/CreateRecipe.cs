@@ -23,6 +23,6 @@ public static class CreateRecipe
         var recipe = Recipe.Create(content, time.GetUtcNow());
         db.Recipes.Add(recipe);
         await db.SaveChangesAsync(cancellationToken);
-        return TypedResults.Created($"/api/recipes/{recipe.Id}", await RecipeResponse.FromAsync(recipe, catalog, household, cancellationToken));
+        return TypedResults.Created($"/api/recipes/{recipe.Id}", await RecipeResponse.FromAsync(recipe, db, catalog, household, cancellationToken));
     }
 }

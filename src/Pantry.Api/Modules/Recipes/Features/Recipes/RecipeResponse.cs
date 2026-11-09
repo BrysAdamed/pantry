@@ -1,6 +1,7 @@
 using Pantry.Api.Modules.Catalog;
 using Pantry.Api.Modules.Household;
 using Pantry.Api.Modules.Recipes.Domain;
+using Pantry.Api.Modules.Recipes.Persistence;
 
 namespace Pantry.Api.Modules.Recipes.Features.Recipes;
 
@@ -19,6 +20,9 @@ public sealed record RecipeResponse(
     IReadOnlyList<string> Steps,
     Nutrition Nutrition,
     bool MakeAgain,
+    decimal? AverageRating,
+    int RatingCount,
+    bool IsFavourite,
     int? CooldownDays,
     bool IsArchived,
     DateTimeOffset? ArchivedAt,
@@ -29,8 +33,9 @@ public sealed record RecipeResponse(
     IReadOnlyList<RecipeDislikeResponse> Dislikes)
 {
     public static async Task<RecipeResponse> FromAsync(
-        Recipe recipe, ICatalogModule catalog, IHouseholdModule household, CancellationToken cancellationToken)
+        Recipe recipe, RecipesDbContext db, ICatalogModule catalog, IHouseholdModule household, CancellationToken cancellationToken)
     {
+        var rating = await RecipeRatings.LoadAsync(db, recipe, cancellationToken);
         var lines = recipe.OrderedLines();
         var ingredients = (await catalog.GetIngredientsAsync(lines.Select(l => l.IngredientId).Distinct().ToList(), cancellationToken))
             .ToDictionary(i => i.Id);
@@ -61,6 +66,9 @@ public sealed record RecipeResponse(
             recipe.StepTexts(),
             recipe.Nutrition,
             recipe.MakeAgain,
+            rating.RoundedAverage,
+            rating.RatingCount,
+            rating.IsFavourite,
             recipe.CooldownDays,
             recipe.IsArchived,
             recipe.ArchivedAt,

@@ -28,6 +28,6 @@ public static class UpdateRecipe
 
         recipe.Update(content, time.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
-        return TypedResults.Ok(await RecipeResponse.FromAsync(recipe, catalog, household, cancellationToken));
+        return TypedResults.Ok(await RecipeResponse.FromAsync(recipe, db, catalog, household, cancellationToken));
     }
 }

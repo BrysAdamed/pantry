@@ -190,19 +190,7 @@ public sealed class RecipeHistoryTests(PantryApiFactory factory) : IAsyncLifetim
     private async Task<List<JsonElement>> HistoryAsync(Guid recipeId) =>
         (await _client.GetFromJsonAsync<JsonElement>($"{RecipesUrl}/{recipeId}/history")).EnumerateArray().ToList();
 
-    private Task RecordEatenAsync(EatenPlanEntry entry) =>
-        InTransactionAsync((recipes, transaction) => recipes.RecordEatenAsync(entry, transaction));
+    private Task RecordEatenAsync(EatenPlanEntry entry) => factory.RecordEatenAsync(entry);
 
-    private Task RecordUneatenAsync(Guid planEntryId) =>
-        InTransactionAsync((recipes, transaction) => recipes.RecordUneatenAsync(planEntryId, transaction));
-
-    private async Task InTransactionAsync(Func<IRecipesModule, NpgsqlTransaction, Task> write)
-    {
-        await using var connection = new NpgsqlConnection(factory.ConnectionString);
-        await connection.OpenAsync();
-        await using var transaction = await connection.BeginTransactionAsync();
-        await using var scope = factory.Services.CreateAsyncScope();
-        await write(scope.ServiceProvider.GetRequiredService<IRecipesModule>(), transaction);
-        await transaction.CommitAsync();
-    }
+    private Task RecordUneatenAsync(Guid planEntryId) => factory.RecordUneatenAsync(planEntryId);
 }

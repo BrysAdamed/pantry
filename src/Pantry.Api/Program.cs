@@ -22,7 +22,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddHouseholdModule();
 builder.Services.AddCatalogModule(builder.Configuration);
-builder.Services.AddRecipesModule();
+builder.Services.AddRecipesModule(builder.Configuration);
 
 var app = builder.Build();
 
