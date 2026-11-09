@@ -14,6 +14,17 @@ export interface CurrentUser {
   theme: 'system' | 'light' | 'dark';
 }
 
+export type PasskeyLinkKind = 'invite' | 'recovery';
+
+/** An invite or recovery link as its redeem screen shows it. */
+export interface RedeemableLink {
+  kind: PasskeyLinkKind;
+  /** The member's name (invite) or the user's display name (recovery). */
+  name: string;
+  invitedBy: string | null;
+  expiresAt: string;
+}
+
 /** Marks a request whose 401 the caller handles itself, so the auth interceptor does not send the user to sign-in. */
 export const HANDLES_UNAUTHORIZED = new HttpContextToken<boolean>(() => false);
 
@@ -58,7 +69,25 @@ export class IdentityApi {
     return firstValueFrom(this.http.post<CurrentUser>('/api/auth/sign-in', { credential }, handlesUnauthorized()));
   }
 
+  redeemableLink(token: string): Promise<RedeemableLink> {
+    return firstValueFrom(this.http.get<RedeemableLink>(redeemUrl(token), handlesUnauthorized()));
+  }
+
+  redeemPasskeyOptions(token: string, displayName: string): Promise<PublicKeyCredentialCreationOptionsJSON> {
+    return firstValueFrom(
+      this.http.post<PublicKeyCredentialCreationOptionsJSON>(`${redeemUrl(token)}/passkey-options`, { displayName }, handlesUnauthorized()),
+    );
+  }
+
+  completeRedeem(token: string, credential: PublicKeyCredentialJSON): Promise<CurrentUser> {
+    return firstValueFrom(this.http.post<CurrentUser>(`${redeemUrl(token)}/complete`, { credential }, handlesUnauthorized()));
+  }
+
   async signOut(): Promise<void> {
     await firstValueFrom(this.http.post('/api/auth/sign-out', null, handlesUnauthorized()));
   }
+}
+
+function redeemUrl(token: string): string {
+  return `/api/passkey-links/redeem/${encodeURIComponent(token)}`;
 }

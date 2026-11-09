@@ -14,10 +14,10 @@ const user: CurrentUser = { id: '1', displayName: 'Alex', role: 'admin', uiLangu
 class Screen {}
 
 describe('Session guards', () => {
-  let api: { me: ReturnType<typeof vi.fn>; signOut: ReturnType<typeof vi.fn> };
+  let api: { me: ReturnType<typeof vi.fn>; signOut: ReturnType<typeof vi.fn>; refreshAntiforgeryToken: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    api = { me: vi.fn(), signOut: vi.fn().mockResolvedValue(undefined) };
+    api = { me: vi.fn(), signOut: vi.fn().mockResolvedValue(undefined), refreshAntiforgeryToken: vi.fn().mockResolvedValue(undefined) };
     TestBed.configureTestingModule({
       providers: [
         { provide: IdentityApi, useValue: api },
@@ -68,6 +68,26 @@ describe('Session guards', () => {
     await harness.navigateByUrl('/planner');
 
     expect(url()).toBe('/sign-in?returnUrl=%2Fplanner');
+  });
+
+  it('refreshes the antiforgery token before signing out, so a token from an ended session does not fail the call', async () => {
+    const calls: string[] = [];
+    api.refreshAntiforgeryToken.mockImplementation(async () => calls.push('token'));
+    api.signOut.mockImplementation(async () => calls.push('signOut'));
+
+    await TestBed.inject(Session).signOut();
+
+    expect(calls).toEqual(['token', 'signOut']);
+  });
+
+  it('forgets the user even when the sign-out call fails', async () => {
+    const session = TestBed.inject(Session);
+    session.signedIn(user);
+    api.signOut.mockRejectedValue(new HttpErrorResponse({ status: 400 }));
+
+    await expect(session.signOut()).rejects.toBeInstanceOf(HttpErrorResponse);
+
+    expect(session.user()).toBeNull();
   });
 
   it('sends a signed-in user from sign-in to the requested page', async () => {

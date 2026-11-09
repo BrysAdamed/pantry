@@ -53,8 +53,15 @@
                   <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-success bg-success-surface text-success">{{ t('members.account.user') }}</span>
                 }
                 @default {
-                  <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-border text-muted-foreground">{{ t('members.account.none') }}</span>
+                  @if (openLinkByMember().has(member.id)) {
+                    <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-info bg-info-surface text-info">{{ t('members.account.invited') }}</span>
+                  } @else {
+                    <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-border text-muted-foreground">{{ t('members.account.none') }}</span>
+                  }
                 }
+              }
+              @if (member.account && openLinkByMember().has(member.id)) {
+                <span class="inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] px-2 py-0.5 text-[11px] font-extrabold border-info bg-info-surface text-info">{{ t('members.account.recoveryLinkSent') }}</span>
               }
             </div>
 
@@ -89,7 +96,44 @@
               </button>
             </div>
 
-            <div class="col-start-2 col-end-4 flex flex-wrap items-center gap-2 empty:hidden md:col-auto md:justify-self-end">
+            <div
+              class="col-start-2 col-end-4 flex flex-wrap items-center gap-2 empty:hidden md:col-auto md:justify-self-end"
+              role="group"
+              [attr.aria-label]="member.name"
+            >
+              @if (isAdmin()) {
+                @let link = openLinkByMember().get(member.id);
+                @if (!member.account) {
+                  <button hlmBtn variant="outline" size="sm" type="button" (click)="issueLink(member)">
+                    <app-icon name="link" class="size-4" />
+                    {{ link ? t('members.newLink') : t('members.invite') }}
+                  </button>
+                  @if (link) {
+                    <button hlmBtn variant="ghost" size="sm" type="button" (click)="revokeLink(link)">{{ t('members.revokeLink') }}</button>
+                  }
+                } @else if (member.userId !== myUserId()) {
+                  @if (removingUserOf() === member.id) {
+                    <span class="text-sm font-bold">{{ t('members.confirmRemoveUser', { name: member.name }) }}</span>
+                    <button hlmBtn variant="ghost" size="sm" type="button" (click)="removingUserOf.set(null)">{{ t('members.cancel') }}</button>
+                    <button hlmBtn variant="destructive" size="sm" type="button" (click)="removeUser(member)">{{ t('members.removeUser') }}</button>
+                  } @else {
+                    <button hlmBtn variant="ghost" size="sm" type="button" [title]="t('members.recoverHint')" (click)="issueLink(member)">
+                      {{ t('members.recover') }}
+                    </button>
+                    @if (link) {
+                      <button hlmBtn variant="ghost" size="sm" type="button" (click)="revokeLink(link)">{{ t('members.revokeLink') }}</button>
+                    }
+                    @if (member.account === 'admin') {
+                      <button hlmBtn variant="ghost" size="sm" type="button" (click)="changeRole(member, 'user')">{{ t('members.demote') }}</button>
+                    } @else {
+                      <button hlmBtn variant="ghost" size="sm" type="button" (click)="changeRole(member, 'admin')">{{ t('members.promote') }}</button>
+                    }
+                    <button hlmBtn variant="ghost" size="sm" type="button" class="text-danger" (click)="removingUserOf.set(member.id)">
+                      {{ t('members.removeUser') }}
+                    </button>
+                  }
+                }
+              }
               @if (!member.account) {
                 @if (deletingId() === member.id) {
                   <span class="text-sm font-bold">{{ t('members.confirmDelete', { name: member.name }) }}</span>
@@ -145,6 +189,38 @@
         }}
       </p>
     </div>
+
+    @if (issued(); as issuedLink) {
+      <section
+        class="grid gap-3 rounded-card border-2 border-primary bg-card px-4.5 py-4 shadow-card"
+        data-testid="issued-link"
+        [attr.aria-label]="t('members.issued.' + issuedLink.kind + '.title', { name: issuedLink.name })"
+      >
+        <h3 class="text-lg font-extrabold">{{ t('members.issued.' + issuedLink.kind + '.title', { name: issuedLink.name }) }}</h3>
+        <p class="text-sm text-muted-foreground">{{ t('members.issued.' + issuedLink.kind + '.body') }}</p>
+        <div class="flex gap-2">
+          <input
+            #issuedUrl
+            readonly
+            class="h-tap min-w-0 flex-1 rounded-control border-2 border-outline bg-card px-3 font-mono text-sm"
+            data-testid="issued-link-url"
+            [value]="issuedLink.url"
+            [attr.aria-label]="t('members.issued.address')"
+            (focus)="issuedUrl.select()"
+          />
+          <button hlmBtn variant="outline" type="button" data-testid="issued-link-copy" (click)="copyIssuedLink()">
+            <app-icon name="copy" class="size-4" />
+            {{ copied() ? t('members.issued.copied') : t('members.issued.copy') }}
+          </button>
+        </div>
+        <p class="text-xs text-muted-foreground">{{ t('members.issued.note') }}</p>
+        <button hlmBtn type="button" class="justify-self-end" (click)="issued.set(null)">{{ t('members.issued.done') }}</button>
+      </section>
+    }
+
+    @if (lastAdmin()) {
+      <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('members.lastAdmin') }}</p>
+    }
 
     @if (saveFailed()) {
       <p class="rounded-control border-2 border-danger bg-danger-surface px-3.5 py-3 text-sm" role="alert">{{ t('members.saveFailed') }}</p>

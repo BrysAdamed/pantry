@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { FIRST_RUN_PATH, requireFirstRunNeeded, requireSetupDone } from './identity/setup-status';
 import { requireSignedIn, requireSignedOut, SIGN_IN_PATH } from './identity/session';
+import { REDEEM_PATH } from './identity/user-admin-api';
 import { Shell } from './shell/shell';
 
 export const routes: Routes = [
@@ -25,6 +26,10 @@ export const routes: Routes = [
     path: SIGN_IN_PATH,
     canActivate: [requireSetupDone, requireSignedOut],
     loadComponent: () => import('./identity/sign-in/sign-in').then((m) => m.SignIn),
+  },
+  {
+    path: `${REDEEM_PATH}/:token`,
+    loadComponent: () => import('./identity/redeem-link/redeem-link').then((m) => m.RedeemLink),
   },
   {
     path: 'design-system',

@@ -13,6 +13,7 @@ export interface Member {
   portionFactor: number;
   position: number;
   account: 'admin' | 'user' | null;
+  userId: string | null;
 }
 
 export interface MembersResponse {

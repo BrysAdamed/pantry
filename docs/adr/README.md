@@ -20,3 +20,4 @@ Short records of decisions that shape the project. Format: context, decision, co
 | [0014](0014-spa-authentication.md) | SPA authentication: Identity passkeys over JSON, cookie session, antiforgery header | Accepted |
 | [0015](0015-cross-module-transactions.md) | Cross-module writes share the caller's transaction | Accepted |
 | [0016](0016-data-protection-keys.md) | Data Protection keys in Postgres, so sessions survive container recreation | Accepted |
+| [0017](0017-passkey-links-and-user-administration.md) | Invites and recovery links as hashed single-use passkey links; serialized user administration; sessions rechecked every minute | Accepted |

@@ -41,9 +41,17 @@ export class Session {
     this.current.set(null);
   }
 
+  /**
+   * Ends the session. Fetches a fresh antiforgery token first, because a token from a session that already ended
+   * would make the sign-out call fail. The user is forgotten here even when the call fails.
+   */
   async signOut(): Promise<void> {
-    await this.api.signOut();
-    this.current.set(null);
+    try {
+      await this.api.refreshAntiforgeryToken();
+      await this.api.signOut();
+    } finally {
+      this.current.set(null);
+    }
   }
 }
 

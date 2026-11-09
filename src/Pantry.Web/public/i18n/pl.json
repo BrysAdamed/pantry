@@ -179,7 +179,9 @@
       "account": {
         "admin": "administrator",
         "user": "ma konto",
-        "none": "bez konta"
+        "none": "bez konta",
+        "invited": "zaproszenie wysłane",
+        "recoveryLinkSent": "link odzyskania wysłany"
       },
       "nameLabel": "Imię",
       "rename": "Zmień imię: {{name}}",
@@ -191,7 +193,32 @@
       "confirm": "Usuń",
       "loadFailed": "Nie udało się wczytać domowników. Sprawdź połączenie.",
       "retry": "Spróbuj ponownie",
-      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz."
+      "saveFailed": "Zmiana nie została zapisana. Sprawdź połączenie i spróbuj jeszcze raz.",
+      "invite": "Zaproś",
+      "newLink": "Nowy link",
+      "revokeLink": "Unieważnij link",
+      "recover": "Odzyskaj dostęp",
+      "recoverHint": "Gdy ktoś zgubi telefon",
+      "promote": "Nadaj rolę administratora",
+      "demote": "Odbierz rolę administratora",
+      "removeUser": "Usuń konto",
+      "confirmRemoveUser": "Usunąć konto: {{name}}? Domownik zostaje.",
+      "lastAdmin": "Ostatni administrator musi zostać. Najpierw nadaj tę rolę komuś innemu.",
+      "issued": {
+        "invite": {
+          "title": "Zaproszenie dla: {{name}}",
+          "body": "Wyślij ten link tylko tej osobie. Otworzy go na swoim telefonie i utworzy klucz dostępu."
+        },
+        "recovery": {
+          "title": "Link odzyskania dla: {{name}}",
+          "body": "Wyślij ten link tylko tej osobie. Otworzy go na nowym telefonie i doda klucz dostępu."
+        },
+        "address": "Adres linku",
+        "copy": "Kopiuj",
+        "copied": "Skopiowano",
+        "note": "Link działa 48 godzin i tylko raz. Nowy link unieważnia ten.",
+        "done": "Gotowe"
+      }
     }
   },
   "signIn": {
@@ -202,7 +229,7 @@
     "signIn": "Zaloguj się kluczem dostępu",
     "signingIn": "Czekam na klucz dostępu…",
     "retry": "Spróbuj ponownie",
-    "hint": "Nie masz konta? Poproś domownika o zaproszenie.",
+    "hint": "Nie masz konta? Poproś administratora o zaproszenie.",
     "expired": "Sesja wygasła. Zaloguj się ponownie.",
     "cancelled": {
       "title": "Logowanie przerwane.",
@@ -220,5 +247,63 @@
       "title": "Klucze dostępu tu nie działają.",
       "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
     }
+  },
+  "redeemLink": {
+    "loading": "Otwieranie linku…",
+    "loadFailed": {
+      "title": "Nie udało się otworzyć linku.",
+      "body": "Sprawdź połączenie i spróbuj ponownie."
+    },
+    "invite": {
+      "label": "Zaproszenie",
+      "title": "{{name}} zaprasza Cię do Spiżarni",
+      "titleAnonymous": "Zaproszenie do Spiżarni",
+      "create": "Dołącz i utwórz klucz"
+    },
+    "recovery": {
+      "label": "Link odzyskania",
+      "title": "Wróć do Spiżarni, {{name}}",
+      "body": "Utwórz klucz dostępu na tym urządzeniu. Klucze na innych urządzeniach działają dalej.",
+      "create": "Utwórz klucz dostępu"
+    },
+    "validUntil": "Ważny do {{date}}",
+    "nameLabel": "Jak masz na imię?",
+    "creating": "Czekam na klucz dostępu…",
+    "retry": "Spróbuj ponownie",
+    "hint": "Bez hasła. Klucz zostaje w menedżerze haseł telefonu.",
+    "cancelled": {
+      "title": "Tworzenie klucza przerwane.",
+      "body": "Okno klucza zostało zamknięte. Spróbuj jeszcze raz."
+    },
+    "failed": {
+      "title": "Nie udało się zapisać klucza.",
+      "body": "Sprawdź połączenie i spróbuj jeszcze raz."
+    },
+    "unsupported": {
+      "title": "Klucze dostępu tu nie działają.",
+      "body": "Otwórz aplikację przez HTTPS w aktualnej przeglądarce."
+    },
+    "expired": {
+      "title": "Link wygasł",
+      "body": "Link działa 48 godzin. Poproś administratora o nowy."
+    },
+    "used": {
+      "title": "Link został już użyty",
+      "body": "Każdy link działa tylko raz. Jeśli to nie Ty, powiedz administratorowi."
+    },
+    "revoked": {
+      "title": "Link został unieważniony",
+      "body": "Administrator go unieważnił albo wysłał nowszy. Poproś o nowy link."
+    },
+    "notFound": {
+      "title": "Ten link nie działa",
+      "body": "Sprawdź, czy skopiowano cały adres, albo poproś administratora o nowy link."
+    },
+    "done": {
+      "title": "Witaj w domu!",
+      "body": "Klucz dostępu zapisany na tym urządzeniu. Następnym razem wystarczy odcisk palca albo twarz.",
+      "action": "Przejdź do planu"
+    },
+    "signIn": "Przejdź do logowania"
   }
 }

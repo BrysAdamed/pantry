@@ -1,9 +1,12 @@
 import { DecimalPipe } from '@angular/common';
-import { httpResource } from '@angular/common/http';
+import { HttpErrorResponse, HttpStatusCode, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { UiLanguageService } from '../../core/i18n/ui-language.service';
+import { PasskeyLinkKind } from '../../identity/identity-api';
+import { Session } from '../../identity/session';
+import { OpenPasskeyLink, PASSKEY_LINKS_URL, passkeyLinkUrl, UserAdminApi } from '../../identity/user-admin-api';
 import { Icon } from '../../shared/icon/icon';
 import {
   HouseholdApi,
@@ -18,7 +21,14 @@ import {
 
 export const FACTOR_FORMAT = '1.0-2';
 
-/** Members with their portion factors and the live household serving. */
+/** A link the admin just issued, shown once with its address to copy. */
+export interface IssuedLink {
+  kind: PasskeyLinkKind;
+  name: string;
+  url: string;
+}
+
+/** Members with their portion factors and the live household serving. Admins also manage accounts here. */
 @Component({
   selector: 'app-members-section',
   imports: [TranslocoDirective, HlmButton, Icon, DecimalPipe],
@@ -28,6 +38,8 @@ export const FACTOR_FORMAT = '1.0-2';
 })
 export class MembersSection {
   private readonly api = inject(HouseholdApi);
+  private readonly userAdmin = inject(UserAdminApi);
+  private readonly session = inject(Session);
   private readonly pendingSaves = new Map<string, Promise<unknown>>();
 
   protected readonly language = inject(UiLanguageService).current;
@@ -41,17 +53,36 @@ export class MembersSection {
     roundFactor(this.members().reduce((sum, member) => sum + member.portionFactor, 0)),
   );
 
+  protected readonly isAdmin = computed(() => this.session.user()?.role === 'admin');
+  protected readonly myUserId = computed(() => this.session.user()?.id ?? null);
+  protected readonly openLinks = httpResource<OpenPasskeyLink[]>(() => (this.isAdmin() ? PASSKEY_LINKS_URL : undefined));
+  protected readonly openLinkByMember = computed(() => {
+    const links = this.openLinks.value() ?? [];
+    return new Map(
+      this.members().flatMap((member) => {
+        const link = links.find((l) => (member.userId ? l.userId === member.userId : l.memberId === member.id));
+        return link ? [[member.id, link] as const] : [];
+      }),
+    );
+  });
+
   protected readonly newName = signal('');
   protected readonly canAdd = computed(() => isValidName(this.newName()));
   protected readonly adding = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly deletingId = signal<string | null>(null);
+  protected readonly removingUserOf = signal<string | null>(null);
   protected readonly saveFailed = signal(false);
+  protected readonly lastAdmin = signal(false);
+  protected readonly issued = signal<IssuedLink | null>(null);
+  protected readonly copied = signal(false);
 
   private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
+  private readonly issuedUrl = viewChild<ElementRef<HTMLInputElement>>('issuedUrl');
 
   constructor() {
     effect(() => this.nameInput()?.nativeElement.focus());
+    effect(() => this.issuedUrl()?.nativeElement.focus());
   }
 
   protected step(id: string, direction: 1 | -1): void {
@@ -103,6 +134,64 @@ export class MembersSection {
     } catch {
       this.failAndReload();
     }
+  }
+
+  /** Issues an invite for a member without an account, or a recovery link for a member's user. */
+  protected async issueLink(member: Member): Promise<void> {
+    await this.administer(async () => {
+      const link = member.userId
+        ? await this.userAdmin.issueRecoveryLink(member.userId)
+        : await this.userAdmin.issueInvite(member.id);
+      this.copied.set(false);
+      this.issued.set({ kind: link.kind, name: member.name, url: passkeyLinkUrl(link.token) });
+    });
+  }
+
+  protected async revokeLink(link: OpenPasskeyLink): Promise<void> {
+    await this.administer(() => this.userAdmin.revokeLink(link.id));
+  }
+
+  protected async changeRole(member: Member, role: 'admin' | 'user'): Promise<void> {
+    await this.administer(async () => {
+      await this.userAdmin.changeRole(member.userId!, role);
+      this.members.update((members) => members.map((m) => (m.id === member.id ? { ...m, account: role } : m)));
+    });
+  }
+
+  protected async removeUser(member: Member): Promise<void> {
+    this.removingUserOf.set(null);
+    await this.administer(async () => {
+      await this.userAdmin.removeUser(member.userId!);
+      this.members.update((members) => members.map((m) => (m.id === member.id ? { ...m, account: null, userId: null } : m)));
+    });
+  }
+
+  protected async copyIssuedLink(): Promise<void> {
+    const issued = this.issued();
+    if (!issued) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(issued.url);
+      this.copied.set(true);
+    } catch {
+      this.copied.set(false);
+    }
+  }
+
+  private async administer(action: () => Promise<unknown>): Promise<void> {
+    this.lastAdmin.set(false);
+    try {
+      await action();
+      this.saveFailed.set(false);
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.Conflict) {
+        this.lastAdmin.set(true);
+      } else {
+        this.failAndReload();
+      }
+    }
+    this.openLinks.reload();
   }
 
   /** Shows the change at once and sends saves of one member one after another, so the last change wins. */

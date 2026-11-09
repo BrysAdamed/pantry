@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { DESTINATIONS } from './destinations';
@@ -29,6 +29,7 @@ describe('Shell', () => {
               ...DESTINATIONS.map((path) => ({ path, component: Screen })),
             ],
           },
+          { path: 'sign-in', component: Screen },
         ]),
       ],
     });
@@ -87,6 +88,22 @@ describe('Shell', () => {
     await harness.fixture.whenStable();
 
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(page().querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('signs out to the sign-in screen even when the session had already ended', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    shell().querySelector<HTMLButtonElement>('[data-testid="avatar-menu-trigger"]')!.click();
+    await harness.fixture.whenStable();
+
+    page().querySelector<HTMLButtonElement>('[data-testid="sign-out"]')!.click();
+    http.expectOne('/api/antiforgery').flush(null, { status: 204, statusText: 'No Content' });
+    await new Promise((resolve) => setTimeout(resolve));
+    http.expectOne('/api/auth/sign-out').flush(null, { status: 400, statusText: 'Bad Request' });
+    await new Promise((resolve) => setTimeout(resolve));
+    await harness.fixture.whenStable();
+
+    expect(TestBed.inject(Router).url).toBe('/sign-in');
     expect(page().querySelector('[role="dialog"]')).toBeNull();
   });
 });

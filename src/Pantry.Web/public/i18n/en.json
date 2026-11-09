@@ -179,7 +179,9 @@
       "account": {
         "admin": "admin",
         "user": "has an account",
-        "none": "no account"
+        "none": "no account",
+        "invited": "invite sent",
+        "recoveryLinkSent": "recovery link sent"
       },
       "nameLabel": "Name",
       "rename": "Rename {{name}}",
@@ -191,7 +193,32 @@
       "confirm": "Remove",
       "loadFailed": "Members could not be loaded. Check the connection.",
       "retry": "Try again",
-      "saveFailed": "The change was not saved. Check the connection and try again."
+      "saveFailed": "The change was not saved. Check the connection and try again.",
+      "invite": "Invite",
+      "newLink": "New link",
+      "revokeLink": "Revoke link",
+      "recover": "Recover access",
+      "recoverHint": "When someone loses their phone",
+      "promote": "Make admin",
+      "demote": "Remove admin role",
+      "removeUser": "Remove account",
+      "confirmRemoveUser": "Remove the account of {{name}}? The member stays.",
+      "lastAdmin": "The last admin has to stay. Make someone else an admin first.",
+      "issued": {
+        "invite": {
+          "title": "Invite for {{name}}",
+          "body": "Send this link only to this person. They open it on their phone and create a passkey."
+        },
+        "recovery": {
+          "title": "Recovery link for {{name}}",
+          "body": "Send this link only to this person. They open it on the new phone and add a passkey."
+        },
+        "address": "Link address",
+        "copy": "Copy",
+        "copied": "Copied",
+        "note": "The link works for 48 hours and only once. A new link cancels this one.",
+        "done": "Done"
+      }
     }
   },
   "signIn": {
@@ -202,7 +229,7 @@
     "signIn": "Sign in with a passkey",
     "signingIn": "Waiting for the passkey…",
     "retry": "Try again",
-    "hint": "No account? Ask someone in the household for an invite.",
+    "hint": "No account? Ask the admin for an invite.",
     "expired": "Your session has expired. Sign in again.",
     "cancelled": {
       "title": "Sign-in interrupted.",
@@ -220,5 +247,63 @@
       "title": "Passkeys do not work here.",
       "body": "Open the app over HTTPS in an up-to-date browser."
     }
+  },
+  "redeemLink": {
+    "loading": "Opening the link…",
+    "loadFailed": {
+      "title": "The link could not be opened.",
+      "body": "Check the connection and try again."
+    },
+    "invite": {
+      "label": "Invite",
+      "title": "{{name}} invites you to Pantry",
+      "titleAnonymous": "You are invited to Pantry",
+      "create": "Join and create a passkey"
+    },
+    "recovery": {
+      "label": "Recovery link",
+      "title": "Get back into Pantry, {{name}}",
+      "body": "Create a passkey on this device. Passkeys on your other devices keep working.",
+      "create": "Create a passkey"
+    },
+    "validUntil": "Valid until {{date}}",
+    "nameLabel": "What is your name?",
+    "creating": "Waiting for the passkey…",
+    "retry": "Try again",
+    "hint": "No password. The passkey stays in your phone's password manager.",
+    "cancelled": {
+      "title": "Passkey creation cancelled.",
+      "body": "The passkey window was closed. Try again."
+    },
+    "failed": {
+      "title": "The passkey could not be saved.",
+      "body": "Check the connection and try again."
+    },
+    "unsupported": {
+      "title": "Passkeys do not work here.",
+      "body": "Open the app over HTTPS in an up-to-date browser."
+    },
+    "expired": {
+      "title": "This link has expired",
+      "body": "Links work for 48 hours. Ask the admin for a new one."
+    },
+    "used": {
+      "title": "This link was already used",
+      "body": "Each link works only once. If it was not you, tell the admin."
+    },
+    "revoked": {
+      "title": "This link was cancelled",
+      "body": "The admin cancelled it or sent a newer one. Ask for a new link."
+    },
+    "notFound": {
+      "title": "This link does not work",
+      "body": "Check that the whole address was copied, or ask the admin for a new link."
+    },
+    "done": {
+      "title": "Welcome home!",
+      "body": "Your passkey is saved on this device. Next time a fingerprint or your face is enough.",
+      "action": "Go to the plan"
+    },
+    "signIn": "Go to sign-in"
   }
 }

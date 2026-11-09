@@ -1,0 +1,88 @@
+<main *transloco="let t; prefix: 'redeemLink'" class="mx-auto flex min-h-dvh w-full max-w-sm flex-col gap-5 px-5 pt-8 pb-8">
+  <section class="grid flex-1 content-center justify-items-center gap-4 text-center" aria-live="polite">
+    <img src="icons/icon.svg" alt="" class="size-16" />
+
+    @switch (state()) {
+      @case ('loading') {
+        <p class="text-sm text-muted-foreground" data-testid="redeem-loading">{{ t('loading') }}</p>
+      }
+      @case ('loadFailed') {
+        <div role="alert" data-testid="redeem-error" class="w-full rounded-control border-2 border-danger bg-danger-surface px-3 py-2.5 text-left text-sm">
+          <p><b>{{ t('loadFailed.title') }}</b> {{ t('loadFailed.body') }}</p>
+        </div>
+      }
+      @case ('done') {
+        <h1 class="text-3xl" data-testid="redeem-done">{{ t('done.title') }}</h1>
+        <p class="text-sm text-muted-foreground">{{ t('done.body') }}</p>
+      }
+      @default {
+        @if (isDead()) {
+          <h1 class="text-3xl" data-testid="redeem-dead">{{ t(state() + '.title') }}</h1>
+          <p class="text-sm text-muted-foreground">{{ t(state() + '.body') }}</p>
+        } @else if (link(); as link) {
+          <div class="grid w-full gap-1 rounded-card border-2 border-dashed border-primary bg-card p-3.5 text-left">
+            <span class="text-xs font-bold tracking-[.08em] text-muted-foreground uppercase">{{ t(link.kind + '.label') }}</span>
+            <h1 class="text-xl font-extrabold" data-testid="redeem-title">
+              @if (link.kind === 'invite') {
+                {{ link.invitedBy ? t('invite.title', { name: link.invitedBy }) : t('invite.titleAnonymous') }}
+              } @else {
+                {{ t('recovery.title', { name: link.name }) }}
+              }
+            </h1>
+            <span class="text-xs text-muted-foreground">{{
+              t('validUntil', { date: (link.expiresAt | date: expiryFormat : undefined : language()) })
+            }}</span>
+          </div>
+
+          @if (isInvite()) {
+            <label class="grid w-full gap-1.5 text-left">
+              <span class="text-sm font-bold">{{ t('nameLabel') }}</span>
+              <input
+                class="min-h-tap w-full min-w-0 rounded-control border-2 border-outline bg-card px-3 py-2 disabled:opacity-45"
+                name="displayName"
+                autocomplete="name"
+                [maxLength]="maxLength"
+                [value]="displayName()"
+                [disabled]="state() === 'creating' || state() === 'unsupported'"
+                (input)="displayName.set($any($event.target).value)"
+                (keydown.enter)="createPasskey()"
+              />
+            </label>
+          } @else {
+            <p class="text-sm text-muted-foreground">{{ t('recovery.body') }}</p>
+          }
+
+          @if (isRetryable() || state() === 'unsupported') {
+            <div
+              role="alert"
+              data-testid="redeem-error"
+              class="flex w-full items-start gap-2 rounded-control border-2 border-danger bg-danger-surface px-3 py-2.5 text-left text-sm"
+            >
+              <p><b>{{ t(state() + '.title') }}</b> {{ t(state() + '.body') }}</p>
+            </div>
+          }
+        }
+      }
+    }
+  </section>
+
+  <footer class="grid gap-2.5">
+    @if (showsForm()) {
+      <button hlmBtn size="lg" class="w-full" data-testid="redeem-create" [disabled]="!canCreate()" (click)="createPasskey()">
+        @switch (state()) {
+          @case ('creating') { {{ t('creating') }} }
+          @case ('cancelled') { {{ t('retry') }} }
+          @case ('failed') { {{ t('retry') }} }
+          @default { {{ t(link()!.kind + '.create') }} }
+        }
+      </button>
+      <p class="text-center text-xs text-muted-foreground">{{ t('hint') }}</p>
+    } @else if (state() === 'done') {
+      <button hlmBtn size="lg" class="w-full" data-testid="redeem-open-app" (click)="openApp()">{{ t('done.action') }}</button>
+    } @else if (state() === 'loadFailed') {
+      <button hlmBtn size="lg" class="w-full" data-testid="redeem-reload" (click)="load()">{{ t('retry') }}</button>
+    } @else if (isDead()) {
+      <button hlmBtn variant="outline" size="lg" class="w-full" data-testid="redeem-sign-in" (click)="goToSignIn()">{{ t('signIn') }}</button>
+    }
+  </footer>
+</main>

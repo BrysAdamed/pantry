@@ -8,6 +8,8 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **Member** | A person in the household. Has a portion factor. May or may not have a user account (a toddler is a member, not a user). |
 | **User** | Someone who can sign in. Belongs to the household. |
 | **Admin** | A user who can also manage users: invite, issue recovery links, remove users, promote another admin. The first user is the admin; the last admin cannot be removed or demoted. |
+| **Invite** | A link an admin issues for a member without a user (*Zaproszenie*). Valid 48 hours, single use. Opening it creates the user, links it to the member and registers a passkey. |
+| **Recovery link** | A link an admin issues for an existing user who lost their device (*Link odzyskania*). Same rules as an invite; opening it adds a passkey to that user. Invites and recovery links are both *passkey links* in code; a new one revokes the previous open one for the same member or user. |
 | **First run** | The setup on a fresh deployment (*Pierwsze uruchomienie*): while no user exists, the app asks for a name and creates the admin with a passkey. |
 | **Portion factor** | How much of a standard serving a member eats (e.g. adult 1.0, toddler 0.3). Configurable. |
 | **Household serving** | Sum of portion factors of members eating a meal. Drives shopping quantities. |

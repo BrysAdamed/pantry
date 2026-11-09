@@ -95,11 +95,11 @@ export class AvatarMenu {
   protected async signOut(): Promise<void> {
     this.signingOut.set(true);
     try {
-      await this.session.signOut();
-      this.open.set(false);
-      await this.router.navigateByUrl(`/${SIGN_IN_PATH}`, { replaceUrl: true });
+      await this.session.signOut().catch(() => undefined);
     } finally {
+      this.open.set(false);
       this.signingOut.set(false);
+      await this.router.navigateByUrl(`/${SIGN_IN_PATH}`, { replaceUrl: true });
     }
   }
 

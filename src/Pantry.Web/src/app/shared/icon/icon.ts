@@ -18,7 +18,9 @@ export type IconName =
   | 'close'
   | 'chevronLeft'
   | 'chevronRight'
-  | 'signOut';
+  | 'signOut'
+  | 'link'
+  | 'copy';
 
 /** Decorative line icon from the design prototypes. Label the surrounding control, not the icon. */
 @Component({
@@ -102,6 +104,14 @@ export type IconName =
         }
         @case ('signOut') {
           <path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />
+        }
+        @case ('link') {
+          <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+          <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+        }
+        @case ('copy') {
+          <rect x="9" y="9" width="12" height="12" rx="2" />
+          <path d="M5 15V5a2 2 0 0 1 2-2h10" />
         }
       }
     </svg>
