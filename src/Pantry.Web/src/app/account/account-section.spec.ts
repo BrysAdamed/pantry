@@ -5,6 +5,7 @@ import { registerUiLocales } from '../core/i18n/provide-i18n';
 import { CurrentUser } from '../identity/identity-api';
 import { PasskeyCancelledError, Passkeys } from '../identity/passkeys';
 import { Session } from '../identity/session';
+import { fakeMatchMedia } from '../testing/match-media';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { Passkey, PASSKEYS_URL } from './account-api';
 import { AccountSection } from './account-section';
@@ -27,9 +28,7 @@ describe('AccountSection', () => {
 
   beforeEach(async () => {
     registerUiLocales();
-    window.matchMedia = vi.fn(
-      (query: string) => ({ matches: false, media: query, addEventListener: () => undefined }) as unknown as MediaQueryList,
-    );
+    fakeMatchMedia();
     passkeys = { create: vi.fn().mockResolvedValue({ id: 'new' }) };
     await TestBed.configureTestingModule({
       imports: [AccountSection],
