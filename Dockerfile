@@ -9,6 +9,7 @@ RUN npx ng build --configuration production
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS api
 WORKDIR /src
+COPY Directory.Build.props Directory.Packages.props ./
 COPY src/Pantry.Api/Pantry.Api.csproj src/Pantry.Api/
 RUN dotnet restore src/Pantry.Api/Pantry.Api.csproj
 COPY src/Pantry.Api/ src/Pantry.Api/

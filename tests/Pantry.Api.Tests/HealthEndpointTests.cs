@@ -1,19 +1,22 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
+using Pantry.Api.Infrastructure.Health;
+using Pantry.Api.Tests.Infrastructure;
 
 namespace Pantry.Api.Tests;
 
-public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+[Collection(ApiCollection.Name)]
+public sealed class HealthEndpointTests(PantryApiFactory factory)
 {
     [Fact]
-    public async Task Health_returns_ok()
+    public async Task Health_returns_ok_when_database_is_reachable()
     {
         var client = factory.CreateClient();
 
-        var health = await client.GetFromJsonAsync<HealthResponse>("/api/health");
+        var response = await client.GetAsync("/api/health");
+        var health = await response.Content.ReadFromJsonAsync<HealthResponse>();
 
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("ok", health?.Status);
     }
 
