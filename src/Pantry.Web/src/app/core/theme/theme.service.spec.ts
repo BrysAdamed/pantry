@@ -1,25 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { fakeMatchMedia, FakeMediaQueries } from '../../testing/match-media';
 import { ThemeService } from './theme.service';
 
 describe('ThemeService', () => {
-  let systemPrefersDark: boolean;
-  let changeListener: ((event: MediaQueryListEvent) => void) | undefined;
+  let systemTheme: FakeMediaQueries;
 
   beforeEach(() => {
     localStorage.clear();
     delete document.documentElement.dataset['theme'];
-    systemPrefersDark = false;
-    changeListener = undefined;
-    window.matchMedia = vi.fn(
-      (query: string) =>
-        ({
-          matches: systemPrefersDark,
-          media: query,
-          addEventListener: (_: string, listener: (event: MediaQueryListEvent) => void) => {
-            changeListener = listener;
-          },
-        }) as unknown as MediaQueryList,
-    );
+    systemTheme = fakeMatchMedia(false);
   });
 
   function create(): ThemeService {
@@ -29,7 +18,7 @@ describe('ThemeService', () => {
   }
 
   it('follows the system theme by default', () => {
-    systemPrefersDark = true;
+    systemTheme.setMatches(true);
 
     const service = create();
 
@@ -40,17 +29,17 @@ describe('ThemeService', () => {
   it('reacts when the system theme changes', () => {
     create();
 
-    changeListener?.({ matches: true } as MediaQueryListEvent);
+    systemTheme.setMatches(true);
 
     expect(document.documentElement.dataset['theme']).toBe('dark');
   });
 
   it('keeps an explicit choice over the system theme and remembers it', () => {
-    systemPrefersDark = true;
+    systemTheme.setMatches(true);
     const service = create();
 
     service.use('light');
-    changeListener?.({ matches: true } as MediaQueryListEvent);
+    systemTheme.setMatches(true);
 
     expect(document.documentElement.dataset['theme']).toBe('light');
     expect(localStorage.getItem('pantry.theme')).toBe('light');
