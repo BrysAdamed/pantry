@@ -58,7 +58,7 @@ dotnet ef migrations add <Name> --project src/Pantry.Api --context CatalogDbCont
 
 ## Authentication
 
-See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only; the session is an HttpOnly cookie. Every `/api` endpoint requires a signed-in user; opt out with `.AllowAnonymous()`. Unsafe `/api` requests need the `X-XSRF-TOKEN` header, which Angular's `HttpClient` sends from the `XSRF-TOKEN` cookie. Passkey relying party ID and origins come from `Identity:Passkeys` (`appsettings.Development.json` for dev, `PASSKEY_*` in `.env` for Docker).
+See [ADR 0014](adr/0014-spa-authentication.md). Users sign in with passkeys only; the session is an HttpOnly cookie. Every `/api` endpoint requires a signed-in user; opt out with `.AllowAnonymous()`. Unsafe `/api` requests need the `X-XSRF-TOKEN` header, which Angular's `HttpClient` sends from the `XSRF-TOKEN` cookie. The SPA gets a fresh anonymous token from `GET /api/antiforgery` before signing in. Data Protection keys (cookie encryption) live in the `data_protection` schema ([ADR 0015](adr/0015-data-protection-keys.md)). Passkey relying party ID and origins come from `Identity:Passkeys` (`appsettings.Development.json` for dev, `PASSKEY_*` in `.env` for Docker).
 
 ## Frontend
 

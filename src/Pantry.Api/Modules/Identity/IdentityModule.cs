@@ -6,6 +6,7 @@ using Pantry.Api.Modules.Identity.Auth;
 using Pantry.Api.Modules.Identity.Domain;
 using Pantry.Api.Modules.Identity.Features.Me;
 using Pantry.Api.Modules.Identity.Features.Setup;
+using Pantry.Api.Modules.Identity.Features.SignIn;
 using Pantry.Api.Modules.Identity.Persistence;
 
 namespace Pantry.Api.Modules.Identity;
@@ -25,7 +26,9 @@ public static class IdentityModule
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+        services.AddAuthentication(IdentityConstants.ApplicationScheme)
+            .AddCookie(IdentityConstants.ApplicationScheme)
+            .AddCookie(IdentityConstants.TwoFactorUserIdScheme);
         services.AddAuthorization();
         services.AddIdentityCore<User>(options =>
             {
@@ -51,6 +54,11 @@ public static class IdentityModule
         setup.MapGetSetupStatus();
         setup.MapCreateFirstRunPasskeyOptions();
         setup.MapCompleteFirstRun();
+
+        var auth = api.MapGroup("/auth").AllowAnonymous();
+        auth.MapCreateSignInPasskeyOptions();
+        auth.MapSignInWithPasskey();
+        auth.MapSignOut();
 
         api.MapGetMe();
         return api;

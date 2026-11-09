@@ -29,10 +29,13 @@ public sealed class PantryApiFactory : WebApplicationFactory<Program>, IAsyncLif
     }
 
     /// <summary>A browser-like client: keeps cookies over HTTPS (session cookies are Secure) and sends the antiforgery header.</summary>
-    public HttpClient CreateBrowserClient()
+    public HttpClient CreateBrowserClient(CookieContainerHandler? cookies = null) => CreateBrowserClient(this, cookies);
+
+    /// <summary>A browser-like client for <paramref name="app"/>, for example a restarted app made by <c>WithWebHostBuilder</c>.</summary>
+    public static HttpClient CreateBrowserClient(WebApplicationFactory<Program> app, CookieContainerHandler? cookies = null)
     {
-        var cookies = new CookieContainerHandler();
-        return CreateDefaultClient(BaseAddress, new AntiforgeryHandler(cookies), cookies);
+        cookies ??= new CookieContainerHandler();
+        return app.CreateDefaultClient(BaseAddress, new AntiforgeryHandler(cookies), cookies);
     }
 
     public async Task DeleteAllUsersAsync()

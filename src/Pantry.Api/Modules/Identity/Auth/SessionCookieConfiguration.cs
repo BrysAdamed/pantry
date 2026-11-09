@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 namespace Pantry.Api.Modules.Identity.Auth;
@@ -14,6 +15,7 @@ internal static class SessionCookieConfiguration
         Harden(options);
         options.ExpireTimeSpan = settings.Value.Lifetime;
         options.SlidingExpiration = true;
+        options.Events.OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync;
         options.Events.OnRedirectToLogin = context =>
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -29,6 +31,7 @@ internal static class SessionCookieConfiguration
     public static void ApplyPasskeyCeremony(CookieAuthenticationOptions options)
     {
         options.Cookie.Name = PasskeyCeremonyCookieName;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
         Harden(options);
     }
 

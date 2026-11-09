@@ -36,4 +36,5 @@ Use these terms in code, API, UI copy and tickets. Polish UI labels are in paren
 | **UI language** | The language of labels in the app (*Język interfejsu*): `pl` or `en`, chosen per user. Independent of the content language. |
 | **Theme** | Light or dark look of the app (*Motyw*). Follows the system unless the user picks one. |
 | **Passkey** | The sign-in credential (*Klucz dostępu*) stored by the phone or computer. No passwords (ADR 0004). |
+| **Session** | A signed-in browser (*Sesja*). Starts with a passkey sign-in, lasts while the device keeps using the app (30 days idle by default) and ends with sign-out. |
 | **Access token** | Personal token an MCP client uses to call the app. Revocable. |

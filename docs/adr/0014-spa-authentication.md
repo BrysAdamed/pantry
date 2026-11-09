@@ -11,7 +11,13 @@ ADR 0004 picks ASP.NET Core Identity with passkeys. The .NET 10 templates show p
 - Relying party ID and allowed origins come from configuration (`Identity:Passkeys`), validated on startup. Origin checks use `IdentityPasskeyOptions.ValidateOrigin` against that list, so the dev proxy (`ng serve` on another port) and a reverse proxy in production both work.
 - Session: the Identity application cookie, HttpOnly, Secure, `SameSite=Strict`, persistent with sliding expiry (`Identity:Session:Lifetime`, default 30 days). `/api` answers 401/403 instead of redirecting.
 - Every `/api` endpoint requires a signed-in user unless it opts out with `AllowAnonymous` (health, setup, sign-in).
-- Antiforgery: every unsafe `/api` request must carry the `X-XSRF-TOKEN` header. The API sends the token in a readable `XSRF-TOKEN` cookie on `/api` GETs and after sign-in; Angular's `HttpClient` echoes it automatically.
+- Antiforgery: every unsafe `/api` request must carry the `X-XSRF-TOKEN` header. The API sends the token in a readable `XSRF-TOKEN` cookie on safe `/api` requests (GET, HEAD, OPTIONS, TRACE) and after sign-in and sign-out; Angular's `HttpClient` echoes it automatically. Tokens are bound to the user, so:
+  - tokens are issued before authorization runs, so even a 401 answer carries a fresh token for the now anonymous browser;
+  - tokens are validated after authorization, so an unsafe request whose session expired gets 401 (sign in again) rather than 400;
+  - `GET /api/antiforgery` (anonymous, 204) is the explicit token source; the sign-in screen calls it before starting the ceremony, because a token left over from an expired session would make the sign-in POST fail.
+- Sign-in (PAN-20): `POST /api/auth/passkey-options` (`MakePasskeyRequestOptionsAsync(null)`, discoverable credentials, no user name) and `POST /api/auth/sign-in`. The sign-in slice runs `PerformPasskeyAssertionAsync` and the same checks as `PasskeySignInAsync` itself (can sign in, not locked out, update the passkey), because `PasskeySignInAsync` always creates a non-persistent session and does not return the user. A failed sign-in answers 401. `POST /api/auth/sign-out` is anonymous and idempotent.
+- Only the two cookie schemes in use are registered: the application cookie (`pantry.session`, security stamp validation) and the passkey ceremony cookie (`pantry.passkey`, 5 minutes). Identity's external-login and two-factor remember-me cookies are not registered. `SignInManager` clears the ceremony cookie when it reads the ceremony state.
+- `/api` responses are `Cache-Control: no-store`.
 - First run is guarded by a Postgres advisory lock taken in the same transaction that checks for users and creates the admin, so two concurrent first runs create one admin.
 
 ## Consequences

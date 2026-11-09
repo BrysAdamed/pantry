@@ -9,9 +9,10 @@ namespace Pantry.Api.Tests.Infrastructure;
 
 /// <summary>
 /// A minimal WebAuthn platform authenticator in software: answers <c>navigator.credentials.create()</c> options with
-/// an ES256 credential and a <c>none</c> attestation, serialized like the browser's <c>PublicKeyCredential.toJSON()</c>.
-/// .NET 10 has no virtual authenticator for tests, so this exercises the real attestation verification of
-/// <c>SignInManager.PerformPasskeyAttestationAsync</c> end to end.
+/// an ES256 credential and a <c>none</c> attestation, and <c>navigator.credentials.get()</c> options with a signed
+/// assertion, serialized like the browser's <c>PublicKeyCredential.toJSON()</c>.
+/// .NET 10 has no virtual authenticator for tests, so this exercises the real attestation and assertion verification
+/// of <c>SignInManager</c> end to end.
 /// </summary>
 public sealed class SoftwareAuthenticator(string origin) : IDisposable
 {
@@ -20,6 +21,7 @@ public sealed class SoftwareAuthenticator(string origin) : IDisposable
     private const byte AttestedCredentialData = 0x40;
 
     private readonly ECDsa _key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+    private string? _userHandle;
 
     public byte[] CredentialId { get; } = RandomNumberGenerator.GetBytes(32);
 
@@ -27,6 +29,7 @@ public sealed class SoftwareAuthenticator(string origin) : IDisposable
     {
         var relyingPartyId = overrideRelyingPartyId ?? creationOptions.GetProperty("rp").GetProperty("id").GetString()!;
         var challenge = creationOptions.GetProperty("challenge").GetString()!;
+        _userHandle = creationOptions.TryGetProperty("user", out var user) ? user.GetProperty("id").GetString() : null;
 
         var clientDataJson = JsonSerializer.SerializeToUtf8Bytes(new
         {
@@ -48,6 +51,43 @@ public sealed class SoftwareAuthenticator(string origin) : IDisposable
                 ["clientDataJSON"] = Base64Url(clientDataJson),
                 ["attestationObject"] = Base64Url(AttestationObject(relyingPartyId)),
                 ["transports"] = new JsonArray("internal"),
+            },
+        };
+    }
+
+    /// <summary>Answers <c>navigator.credentials.get()</c> request options with an assertion signed by the created passkey.</summary>
+    public JsonObject Get(JsonElement requestOptions)
+    {
+        var relyingPartyId = requestOptions.GetProperty("rpId").GetString()!;
+        var challenge = requestOptions.GetProperty("challenge").GetString()!;
+
+        var clientDataJson = JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            type = "webauthn.get",
+            challenge,
+            origin,
+            crossOrigin = false,
+        });
+
+        using var authenticatorData = new MemoryStream();
+        authenticatorData.Write(SHA256.HashData(Encoding.UTF8.GetBytes(relyingPartyId)));
+        authenticatorData.WriteByte(UserPresent | UserVerified);
+        authenticatorData.Write(new byte[4]);
+        var signedData = authenticatorData.ToArray().Concat(SHA256.HashData(clientDataJson)).ToArray();
+
+        return new JsonObject
+        {
+            ["id"] = Base64Url(CredentialId),
+            ["rawId"] = Base64Url(CredentialId),
+            ["type"] = "public-key",
+            ["authenticatorAttachment"] = "platform",
+            ["clientExtensionResults"] = new JsonObject(),
+            ["response"] = new JsonObject
+            {
+                ["clientDataJSON"] = Base64Url(clientDataJson),
+                ["authenticatorData"] = Base64Url(authenticatorData.ToArray()),
+                ["signature"] = Base64Url(_key.SignData(signedData, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence)),
+                ["userHandle"] = _userHandle,
             },
         };
     }

@@ -62,6 +62,7 @@ public sealed class FirstRunTests(PantryApiFactory factory) : IAsyncLifetime
         Assert.Contains("secure", sessionCookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("samesite=strict", sessionCookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("expires=", sessionCookie, StringComparison.OrdinalIgnoreCase);
+        IdentityScenarios.AssertCleared(response, "pantry.passkey");
 
         var me = await client.GetFromJsonAsync<JsonElement>("/api/me");
         Assert.Equal("Admin example", me.GetProperty("displayName").GetString());
