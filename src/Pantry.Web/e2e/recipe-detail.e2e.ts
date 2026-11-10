@@ -37,7 +37,7 @@ const curry = {
   cooldownDays: null,
   cooldown: { days: 21, isHouseholdDefault: true, lastEaten: isoDay(-2), availableFrom: isoDay(19) },
   isArchived: false,
-  archivedAt: null,
+  archivedAt: null as string | null,
   createdAt: '2026-11-01T10:00:00Z',
   updatedAt: '2026-11-01T10:00:00Z',
   lines: [line('chicken', 150, 'g'), line('garlic', 1, 'clove', 'crushed'), line('salt', null, null)],

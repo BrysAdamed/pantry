@@ -24,6 +24,7 @@ const recipe = (id: string, name: string, change: Record<string, unknown> = {}) 
   isArchived: false,
   updatedAt: '2026-11-01T10:00:00Z',
   dislikes: [] as { kind: string }[],
+  ingredients: [] as string[],
   ...change,
 });
 
@@ -67,7 +68,7 @@ async function mockLibrary(page: Page, recipes = library) {
       .filter(
         (r) =>
           !search ||
-          [r.name, ...r.tags, ...((r['ingredients'] as string[] | undefined) ?? [])].some((text) => text.toLowerCase().includes(search)),
+          [r.name, ...r.tags, ...r.ingredients].some((text) => text.toLowerCase().includes(search)),
       )
       .filter((r) => tags.every((tag) => r.tags.includes(tag)))
       .filter((r) => params.get('withoutNever') !== 'true' || !r.dislikes.some((d) => d.kind === 'never'))
