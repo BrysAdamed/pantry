@@ -29,7 +29,7 @@ describe('RatingSheet', () => {
           useValue: {
             entryId: 'h1',
             recipeName: 'Chicken curry',
-            date: '2026-11-08',
+            date: '2024-03-08',
             mealSlotName: 'Dinner',
             rating: null,
             makeAgain: null,
@@ -58,7 +58,7 @@ describe('RatingSheet', () => {
   it('saves stars only once some are chosen, without a make again answer nobody gave', async () => {
     // Arrange
     const root = open();
-    expect(byTestId(root, 'rating-when')!.textContent).toContain('8 Nov 2026');
+    expect(byTestId(root, 'rating-when')!.textContent).toContain('8 Mar 2024');
     expect(byTestId(root, 'rating-save')!.disabled).toBe(true);
     expect(byTestId(root, 'rating-remove')).toBeNull();
 
